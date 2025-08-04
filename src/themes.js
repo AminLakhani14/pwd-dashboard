@@ -60,7 +60,7 @@ export const cyberTheme = createTheme({
     },
     background: {
       default: '#0a0a14', // Deep blue/black
-      paper: 'rgba(20, 20, 30, 0.7)', // Semi-transparent with a blue tint
+      paper: 'rgba(238, 64, 25, 0.7)', // Semi-transparent with a blue tint
     },
     text: {
       primary: '#ffffff',
