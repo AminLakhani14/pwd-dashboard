@@ -1,0 +1,46 @@
+/* Apply the modern font and a smooth transition for color changes */
+body {
+  font-family: 'Poppins', sans-serif;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Sidebar Styling - Increased z-index */
+.sidebar {
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  overflow-x: hidden;
+  z-index: 1300; /* Higher than MUI AppBar's default z-index (1100) */
+}
+
+.sidebar.open {
+  width: 260px;
+}
+
+.sidebar.closed {
+  width: 80px; /* Adjusted for a sleeker collapsed look */
+}
+
+/* Active navigation link style */
+.nav-link.active {
+  background-color: rgba(108, 99, 255, 0.1); /* Use a subtle primary color tint */
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Main content area adjustments for sidebar */
+.main-content {
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Mobile responsiveness for the sidebar */
+@media (max-width: 992px) {
+  .sidebar.closed {
+      width: 0;
+  }
+  .main-content {
+      margin-left: 0 !important;
+  }
+}
