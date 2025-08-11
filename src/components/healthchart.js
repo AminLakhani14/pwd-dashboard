@@ -6,19 +6,21 @@ const HealthMetricsCard = () => {
   const theme = useTheme();
 
   const metrics = [
-    { name: 'Present', value: 87, target: 80 },
-    { name: 'Absent', value: 92, target: 85 },
-    { name: 'Leave', value: 76, target: 70 },
-    { name: 'Vacant', value: 68, target: 65 },
+    { name: 'All Reports', value: 100, target: 100 },
+    { name: 'RHS-A', value: 92, target: 85 },
+    { name: 'MSU', value: 76, target: 70 },
+    { name: 'FWC', value: 68, target: 65 },
   ];
 
   return (
     <Paper
-      elevation={3}
+      elevation={2}
       sx={{
         p: 3,
         borderRadius: '12px',
         backgroundColor: theme.palette.background.paper,
+        width: '510px',
+        height: '300px',
       }}
     >
       <Typography
@@ -29,7 +31,7 @@ const HealthMetricsCard = () => {
           color: theme.palette.text.primary,
         }}
       >
-        Women Medical Officer Dutie Schedule
+        Total Number of Visits 
       </Typography>
       <Typography
         variant="subtitle2"
@@ -38,14 +40,14 @@ const HealthMetricsCard = () => {
           color: theme.palette.text.secondary,
         }}
       >
-        Achievement vs targets for key health metrics
+        Monitoring Visits
       </Typography>
 
       {metrics.map((metric, index) => {
         const exceedsTarget = metric.value >= metric.target;
         const progressValue = Math.min(metric.value, 100); 
         return (
-          <Box key={index} sx={{ mb: 3 }}>
+          <Box key={index} sx={{ mb: 3, height: '20px', }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {metric.name}

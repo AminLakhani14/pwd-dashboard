@@ -11,7 +11,7 @@ import {
 const FuturisticContraceptivePieChart = () => {
   const theme = useTheme();
 
-  // Sample data
+  // Updated color scheme - white and light colors
   const stockData = [
     { name: 'Condoms', value: 12500, expiry: '2024-08-18', status: 'Adequate', color: '#00E5FF' },
     { name: 'COC', value: 8200, expiry: '2024-08-30', status: 'Low', color: '#00BFA5' },
@@ -22,7 +22,6 @@ const FuturisticContraceptivePieChart = () => {
     { name: 'IUCD (CT-380-A)', value: 2088, expiry: '2025-01-05', status: 'Adequate', color: '#1DE9B6' },
   ];
 
-  // Custom active shape for hover effects
   const renderActiveShape = (props) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
 
@@ -34,16 +33,16 @@ const FuturisticContraceptivePieChart = () => {
              A${outerRadius},${outerRadius} 0 ${endAngle - startAngle > Math.PI ? 1 : 0},1 ${cx + outerRadius * Math.cos(endAngle)},${cy + outerRadius * Math.sin(endAngle)} 
              Z`}
           fill={fill}
-          stroke="#121212"
+          stroke="#ffffff"
           strokeWidth={2}
-          style={{ filter: 'drop-shadow(0 0 8px rgba(0,229,255,0.6))' }}
+          style={{ filter: 'drop-shadow(0 0 8px rgba(165,216,255,0.6))' }}
         />
         <text
           x={cx}
           y={cy}
           dy={8}
           textAnchor="middle"
-          fill="#fff"
+          fill="#333"
           style={{ fontSize: '14px', fontWeight: 'bold' }}
         >
           {payload.name}
@@ -58,9 +57,9 @@ const FuturisticContraceptivePieChart = () => {
         p: 3,
         borderRadius: '16px',
         height: '100%',
-        background: 'linear-gradient(145deg, #121212 0%, #1E1E1E 100%)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        border: '1px solid rgba(255,255,255,0.1)'
+        background: '#ffffff',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        border: '1px solid rgba(0,0,0,0.1)'
       }}
     >
       <Typography
@@ -68,19 +67,19 @@ const FuturisticContraceptivePieChart = () => {
         sx={{
           fontWeight: 600,
           mb: 3,
-          color: '#fff',
+          color: '#333',
           display: 'flex',
           alignItems: 'center',
           fontFamily: '"Roboto Condensed", sans-serif',
           letterSpacing: '1px'
         }}
       >
-        <StatusIcon sx={{ mr: 1.5, color: theme.palette.primary.light }} />
+        <StatusIcon sx={{ mr: 1.5, color: '#74C0FC' }} />
         CONTRACEPTIVE STOCK ANALYSIS
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-        {/* Futuristic Pie Chart */}
+        {/* Light Theme Pie Chart */}
         <Box sx={{ 
           width: { xs: '100%', md: '50%' },
           position: 'relative'
@@ -110,7 +109,7 @@ const FuturisticContraceptivePieChart = () => {
                   <Cell 
                     key={`cell-${index}`} 
                     fill={`url(#gradient-${index})`} 
-                    stroke="#121212"
+                    stroke="#ffffff"
                     strokeWidth={2}
                   />
                 ))}
@@ -119,12 +118,13 @@ const FuturisticContraceptivePieChart = () => {
                 content={({ payload }) => (
                   <Paper sx={{ 
                     p: 2, 
-                    background: 'rgba(30,30,30,0.9)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.9)',
+                    border: '1px solid rgba(0,0,0,0.1)',
                     borderRadius: '8px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    color: '#333'
                   }}>
-                    <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 600 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                       {payload[0]?.name}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
@@ -135,11 +135,11 @@ const FuturisticContraceptivePieChart = () => {
                         mr: 1,
                         borderRadius: '2px'
                       }} />
-                      <Typography variant="body2" sx={{ color: '#fff' }}>
+                      <Typography variant="body2">
                         {payload[0]?.value?.toLocaleString()} units
                       </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.5 }}>
+                    <Typography variant="body2" sx={{ color: '#666', mt: 0.5 }}>
                       Exp: {new Date(payload[0]?.payload?.expiry).toLocaleDateString()}
                     </Typography>
                   </Paper>
@@ -158,14 +158,14 @@ const FuturisticContraceptivePieChart = () => {
             pointerEvents: 'none'
           }}>
             <Typography variant="h4" sx={{ 
-              color: '#fff', 
+              color: '#333', 
               fontWeight: 700,
               fontFamily: '"Roboto Condensed", sans-serif'
             }}>
               7
             </Typography>
             <Typography variant="body2" sx={{ 
-              color: 'rgba(255,255,255,0.7)',
+              color: '#666',
               textTransform: 'uppercase',
               letterSpacing: '1px'
             }}>
@@ -193,19 +193,18 @@ const FuturisticContraceptivePieChart = () => {
                 sx={{
                   p: 2,
                   borderRadius: '8px',
-                  background: 'rgba(30,30,30,0.5)',
+                  background: 'rgba(245,245,245,0.9)',
                   borderLeft: `4px solid ${item.color}`,
-                  backdropFilter: 'blur(8px)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: `0 4px 12px ${item.color}40`
+                    boxShadow: `0 4px 12px rgba(0,0,0,0.1)`
                   }
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="subtitle1" sx={{ 
-                    color: '#fff', 
+                    color: '#333', 
                     fontWeight: 600,
                     fontFamily: '"Roboto Condensed", sans-serif'
                   }}>
@@ -235,7 +234,7 @@ const FuturisticContraceptivePieChart = () => {
                   mt: 1
                 }}>
                   <Typography variant="body2" sx={{ 
-                    color: 'rgba(255,255,255,0.8)',
+                    color: '#555',
                     fontFamily: '"Roboto Mono", monospace'
                   }}>
                     {item.value.toLocaleString()} units
