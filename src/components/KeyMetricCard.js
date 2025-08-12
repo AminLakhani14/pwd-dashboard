@@ -112,7 +112,7 @@ export default function KeyMetricCard() {
           }}>
             <CardContent sx={{ flexGrow: 1 }}>
               <Typography variant="h6" fontWeight={600} gutterBottom align="center">
-                Monthly Statistics
+                Statistics
               </Typography>
 
               <Box sx={{ 
