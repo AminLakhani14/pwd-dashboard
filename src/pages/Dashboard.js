@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { Typography, Paper, Grid } from "@mui/material";
+import { Typography, Paper, Grid, Button, Modal, Box, TextField, MenuItem } from "@mui/material";
+import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyMetricCard from "../components/KeyMetricCard";
 import HealthMetricsCard from "../components/healthchart";
 import StockStatusDashboard from "../components/StockStatusDashboard";
@@ -9,12 +10,180 @@ import FuturisticGraph from "../components/FuturisticGraph";
 import WeightLossChart from "../components/WeightLossChart";
 import EnrollmentTrendsChart from "../components/EnrollmentTrendsChart";
 
-
 const Dashboard = () => {
+  const [open, setOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    sdpType: '1',
+    district: '1',
+    center: '1'
+  });
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    // Here you would typically apply the filters to your data
+    console.log('Applied filters:', filters);
+    handleClose();
+  };
+
+  const sdpTypes = [
+    { value: '1', label: 'Select SDP Type For All' },
+    { value: '2', label: 'Population Welfare Department - FWC' },
+    { value: '3', label: 'Population Welfare Department - MSU' },
+    { value: '4', label: 'Population Welfare Department - RHS-A' },
+  ];
+
+  const districts = [
+    { value: '1', label: '---Select All---' },
+    { value: 'district2', label: 'District 2' },
+    { value: 'district3', label: 'District 3' },
+  ];
+
+  const centers = [
+    { value: '1', label: '---Select All---' },
+    { value: 'center2', label: 'Center 2' },
+    { value: 'center3', label: 'Center 3' },
+  ];
+
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: '16px',
+  };
 
   return (
     <Container fluid>
-      <Row >
+      <Row className="d-flex justify-content-between align-items-center mb-3">
+        <Col>
+          <Typography variant="h4">Dashboard</Typography>
+        </Col>
+        <Col className="d-flex justify-content-end">
+          <Button 
+            variant="contained" 
+            startIcon={<FilterListIcon />}
+            onClick={handleOpen}
+            sx={{
+              borderRadius: '12px',
+              textTransform: 'none',
+              boxShadow: 'none',
+              backgroundColor: 'black'
+            }}
+          >
+            Filters
+          </Button>
+        </Col>
+      </Row>
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="filter-modal-title"
+        aria-describedby="filter-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="filter-modal-title" variant="h6" component="h2" mb={2}>
+            Filter Dashboard Data
+          </Typography>
+          
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Start Date"
+            type="date"
+            name="startDate"
+            value={filters.startDate}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+          />
+          
+          <TextField
+            fullWidth
+            margin="normal"
+            label="End Date"
+            type="date"
+            name="endDate"
+            value={filters.endDate}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+          />
+          
+          <TextField
+            select
+            fullWidth
+            margin="normal"
+            label="Type of SDP"
+            name="sdpType"
+            value={filters.sdpType}
+            onChange={handleChange}
+          >
+            {sdpTypes.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          
+          <TextField
+            select
+            fullWidth
+            margin="normal"
+            label="District"
+            name="district"
+            value={filters.district}
+            onChange={handleChange}
+          >
+            {districts.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          
+          <TextField
+            select
+            fullWidth
+            margin="normal"
+            label="Center"
+            name="center"
+            value={filters.center}
+            onChange={handleChange}
+          >
+            {centers.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={handleClose} sx={{ mr: 2, color: 'black', boxShadow: "1px 1px 8px -1px rgb(160 160 160)", }}>
+              Cancel
+            </Button>
+            <Button variant="contained" sx={{ backgroundColor: 'black' }} onClick={handleApplyFilters}>
+              Apply Filters
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Row>
           <KeyMetricCard />
       </Row>
 
@@ -39,7 +208,7 @@ const Dashboard = () => {
             sx={{
               p: { xs: 1, sm: 2 },
               borderRadius: "16px",
-              height: "1300px",
+              height: "100%",
               border: "1px solid",
               borderColor: "divider",
               boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
@@ -52,9 +221,7 @@ const Dashboard = () => {
               Monthly Attendance Trend
             </Typography>
 
-            <HealthMetricsCard width="100%" height="85%" />
-
-            <div style={{marginTop:'100px', }}>
+            <div >
               <StockStatusDashboard />
             </div>
           </Paper>

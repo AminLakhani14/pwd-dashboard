@@ -213,7 +213,7 @@ const StockStatusDashboard = () => {
         borderRadius: '16px',
         backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
-        height: '100%'
+        // height: '100%'
       }}
     >
       <Typography
