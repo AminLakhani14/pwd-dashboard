@@ -13,7 +13,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import HealthMetricsCard from "./healthchart";
-import Stack from '@mui/material/Stack';
 import { PieChart as PieChartMUI } from '@mui/x-charts/PieChart';
 import StackBars from "./StackBars";
 

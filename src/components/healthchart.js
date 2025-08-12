@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, Paper, LinearProgress, useTheme } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const HealthMetricsCard = () => {
   const theme = useTheme();
@@ -40,7 +39,6 @@ const HealthMetricsCard = () => {
     position: 'relative'}}>
 
       {metrics.map((metric, index) => {
-        const exceedsTarget = metric.value >= metric.target;
         const progressValue = Math.min(metric.value, 100); 
         return (
           <Box key={index} sx={{ mb: 3, height: '20px', }}>
