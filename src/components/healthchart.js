@@ -49,7 +49,7 @@ const HealthMetricsCard = () => {
         return (
           <Box key={index} sx={{ mb: 3, height: '20px', }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+              <Typography variant="body1" sx={{ fontWeight: 300, fontSize: '15px' }}>
                 {metric.name}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -57,15 +57,13 @@ const HealthMetricsCard = () => {
                   variant="body1"
                   sx={{
                     fontWeight: 600,
-                    color: exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
+                    color: 'black',
+                    // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                   }}
                 >
-                  {metric.value}%
+                  {metric.value}
                 </Typography>
-                <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mx: 1 }}>
-                  (Target: {metric.target}%)
-                </Typography>
-                {exceedsTarget && <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: '1rem' }} />}
+                {/* {exceedsTarget && <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: '1rem' }} />} */}
               </Box>
             </Box>
 
@@ -79,7 +77,8 @@ const HealthMetricsCard = () => {
                   backgroundColor: theme.palette.grey[200],
                   '& .MuiLinearProgress-bar': {
                     borderRadius: '4px',
-                    backgroundColor: exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
+                    backgroundColor: 'black',
+                    // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                   },
                 }}
               />

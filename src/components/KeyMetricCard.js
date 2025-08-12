@@ -59,14 +59,14 @@ const DonutWithCenterText = ({ value, color, label, size = 80 }) => {
             fill="#333"
             textAnchor="middle"
             dominantBaseline="middle"
-            fontSize={chartSize / 9}
+            fontSize={chartSize / 8}
             fontWeight="bold"
           >
             {value}%
           </text>
         </PieChart>
       </ResponsiveContainer>
-      <Typography style={{fontSize: size / 9}} variant={size > 100 ? "subtitle1" : "subtitle2"}>
+      <Typography style={{fontSize: size / 7}} variant={size > 100 ? "subtitle1" : "subtitle2"}>
         {label}
       </Typography>
     </Box>
@@ -275,7 +275,7 @@ export default function KeyMetricCard() {
           }}>
             
             <CardContent sx={{ flexGrow: 1, }}>
-              <Typography variant="h6" sx={{fontSize:"16px"}} fontWeight={600} gutterBottom align="center">
+              <Typography variant="h6" sx={{fontSize:"16px", marginBottom:'30px' }} fontWeight={600} gutterBottom align="center">
                 Attendance Overview
               </Typography>
 
@@ -302,7 +302,7 @@ export default function KeyMetricCard() {
                       boxShadow: "1px 1px 8px -1px rgb(160 160 160)",
                     }}>
                       <Typography variant="subtitle2" align="center">
-                        Students
+                        All Staff
                       </Typography>
                       <Typography variant="h6" align="center" fontWeight="bold">
                         1885
