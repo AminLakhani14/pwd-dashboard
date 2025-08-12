@@ -13,7 +13,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import HealthMetricsCard from "./healthchart";
- 
+import Stack from '@mui/material/Stack';
+import { PieChart as PieChartMUI } from '@mui/x-charts/PieChart';
+import StackBars from "./StackBars";
+
 const COLORS = {
   present: "#4CAF50",
   absent: "#F44336",
@@ -22,7 +25,10 @@ const COLORS = {
   notMarked: "#42A5F5",
   grey: "#E0E0E0",
 };
-
+const data2 = [
+  { label: 'Branded', value: 700 },
+  { label: 'Un Branded', value: 300 },
+];
 const data = [
   { name: "Present", value: 57.47, color: "#4caf50" },
   { name: "Absent", value: 14.51, color: "#f44336" },
@@ -77,85 +83,24 @@ export default function KeyMetricCard() {
   return (
     <Box sx={{ width: "100%", p: 2 }}>
       <Grid container spacing={3} alignItems="stretch" >
-        {/* Card 1 - Daily Attendance (Smaller Height) */}
-        {/* <Grid item xs={12} md={4}>
-          <Card sx={{ 
+        {/* Card 2 - Monthly Statistics (Smaller Height) */}
+        <Grid item xs={12} md={4}>
+           <HealthMetricsCard />
+           <Card sx={{ 
             borderRadius: 3, 
             boxShadow: 3, 
-            height: "300px", // Reduced height
-            width: "369px",
+            height: "auto", // Reduced height
+            width: "auto",
             display: "flex",
-            flexDirection: "column"
+            flexDirection: "column",
+            marginTop:'20px',
           }}>
             <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom align="center">
-                Daily Attendance
-              </Typography>
-              
-              <Box sx={{ 
-                display: 'flex', 
-                height: '220px',
-                alignItems: 'center'
-              }}>
-                <Box sx={{ 
-                  width: '40%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 1,
-                  pl: 2
-                }}>
-                  {dailyData.map((entry, index) => (
-                    <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Box sx={{
-                        width: 12,
-                        height: 12,
-                        backgroundColor: entry.color,
-                        borderRadius: '50%',
-                        mr: 1.5
-                      }} />
-                      <Typography variant="body2">{entry.name}</Typography>
-                    </Box>
-                  ))}
-                </Box>
-                
-                <Box sx={{ width: '60%', height: '100%' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={dailyData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={60}
-                        innerRadius={25}
-                        label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                        labelLine={false}
-                      >
-                        {dailyData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.color} 
-                            stroke="#fff"
-                            strokeWidth={2}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value, name, props) => [
-                          `${value} (${(props.payload.percent * 100).toFixed(1)}%)`, 
-                          name
-                        ]}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid> */}
-
-        {/* Card 2 - Monthly Statistics (Smaller Height) */}
+              <StackBars/>
+              </CardContent>
+              </Card>
+           
+        </Grid>
         <Grid item xs={12} md={4}>
           <Card sx={{ 
             borderRadius: 3, 
@@ -201,68 +146,46 @@ export default function KeyMetricCard() {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
-
-         {/* Present Ratio */}
-         {/* <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3, boxShadow: 3, height: "300px", width: "369px", }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={600} gutterBottom align="center"> 
-                Present Ratio
+          <Card sx={{ 
+            borderRadius: 3, 
+            boxShadow: 3, 
+            height: "auto", // Reduced height
+            width: "369px",
+            display: "flex",
+            flexDirection: "column",
+            marginTop: "20px"
+          }}>
+          <CardContent sx={{flexGrow:1}}>
+            <Typography variant="h6" fontWeight={600} gutterBottom align="center">
+                 Status Of FWC
               </Typography>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <Avatar
-                    sx={{
-                      bgcolor: "#BBDEFB",
-                      color: "#1565C0",
-                      width: 50,
-                      height: 50,
-                    }}
-                  >
-                    <BoyIcon />
-                  </Avatar>
-                  <Typography variant="h6" align="center">
-                    581
-                  </Typography>
-                  <Typography variant="caption" display="block" align="center">
-                    59.23%
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Avatar
-                    sx={{
-                      bgcolor: "#F8BBD0",
-                      color: "#AD1457",
-                      width: 50,
-                      height: 50,
-                    }}
-                  >
-                    <GirlIcon />
-                  </Avatar>
-                  <Typography variant="h6" align="center">
-                    400
-                  </Typography>
-                  <Typography variant="caption" display="block" align="center">
-                    40.77%
-                  </Typography>
-                </Grid>
-              </Grid>
-              <Box
-                sx={{ display: "flex", justifyContent: "space-around", mt: 3 }}
-              >
-                {donutData.map((d, i) => (
-                  <DonutWithCenterText key={i} {...d} />
-                ))}
+              <Box sx={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                justifyContent: "space-between",
+                height: "auto"
+              }}>
+                {/* Present - Centered at top */}
+                <PieChartMUI
+                  series={[
+                    {
+                      startAngle: -90,
+                      endAngle: 90,
+                      paddingAngle: 5,
+                      innerRadius: 60,
+                      outerRadius: 80,
+                      cy: '75%',
+                      data:data2,
+                    },
+                  ]}
+                  width={200}
+                  height={150}
+                  // hideLegend
+                />
               </Box>
             </CardContent>
           </Card>
-        </Grid> */}
-
-        <Grid item xs={12} md={4}>
-           <HealthMetricsCard />
         </Grid>
-
         {/* Card 3 - Attendance Overview (Taller Height) */}
         <Grid item xs={12} md={4}>
           <Card sx={{ 

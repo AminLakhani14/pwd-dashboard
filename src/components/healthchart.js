@@ -21,6 +21,8 @@ const HealthMetricsCard = () => {
         backgroundColor: theme.palette.background.paper,
         width: '510px',
         height: '300px',
+        display:'flex',
+        flexDirection:'column',
       }}
     >
       <Typography
@@ -33,26 +35,20 @@ const HealthMetricsCard = () => {
       >
         Total Number of Visits 
       </Typography>
-      <Typography
-        variant="subtitle2"
-        sx={{
-          mb: 3,
-          color: theme.palette.text.secondary,
-        }}
-      >
-        Monitoring Visits
-      </Typography>
+
+<div style={{    top: '13%',
+    position: 'relative'}}>
 
       {metrics.map((metric, index) => {
         const exceedsTarget = metric.value >= metric.target;
         const progressValue = Math.min(metric.value, 100); 
         return (
           <Box key={index} sx={{ mb: 3, height: '20px', }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body1" sx={{ fontWeight: 300, fontSize: '15px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0 }}>
+              <Typography variant="body1" sx={{ fontWeight: 300, fontSize: '15px',marginBottom:'0px'}}>
                 {metric.name}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center',marginTop:'0px',marginBottom:'0px' }}>
                 <Typography
                   variant="body1"
                   sx={{
@@ -86,6 +82,7 @@ const HealthMetricsCard = () => {
           </Box>
         );
       })}
+      </div>
     </Paper>
   );
 };
