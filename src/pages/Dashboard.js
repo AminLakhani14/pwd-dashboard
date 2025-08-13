@@ -189,7 +189,10 @@ const Dashboard = () => {
       <Row>
         <Col lg={12} className="mb-4">
           <Grid item xs={12} md={6}>
-            <ContraceptivePieChart />
+          <div >
+              <StockStatusDashboard />
+            </div>
+            {/* <ContraceptivePieChart /> */}
           </Grid>
         </Col>
       </Row>

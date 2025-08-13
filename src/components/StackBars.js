@@ -22,30 +22,20 @@ const furnitureData = [
   { shortform: 'MC', fullForm: 'Medicine Cabinet', good: 8, satisfactory: 8, poor: 5 }, 
 ];
 
-const valueFormatter = (value) => `${(value / 7 * 100).toFixed(1)}%`; // Total items = 7
+const valueFormatter = (value) => `${(value / 7 * 100).toFixed(1)}%`;
 
 export function addLabels(series) {
   return series.map((item) => ({
     ...item,
     label: translations[item.dataKey] || item.dataKey,
     valueFormatter: (v) => (v !== null ? valueFormatter(v) : '-'),
-    tooltip: (params) => {
-      const total = 7;
-      const val = params.value || 0;
-      const percentage = (val / total * 100).toFixed(1);
+    tooltip: ({ value, dataKey }) => {
       const fullForm = {
         good: 'Good',
         satisfactory: 'Satisfactory',
         poor: 'Poor',
-      }[params.dataKey] || params.dataKey;
-      const quantities = {
-        good: 6,
-        satisfactory: 1,
-        poor: 0,
-      };
-      return {
-        value: `${fullForm}: ${quantities[params.dataKey]} items (${percentage}%)`,
-      };
+      }[dataKey] || dataKey;
+      return `${fullForm}: ${value} items (${valueFormatter(value)})`;
     },
   }));
 }
@@ -57,44 +47,37 @@ export default function StackBars() {
       <BarChart
         dataset={furnitureData}
         series={addLabels([
-          { dataKey: 'poor', stack: 'status', color: 'red' },
-          { dataKey: 'good', stack: 'status', color: 'green' },
-          { dataKey: 'satisfactory', stack: 'status', color: 'yellow' },
+          { dataKey: 'good', stack: 'status', color: '#2ecc71' },
+          { dataKey: 'satisfactory', stack: 'status', color: '#d4ac0d' },
+          { dataKey: 'poor', stack: 'status', color: '#d35454' },
         ])}
         xAxis={[{ 
           dataKey: 'shortform',
+          scaleType: 'band',
           labelFormatter: (shortform) => {
-            const mappings = {
-              'OT': 'Office Table',
-              'OC': 'Office Chairs',
-              'B': 'Bench',
-              'ET': 'Examination Table',
-              'IT': 'Instrument Table',
-              'RS': 'Revolving Stool',
-              'MC': 'Medicine Cabinet',
-            };
-            return mappings[shortform] || shortform;
-          },
-          tooltip: {
-            valueFormatter: (shortform) => {
-              const mappings = {
-                'OT': 'Office Table: 3 items',
-                'OC': 'Office Chairs: 12 items',
-                'B': 'Bench',
-                'ET': 'Examination Table',
-                'IT': 'Instrument Table',
-                'RS': 'Revolving Stool',
-                'MC': 'Medicine Cabinet',
-              };
-              return mappings[shortform] || shortform;
-            },
+            const item = furnitureData.find(item => item.shortform === shortform);
+            return item ? item.fullForm : shortform;
           },
         }]}
         height={165}
         margin={0}
         yAxis={[{ width: 50, hide: true }]}
         hideLegend={true}
+        tooltip={{
+          trigger: 'item',
+          content: ({ series, dataIndex }) => {
+            const item = furnitureData[dataIndex];
+            return (
+              <div>
+                <strong>{item.fullForm}</strong>
+                <div>Poor: {item.poor} items</div>
+                <div>Satisfactory: {item.satisfactory} items</div>
+                <div>Good: {item.good} items</div>
+              </div>
+            );
+          },
+        }}
       />
     </div>
   );
-}
+} 

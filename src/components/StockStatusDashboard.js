@@ -96,7 +96,7 @@ const StockStatusDashboard = () => {
     { 
       field: 'item', 
       headerName: 'Product', 
-      width: 180,
+      width: '270',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CircleIcon sx={{ 
@@ -113,7 +113,7 @@ const StockStatusDashboard = () => {
     { 
       field: 'currentStock', 
       headerName: 'Stock Available', 
-      width: 150,
+      width: '270',
       renderCell: (params) => (
         <Typography fontWeight="500">
           {params.value.toLocaleString()}
@@ -121,36 +121,9 @@ const StockStatusDashboard = () => {
       )
     },
     { 
-      field: 'monthsRemaining', 
-      headerName: 'Months Supply', 
-      width: 150,
-      renderCell: (params) => (
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress 
-            variant="determinate" 
-            value={Math.min(params.value * 33, 100)} // Max 3 months = 100%
-            sx={{
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: theme.palette.grey[200],
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 4,
-                backgroundColor: params.value > 2 ? theme.palette.success.main :
-                              params.value > 1 ? theme.palette.warning.main :
-                              theme.palette.error.main
-              }
-            }}
-          />
-          <Typography variant="body2" sx={{ mt: 0.5 }}>
-            {params.value.toFixed(1)} months
-          </Typography>
-        </Box>
-      )
-    },
-    { 
       field: 'expiryDate', 
       headerName: 'Expiry Date', 
-      width: 150,
+      width: '270',
       renderCell: (params) => {
         const expiry = new Date(params.value);
         const today = new Date();
@@ -172,7 +145,7 @@ const StockStatusDashboard = () => {
     { 
       field: 'status', 
       headerName: 'Status', 
-      width: 120,
+      width: '270',
       renderCell: (params) => (
         <Box sx={{
           display: 'flex',
@@ -191,18 +164,18 @@ const StockStatusDashboard = () => {
         </Box>
       )
     },
-    {
-      field: 'actions',
-      type: 'actions',
-      width: 80,
-      getActions: (params) => [
-        <GridActionsCellItem
-          icon={<InfoIcon />}
-          label="View details"
-        //   onClick={() => handleViewDetails(params.row)}
-        />,
-      ],
-    },
+    // {
+    //   field: 'actions',
+    //   type: 'actions',
+    //   width: 80,
+    //   getActions: (params) => [
+    //     <GridActionsCellItem
+    //       icon={<InfoIcon />}
+    //       label="View details"
+    //     //   onClick={() => handleViewDetails(params.row)}
+    //     />,
+    //   ],
+    // },
   ];
 
   return (
