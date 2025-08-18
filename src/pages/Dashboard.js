@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { Typography, Paper, Grid, Button, Modal, Box, TextField, MenuItem } from "@mui/material";
+import { Typography, Paper, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyMetricCard from "../components/KeyMetricCard";
 import StockStatusDashboard from "../components/StockStatusDashboard";
@@ -10,6 +10,10 @@ import WeightLossChart from "../components/WeightLossChart";
 import EnrollmentTrendsChart from "../components/EnrollmentTrendsChart";
 
 const Dashboard = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
     startDate: '',
@@ -31,7 +35,6 @@ const Dashboard = () => {
   };
 
   const handleApplyFilters = () => {
-    // Here you would typically apply the filters to your data
     console.log('Applied filters:', filters);
     handleClose();
   };
@@ -60,20 +63,22 @@ const Dashboard = () => {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: isMobile ? '90%' : 400,
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 4,
+    p: isMobile ? 2 : 4,
     borderRadius: '16px',
+    maxHeight: '90vh',
+    overflowY: 'auto',
   };
 
   return (
-    <Container fluid>
-      <Row className="d-flex justify-content-between align-items-center mb-3">
-        <Col>
-          <Typography variant="h4">Dashboard</Typography>
+    <Container fluid style={{ padding: isMobile ? '0 10px' : '0 16px' }}>
+      <Row className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: isMobile ? '10px' : '0' }}>
+        <Col xs={8} sm={9}>
+          <Typography variant={isMobile ? "h5" : "h4"}>Dashboard</Typography>
         </Col>
-        <Col className="d-flex justify-content-end">
+        <Col xs={4} sm={3} className="d-flex justify-content-end">
           <Button 
             variant="contained" 
             startIcon={<FilterListIcon />}
@@ -82,7 +87,9 @@ const Dashboard = () => {
               borderRadius: '12px',
               textTransform: 'none',
               boxShadow: 'none',
-              backgroundColor: 'black'
+              backgroundColor: 'black',
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+              padding: isMobile ? '6px 12px' : '8px 16px'
             }}
           >
             Filters
@@ -110,6 +117,7 @@ const Dashboard = () => {
             value={filters.startDate}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
+            size={isMobile ? "small" : "medium"}
           />
           
           <TextField
@@ -121,6 +129,7 @@ const Dashboard = () => {
             value={filters.endDate}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
+            size={isMobile ? "small" : "medium"}
           />
           
           <TextField
@@ -131,6 +140,7 @@ const Dashboard = () => {
             name="sdpType"
             value={filters.sdpType}
             onChange={handleChange}
+            size={isMobile ? "small" : "medium"}
           >
             {sdpTypes.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -147,6 +157,7 @@ const Dashboard = () => {
             name="district"
             value={filters.district}
             onChange={handleChange}
+            size={isMobile ? "small" : "medium"}
           >
             {districts.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -163,6 +174,7 @@ const Dashboard = () => {
             name="center"
             value={filters.center}
             onChange={handleChange}
+            size={isMobile ? "small" : "medium"}
           >
             {centers.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -172,10 +184,25 @@ const Dashboard = () => {
           </TextField>
           
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={handleClose} sx={{ mr: 2, color: 'black', boxShadow: "1px 1px 8px -1px rgb(160 160 160)", }}>
+            <Button 
+              onClick={handleClose} 
+              sx={{ 
+                mr: 2, 
+                color: 'black', 
+                boxShadow: "1px 1px 8px -1px rgb(160 160 160)",
+                fontSize: isMobile ? '0.75rem' : '0.875rem'
+              }}
+            >
               Cancel
             </Button>
-            <Button variant="contained" sx={{ backgroundColor: 'black' }} onClick={handleApplyFilters}>
+            <Button 
+              variant="contained" 
+              sx={{ 
+                backgroundColor: 'black',
+                fontSize: isMobile ? '0.75rem' : '0.875rem'
+              }} 
+              onClick={handleApplyFilters}
+            >
               Apply Filters
             </Button>
           </Box>
@@ -183,32 +210,31 @@ const Dashboard = () => {
       </Modal>
 
       <Row>
-          <KeyMetricCard />
+        <KeyMetricCard />
       </Row>
 
       <Row>
-        <Col lg={12} className="mb-4">
-          <Grid item xs={12} md={6}>
-          <div >
+        <Col xs={12} className="mb-4">
+          <Grid item xs={12}>
+            <div>
               <StockStatusDashboard />
             </div>
-            {/* <ContraceptivePieChart /> */}
           </Grid>
         </Col>
       </Row>
 
       <Row>
-        <Col lg={12} className="mb-4">
-        <FuturisticGraph/>
+        <Col xs={12} className="mb-4">
+          <FuturisticGraph/>
         </Col>
       </Row>
 
       <Row>
-        <Col className="mt-5">
+        <Col xs={12} className={isMobile ? "mt-3" : "mt-5"}>
           <Paper
             elevation={0}
             sx={{
-              p: { xs: 1, sm: 2 },
+              p: isMobile ? 1 : 2,
               borderRadius: "16px",
               height: "100%",
               border: "1px solid",
@@ -218,28 +244,32 @@ const Dashboard = () => {
           >
             <Typography
               variant="h6"
-              sx={{ fontWeight: 500, mb: 2, color: "text.primary" }}
+              sx={{ 
+                fontWeight: 500, 
+                mb: isMobile ? 1 : 2, 
+                color: "text.primary",
+                fontSize: isMobile ? '1.1rem' : '1.25rem'
+              }}
             >
               Monthly Attendance Trend
             </Typography>
 
-            <div >
+            <div>
               <StockStatusDashboard />
             </div>
           </Paper>
         </Col>
       </Row>
 
-
       <Row>
-        <Col lg={12} className="mt-3">
-        <WeightLossChart/>
+        <Col xs={12} className="mt-3">
+          <WeightLossChart/>
         </Col>
       </Row>
 
       <Row>
-        <Col lg={12} className="mt-3">
-        <EnrollmentTrendsChart/>
+        <Col xs={12} className="mt-3">
+          <EnrollmentTrendsChart/>
         </Col>
       </Row>
     </Container>
