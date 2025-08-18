@@ -218,7 +218,7 @@ export default function KeyMetricCard() {
             borderRadius: 3, 
             boxShadow: 3, 
             height: "100%",
-            width:  isMobile ? "100%" : "125%",
+            width:  isMobile ? "100%" : "100%",
             display: "flex",
             flexDirection: "column",
           }}>
@@ -236,13 +236,13 @@ export default function KeyMetricCard() {
                 Attendance Overview
               </Typography>
 
-              <Grid container spacing={isMobile ? 1 : 2} sx={{ height: "auto", justifyContent: 'center' }}>
-                <Grid item xs={12} sm={6} md={12}>
+              <Grid container spacing={isMobile ? 1 : 2} sx={{ height: "auto", justifyContent: 'center',width:'100%' }}>
+                <Grid item xs={12} sm={6} md={12} sx={{width:'100%'}}>
                   <Box sx={{ 
                     display: "flex", 
                     flexDirection: "column", 
                     gap: isMobile ? 1 : 2,
-                    width:  isMobile ? "100%" : "150%",
+                    width:  isMobile ? "100%" : "100%",
                     height: "100%",
                     justifyContent: "space-between",
                   }}>
@@ -264,6 +264,7 @@ export default function KeyMetricCard() {
                           borderRadius: 2,
                           boxShadow: "1px 1px 8px -1px rgb(160 160 160)",
                           borderLeft: item.borderLeft,
+                          width:'100%'
                         }}
                       >
                         <Typography variant={isMobile ? "body2" : "subtitle2"} align="center">

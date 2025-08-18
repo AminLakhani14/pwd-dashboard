@@ -18,7 +18,7 @@ const HealthMetricsCard = () => {
         p: 3,
         borderRadius: '12px',
         backgroundColor: theme.palette.background.paper,
-        width: '510px',
+        width: '100%',
         height: '300px',
         display:'flex',
         flexDirection:'column',
