@@ -95,8 +95,8 @@ const StockStatusDashboard = () => {
   const columns = [
     { 
       field: 'item', 
-      headerName: 'Product', 
-      width: '270',
+      headerName: 'Medicine', 
+      width: '200',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CircleIcon sx={{ 
@@ -113,17 +113,19 @@ const StockStatusDashboard = () => {
     { 
       field: 'currentStock', 
       headerName: 'Stock Available', 
-      width: '270',
+      width: '200',
       renderCell: (params) => (
-        <Typography fontWeight="500">
+         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography fontWeight="500" sx={{ display: 'flex', alignItems: 'center' }}>
           {params.value.toLocaleString()}
         </Typography>
+        </Box>
       )
     },
     { 
       field: 'expiryDate', 
       headerName: 'Expiry Date', 
-      width: '270',
+      width: '200',
       renderCell: (params) => {
         const expiry = new Date(params.value);
         const today = new Date();
@@ -135,7 +137,7 @@ const StockStatusDashboard = () => {
             {diffDays < 90 ? (
               <WarningIcon color="warning" sx={{ mr: 1, fontSize: '1rem' }} />
             ) : null}
-            <Typography>
+            <Typography sx={{ display: 'flex', alignItems: 'center' }}>
               {expiry.toLocaleDateString()}
             </Typography>
           </Box>
@@ -145,7 +147,7 @@ const StockStatusDashboard = () => {
     { 
       field: 'status', 
       headerName: 'Status', 
-      width: '270',
+      width: '200',
       renderCell: (params) => (
         <Box sx={{
           display: 'flex',
@@ -186,7 +188,7 @@ const StockStatusDashboard = () => {
         borderRadius: '16px',
         backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
-        // height: '100%'
+        height: '100%'
       }}
     >
       <Typography
@@ -196,20 +198,19 @@ const StockStatusDashboard = () => {
           mb: 2,
           color: theme.palette.text.primary,
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          height: '100%'
         }}
       >
         <MedicalServicesIcon sx={{ mr: 1 }} />
-        Stock Sufficiency Status of Contraceptives
+        Stock Status of Contraceptives
       </Typography>
 
       <Box sx={{ height: 500, width: '100%' }}>
         <DataGrid
           rows={stockData}
           columns={columns}
-          pageSize={7}
-          rowsPerPageOptions={[7]}
-          disableSelectionOnClick
+          hideFooter
           components={{
             Toolbar: GridToolbar,
           }}
@@ -226,71 +227,10 @@ const StockStatusDashboard = () => {
         />
       </Box>
 
-      {/* Summary Cards */}
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <SummaryCard
-            title="Total Products"
-            value={stockData.length}
-            icon={<InventoryIcon color="primary" />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <SummaryCard
-            title="Adequate Stock"
-            value={stockData.filter(item => item.status === 'Adequate').length}
-            icon={<CheckCircleIcon color="success" />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <SummaryCard
-            title="Low Stock"
-            value={stockData.filter(item => item.status === 'Low').length}
-            icon={<WarningIcon color="warning" />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <SummaryCard
-            title="Expiring Soon"
-            value={stockData.filter(item => {
-              const expiry = new Date(item.expiryDate);
-              const today = new Date();
-              const diffTime = expiry - today;
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-              return diffDays < 90;
-            }).length}
-            icon={<ErrorIcon color="error" />}
-          />
-        </Grid>
-      </Grid>
     </Paper>
   );
 };
 
 // Helper component for summary cards
-const SummaryCard = ({ title, value, icon }) => {
-  return (
-    <Paper
-      sx={{
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        height: '100%',
-        borderRadius: '12px'
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        {icon}
-        <Typography variant="subtitle2" sx={{ ml: 1, fontWeight: 600 }}>
-          {title}
-        </Typography>
-      </Box>
-      <Typography variant="h5" sx={{ fontWeight: 700 }}>
-        {value}
-      </Typography>
-    </Paper>
-  );
-};
 
 export default StockStatusDashboard;

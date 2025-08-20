@@ -8,6 +8,7 @@ import ContraceptivePieChart from "../components/ContraceptivePieChart";
 import FuturisticGraph from "../components/FuturisticGraph";
 import WeightLossChart from "../components/WeightLossChart";
 import EnrollmentTrendsChart from "../components/EnrollmentTrendsChart";
+import IecChart from "../components/iECChart";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -73,7 +74,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Container fluid style={{ padding: isMobile ? '0 10px' : '0 16px' }}>
+    <Container >
       <Row className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: isMobile ? '10px' : '0' }}>
         <Col xs={8} sm={9}>
           <Typography variant={isMobile ? "h5" : "h4"}>Dashboard</Typography>
@@ -213,51 +214,22 @@ const Dashboard = () => {
         <KeyMetricCard />
       </Row>
 
-      <Row>
-        <Col xs={12} className="mb-4">
-          <Grid item xs={12}>
+      <Row sx={{height:'100%'}}>
+          <Grid item xs={12} sm={12} md={6} lg={6} sx={{width:'76.5%',height:'100%'}}>
             <div>
               <StockStatusDashboard />
             </div>
           </Grid>
-        </Col>
+          <Grid item xs={12} sm={12} md={4} lg={4} sx={{width:'23.5%', height:'100%'}}>
+            <div>
+              <IecChart/>
+            </div>
+          </Grid>
       </Row>
 
-      <Row>
+      {/* <Row>
         <Col xs={12} className="mb-4">
           <FuturisticGraph/>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={12} className={isMobile ? "mt-3" : "mt-5"}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: isMobile ? 1 : 2,
-              borderRadius: "16px",
-              height: "100%",
-              border: "1px solid",
-              borderColor: "divider",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ 
-                fontWeight: 500, 
-                mb: isMobile ? 1 : 2, 
-                color: "text.primary",
-                fontSize: isMobile ? '1.1rem' : '1.25rem'
-              }}
-            >
-              Monthly Attendance Trend
-            </Typography>
-
-            <div>
-              <StockStatusDashboard />
-            </div>
-          </Paper>
         </Col>
       </Row>
 
@@ -271,9 +243,9 @@ const Dashboard = () => {
         <Col xs={12} className="mt-3">
           <EnrollmentTrendsChart/>
         </Col>
-      </Row>
+      </Row> */}
     </Container>
   );
 };
 
-export default Dashboard;
+export default Dashboard; 

@@ -69,8 +69,8 @@ const DonutWithCenterText = ({ value, color, label, size = 80 }) => {
             fill="#333"
             textAnchor="middle"
             dominantBaseline="middle"
-            fontSize={chartSize / (isMobile ? 6 : 8)}
-            fontWeight="bold"
+            fontSize={(isMobile ? 6 : 10)}
+            fontWeight= '600'
           >
             {value}%
           </text>
@@ -78,8 +78,9 @@ const DonutWithCenterText = ({ value, color, label, size = 80 }) => {
       </ResponsiveContainer>
       <Typography 
         style={{
-          fontSize: chartSize / (isMobile ? 5 : 7),
-          marginTop: isMobile ? 4 : 8
+          fontSize: (isMobile ? 5 : 13),
+          marginTop: isMobile ? 4 : 8,
+          fontWeight: '600',
         }} 
         variant={size > 100 ? "subtitle1" : "subtitle2"}
       >
@@ -97,17 +98,20 @@ export default function KeyMetricCard() {
   return (
     <Box sx={{ 
       width: "100%", 
-      p: isMobile ? 1 : 2,
-      maxWidth: '100vw',
-      overflowX: 'hidden'
+      p: isMobile ? 1 : '2px',
+      maxWidth: '100%',
+      overflowX: 'hidden',
+      marginBottom: '20px'
     }}>
       <Grid 
         container 
         spacing={isMobile ? 1 : isTablet ? 2 : 3} 
         alignItems="stretch"
+        sx={{flexWrap:'nowrap'}}
       >
         {/* Left Column (Health Metrics + Stack Bars) */}
-        <Grid item xs={12} sm={12} md={4} lg={4} sx={{ order: { xs: 1, sm: 1, md: 1 } }}>
+        {/* <Grid item xs={12} sm={12} md={4} lg={4} sx={{ order: { xs: 1, sm: 1, md: 1 } }}> */}
+        <Grid item xs={12} sm={12} md={4} lg={4} sx={{width:'40%'}}>
           <HealthMetricsCard />
           <Card sx={{ 
             borderRadius: 3, 
@@ -125,7 +129,8 @@ export default function KeyMetricCard() {
         </Grid>
         
         {/* Middle Column (Statistics + FWC Status) */}
-        <Grid item xs={12} sm={12} md={6} lg={6} sx={{ order: { xs: 3, sm: 3, md: 3 } }}>
+        {/* <Grid item xs={12} sm={12} md={6} lg={6} sx={{ order: { xs: 3, sm: 3, md: 3 } }}> */}
+        <Grid item xs={12} sm={12} md={6} lg={6} sx={{width:'36.5%'}}>
           <Card sx={{ 
             borderRadius: 3, 
             boxShadow: 3, 
@@ -135,7 +140,15 @@ export default function KeyMetricCard() {
             flexDirection: "column"
           }}>
             <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom align="center">
+              <Typography variant="h6" fontWeight={600} gutterBottom align="left" 
+              sx={{
+                fontWeight: 600,
+                mb: 1,
+                color: theme.palette.text.primary,
+                fontFamily: 'inherit',
+                fontSize: 16
+              }}
+              >
                 Statistics
               </Typography>
 
@@ -150,7 +163,7 @@ export default function KeyMetricCard() {
                     value={data[0].value}
                     color={data[0].color}
                     label={data[0].name}
-                    size={isMobile ? 80 : 100}
+                    size={isMobile ? 80 : 110}
                   />
                 </Box>
 
@@ -183,7 +196,14 @@ export default function KeyMetricCard() {
             marginTop: isMobile ? '10px' : '20px'
           }}>
             <CardContent sx={{flexGrow:1}}>
-              <Typography variant="h6" fontWeight={600} gutterBottom align="center">
+              <Typography variant="h6" fontWeight={600} gutterBottom align="left"
+               sx={{ 
+                fontWeight: 800,
+                mb: 1,
+                color: theme.palette.text.primary,
+                fontFamily: 'inherit',
+                fontSize: 16
+              }}>
                 Status Of FWC
               </Typography>
               <Box sx={{ 
@@ -199,12 +219,12 @@ export default function KeyMetricCard() {
                       endAngle: 90,
                       paddingAngle: 5,
                       innerRadius: 60,
-                      outerRadius: 80,
+                      outerRadius: 110,
                       cy: '75%',
                       data: data2,
                     },
                   ]}
-                  width={isMobile ? 300 : 200}
+                  width={isMobile ? 300 : 220}
                   height={150}
                 />
               </Box>
@@ -213,7 +233,7 @@ export default function KeyMetricCard() {
         </Grid>
         
         {/* Right Column (Attendance Overview) - Always on right side */}
-        <Grid item xs={12} sm={12} md={4} lg={4} sx={{ order: { xs: 3, sm: 3, md: 3 } }}>
+        <Grid item xs={12} sm={12} md={4} lg={4} sx={{width:'23.5%'}}>
           <Card sx={{ 
             borderRadius: 3, 
             boxShadow: 3, 
@@ -227,11 +247,12 @@ export default function KeyMetricCard() {
                 variant="h6" 
                 sx={{
                   fontSize: isMobile ? "14px" : "16px", 
-                  marginBottom: isMobile ? '15px' : '30px'
+                  marginBottom: isMobile ? '15px' : '30px',
+                  fontFamily: 'inherit',
                 }} 
                 fontWeight={600} 
                 gutterBottom 
-                align="center"
+                align="left"
               >
                 Attendance Overview
               </Typography>
@@ -241,7 +262,7 @@ export default function KeyMetricCard() {
                   <Box sx={{ 
                     display: "flex", 
                     flexDirection: "column", 
-                    gap: isMobile ? 1 : 2,
+                    gap: isMobile ? 1 : 3,
                     width:  isMobile ? "100%" : "100%",
                     height: "100%",
                     justifyContent: "space-between",

@@ -25,9 +25,11 @@ export default function StackBars() {
         <Typography 
           variant="subtitle1" 
           sx={{ 
-            fontWeight: 600,
+            fontWeight: 800,
             mb: 1,
-            color: theme.palette.text.primary
+            color: theme.palette.text.primary,
+            fontFamily: 'inherit',
+            fontSize: 16
           }}
         >
           Furniture Position
@@ -59,13 +61,13 @@ export default function StackBars() {
             dataKey: 'fullForm',
             scaleType: 'band',
             tickLabelStyle: { 
-              fontSize: 6,
-              angle: 30,
-              textAnchor: 'start',
-              fill: theme.palette.text.secondary
+              fontSize: 6.7,
+              angle: 12,
+              // textAnchor: 'start',
+              // fill: theme.palette.text.secondary
             },
           }]}
-          height={150}
+          height={142}
           margin={{ 
             left: 5, 
             right: 5, 
@@ -75,8 +77,7 @@ export default function StackBars() {
           slotProps={{
             legend: {
               direction: 'row',
-              position: { vertical: 'bottom', horizontal: 'middle' },
-              // padding: 0,
+              // position: { vertical: 'bottom', horizontal: 'middle' },
               itemMarkWidth: 8,
               itemMarkHeight: 8,
               labelStyle: {
@@ -92,21 +93,20 @@ export default function StackBars() {
               const total = item.good + item.poor + item.satisfactory;
               return (
                 <div style={{ 
-                  // padding: '8px 12px',
                   background: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: '8px'
+                  borderRadius: '8px',
                 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
                     {item.fullForm}
                   </Typography>
-                  <Typography variant="body2">
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
                     Good: {item.good} ({(item.good/total*100).toFixed(0)}%)
                   </Typography>
-                  <Typography variant="body2">
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
                     Satisfactory: {item.satisfactory} ({(item.satisfactory/total*100).toFixed(0)}%)
                   </Typography>
-                  <Typography variant="body2">
+                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
                     Poor: {item.poor} ({(item.poor/total*100).toFixed(0)}%)
                   </Typography>
                 </div>
