@@ -206,7 +206,7 @@ const StockStatusDashboard = () => {
         Stock Status of Contraceptives
       </Typography>
 
-      <Box sx={{ height: 500, width: '100%' }}>
+      <Box sx={{ height: 635, width: '100%' }}>
         <DataGrid
           rows={stockData}
           columns={columns}

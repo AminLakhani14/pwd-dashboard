@@ -215,12 +215,12 @@ const Dashboard = () => {
       </Row>
 
       <Row sx={{height:'100%'}}>
-          <Grid item xs={12} sm={12} md={6} lg={6} sx={{width:'76.5%',height:'100%'}}>
+          <Grid item xs={12} sm={12} md={6} lg={6} sx={{width:'76.5%',height:'100%',paddingLeft:'0px'}}>
             <div>
               <StockStatusDashboard />
             </div>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} sx={{width:'23.5%', height:'100%'}}>
+          <Grid item xs={12} sm={12} md={4} lg={4} sx={{width:'23.5%', height:'100%',paddingRight:'0px'}}>
             <div>
               <IecChart/>
             </div>
