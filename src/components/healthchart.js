@@ -14,7 +14,7 @@ const HealthMetricsCard = () => {
     { name: "All Reports", value: 100, target: 100 },
     { name: "RHS-A", value: 92, target: 85 },
     { name: "MSU", value: 76, target: 70 },
-    { name: "FWC", value: 68, target: 65 },
+    { name: "FWC", value: 58, target: 65 },
   ];
 
   return (
@@ -57,6 +57,7 @@ const HealthMetricsCard = () => {
                     fontWeight: 300,
                     fontSize: "13px",
                     marginBottom: "0px",
+                    color: "text.secondary",
                   }}
                 >
                   {metric.name}
@@ -94,7 +95,7 @@ const HealthMetricsCard = () => {
                     backgroundColor: theme.palette.grey[200],
                     "& .MuiLinearProgress-bar": {
                       borderRadius: "4px",
-                      backgroundColor: "black",
+                      backgroundColor: metric.value > 80 ? '#4caf50' : metric.value < 80 &&  metric.value > 60 ? '#ff9800' : '#f44336' ,
                       // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                     },
                   }}

@@ -7,22 +7,18 @@ import {
   Grid,
   useMediaQuery,
   useTheme,
+  Tooltip
 } from "@mui/material";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
 import HealthMetricsCard from "./healthchart";
-import { PieChart as PieChartMUI } from '@mui/x-charts/PieChart';
 import StackBars from "./StackBars";
+import { pieArcLabelClasses, PieChart } from "@mui/x-charts";
+import '../index.css'
 
 const COLORS = {
   present: "#4CAF50",
-  absent: "#F44336",
+  absent: "#eeeeee45",
   late: "#FFC107",
-  leave: "#FF9800",
+  leave: "#4caf50",
   notMarked: "#42A5F5",
   grey: "#E0E0E0",
 };
@@ -32,63 +28,64 @@ const data2 = [
 ];
 const data = [
   { name: "Present", value: 57.47, color: "#4caf50" },
-  { name: "Absent", value: 14.51, color: "#f44336" },
+  { name: "Absent", value: 14.51, color: "#eeeeee45" },
   { name: "vacant", value: 7.23, color: "#2196f3" },
-  { name: "Leave", value: 9.33, color: "#ff9800" },
+  { name: "Leave", value: 9.33, color: "#4caf50" },
 ];
 
-const DonutWithCenterText = ({ value, color, label, size = 80 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  const chartSize = isMobile ? Math.min(size, 70) : size;
-  const outerRadius = chartSize / 2.5;
-  const innerRadius = outerRadius * 0.7;
 
-  return (
-    <Box sx={{ textAlign: "center" }}>
-      <ResponsiveContainer width={chartSize} height={chartSize}>
-        <PieChart>
-          <Pie
-            data={[
-              { value, color },
-              { value: 100 - value, color: COLORS.grey },
-            ]}
-            dataKey="value"
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
-            startAngle={90}
-            endAngle={-270}
-          >
-            <Cell fill={color} />
-            <Cell fill={COLORS.grey} />
-          </Pie>
-          <text
-            x="50%"
-            y="50%"
-            fill="#333"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize={(isMobile ? 6 : 10)}
-            fontWeight= '600'
-          >
-            {value}%
-          </text>
-        </PieChart>
-      </ResponsiveContainer>
-      <Typography 
-        style={{
-          fontSize: (isMobile ? 5 : 13),
-          marginTop: isMobile ? 4 : 8,
-          fontWeight: '600',
-        }} 
-        variant={size > 100 ? "subtitle1" : "subtitle2"}
-      >
-        {label}
-      </Typography>
-    </Box>
-  );
-};
+// const DonutWithCenterText = ({ value, color, label, size = 80 }) => {
+//   const theme = useTheme();
+//   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+//   const chartSize = isMobile ? Math.min(size, 70) : size;
+//   const outerRadius = chartSize / 2.5;
+//   const innerRadius = outerRadius * 0.7;
+
+//   return (
+//     <Box sx={{ textAlign: "center" }}>
+//       <ResponsiveContainer width={chartSize} height={chartSize}>
+//         <PieChart>
+//           <Pie
+//             data={[
+//               { value, color },
+//               { value: 100 - value, color: COLORS.grey },
+//             ]}
+//             dataKey="value"
+//             innerRadius={innerRadius}
+//             outerRadius={outerRadius}
+//             startAngle={90}
+//             endAngle={-270}
+//           >
+//             <Cell fill={color} />
+//             <Cell fill={COLORS.grey} />
+//           </Pie>
+//           <text
+//             x="50%"
+//             y="50%"
+//             fill="#333"
+//             textAnchor="middle"
+//             dominantBaseline="middle"
+//             fontSize={(isMobile ? 6 : 10)}
+//             fontWeight= '600'
+//           >
+//             {value}%
+//           </text>
+//         </PieChart>
+//       </ResponsiveContainer>
+//       <Typography 
+//         style={{
+//           fontSize: (isMobile ? 5 : 13),
+//           marginTop: isMobile ? 4 : 8,
+//           fontWeight: '600',
+//         }} 
+//         variant={size > 100 ? "subtitle1" : "subtitle2"}
+//       >
+//         {label}
+//       </Typography>
+//     </Box>
+//   );
+// };
 
 export default function KeyMetricCard() {
   const theme = useTheme();
@@ -131,7 +128,7 @@ export default function KeyMetricCard() {
         {/* Middle Column (Statistics + FWC Status) */}
         {/* <Grid item xs={12} sm={12} md={6} lg={6} sx={{ order: { xs: 3, sm: 3, md: 3 } }}> */}
         <Grid item xs={12} sm={12} md={6} lg={6} sx={{width:'36.5%'}}>
-          <Card sx={{ 
+       <Card sx={{ 
             borderRadius: 3, 
             boxShadow: 3, 
             height: isMobile ? "auto" : "300px",
@@ -158,34 +155,145 @@ export default function KeyMetricCard() {
                 justifyContent: "space-between",
                 height: "calc(100% - 40px)"
               }}>
-                <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-                  <DonutWithCenterText
-                    value={data[0].value}
-                    color={data[0].color}
-                    label={data[0].name}
-                    size={isMobile ? 80 : 110}
-                  />
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 2, flexDirection: "column", alignItems: "center" }}>
+                  <PieChart
+                    series={[
+                      {
+                        innerRadius: 35,
+                        outerRadius: 60,
+                        arcLabel: (item) => `${item.value}`, // Display the value
+                        data: [
+                          { label: "Available", value: 57.47, color: "#4caf50" },
+                          { label: "Unavailable", value: 42.53, color: "#b3b3b3" },
+                        ],
+                      },
+                    ]}
+                    sx={{
+                        [`& .${pieArcLabelClasses.root}`]: {
+                          fontWeight: 'bold',
+                          fontSize:'8px'
+                        },
+                      }}
+                    margin={{ right: 5 }}
+                    width={isMobile ? 80 : 120}
+                    height={isMobile ? 80 : 120}
+                    slotProps={{
+                      legend: { hidden: true },
+                    }}
+                  >
+                    <Tooltip
+                      formatter={(value) => `${value}%`}
+                      labelFormatter={(label) => label}
+                      slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
+                    />
+                  </PieChart>
                 </Box>
 
                 <Box sx={{ 
                   display: "flex", 
                   justifyContent: "center", 
-                  gap: 1,
+                  gap: 5,
                   flexWrap: isMobile ? "wrap" : "nowrap"
                 }}>
-                  {data.slice(1).map((item, index) => (
-                    <DonutWithCenterText
-                      key={index}
-                      value={item.value}
-                      color={item.color}
-                      label={item.name}
-                      size={isMobile ? 60 : 70}
-                    />
-                  ))}
+                  <Box sx={{ textAlign: "center" }}>
+                    <PieChart
+                      series={[
+                        {
+                          startAngle: -90,
+                          endAngle: 90,
+                          paddingAngle: 5,
+                          innerRadius: 30,
+                          outerRadius: 52,
+                          cy: '75%',
+                          data: data2,
+                        },
+                      ]}
+                      margin={{ right: 5 }}
+                      width={isMobile ? 300 : 120}
+                      height={90}
+                      slotProps={{
+                        legend: { hidden: true },
+                      }}
+                    >
+                      <Tooltip
+                        formatter={(value) => `${value}`}
+                        labelFormatter={(label) => label}
+                        slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
+                      />
+                    </PieChart>
+                  </Box>
+                  <Box sx={{ textAlign: "center" }}>
+                    <PieChart
+                      series={[
+                        {
+                          innerRadius: 17,
+                          outerRadius: 33, // Slightly reduced to help with label size
+                          arcLabel: (item) => `${item.value}`, // Display the value
+                          data: [
+                            { label: "Available", value: 97.23, color: "#4caf50" },
+                            { label: "Unavailable", value: 92.77, color: "#b3b3b3" },
+                          ],
+                        },
+                      ]}
+                      sx={{
+                        [`& .${pieArcLabelClasses.root}`]: {
+                          fontWeight: 'bold',
+                          fontSize:'7px'
+                        },
+                      }}
+                      margin={{ right: 5 }}
+                      width={isMobile ? 60 : 70}
+                      height={isMobile ? 60 : 70}
+                      slotProps={{
+                        legend: { hidden: true },
+                      }}
+                    >
+                      <Tooltip
+                        formatter={(value) => `${value}%`}
+                        labelFormatter={(label) => label}
+                        slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
+                      />
+                    </PieChart>
+                  </Box>
+                  <Box sx={{ textAlign: "center" }}>
+                    <PieChart
+                      series={[
+                        {
+                          innerRadius: 17,
+                          outerRadius: 33, // Slightly reduced to help with label size
+                          arcLabel: (item) => `${item.value}`, // Display the value
+                          data: [
+                            { label: "Available", value: 99.33, color: "#4caf50" },
+                            { label: "Unavailable", value: 90.67, color: "#b3b3b3" },
+                          ],
+                        },
+                      ]}
+                       sx={{
+                        [`& .${pieArcLabelClasses.root}`]: {
+                          fontWeight: 'bold',
+                          fontSize:'7px'
+                        },
+                      }}
+                      margin={{ right: 5 }}
+                      width={isMobile ? 60 : 70}
+                      height={isMobile ? 60 : 70}
+                      slotProps={{
+                        legend: { hidden: true },
+                      }}
+                    >
+                      <Tooltip
+                        formatter={(value) => `${value}%`}
+                        labelFormatter={(label) => label}
+                        slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
+                      />
+                    </PieChart>
+                  </Box>
                 </Box>
               </Box>
             </CardContent>
           </Card>
+
+          
           <Card sx={{ 
             borderRadius: 3, 
             boxShadow: 3, 
@@ -212,7 +320,7 @@ export default function KeyMetricCard() {
                 justifyContent: "space-between",
                 height: "215px"
               }}>
-                <PieChartMUI
+                <PieChart
                   series={[
                     {
                       startAngle: -90,

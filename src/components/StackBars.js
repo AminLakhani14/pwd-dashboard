@@ -5,6 +5,7 @@ import {
   useTheme
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
+import { Padding } from '@mui/icons-material';
 
 const furnitureData = [
   { shortform: 'OT', fullForm: 'Office Table', good: 36, satisfactory: 8, poor: 4 }, 
@@ -25,11 +26,13 @@ export default function StackBars() {
         <Typography 
           variant="subtitle1" 
           sx={{ 
-            fontWeight: 800,
+            fontWeight: 600,
             mb: 1,
             color: theme.palette.text.primary,
             fontFamily: 'inherit',
-            fontSize: 16
+            fontSize: 16,
+            // padding: 0,
+            // margin: 1,
           }}
         >
           Furniture Position
@@ -67,10 +70,10 @@ export default function StackBars() {
               // fill: theme.palette.text.secondary
             },
           }]}
-          height={142}
+          height={150}
           margin={{ 
-            left: 5, 
-            right: 5, 
+            left: -20, 
+            right: 0, 
             top: 0.5, 
             bottom: 0.3 
           }}
@@ -82,7 +85,7 @@ export default function StackBars() {
               itemMarkHeight: 8,
               labelStyle: {
                 fontSize: 4,
-              },
+                },
             },
           }}
           colors={['#4CAF50', '#FFC107', '#F44336']}

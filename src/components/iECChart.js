@@ -40,7 +40,7 @@ const IecChart = () => {
         display: "flex",
         flexDirection: "column",
         p: 2,
-        mb: 2,
+        mb: 4,
       }}
     >
       <FormControl fullWidth sx={{ mb: 2 }} size="small">
@@ -60,7 +60,7 @@ const IecChart = () => {
         width: '100%',
         display: "flex",
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
       }}>
         <PieChart
           series={[
@@ -82,7 +82,7 @@ const IecChart = () => {
               position: { vertical: "bottom", horizontal: "middle" },
               itemMarkWidth: 8,
               itemMarkHeight: 8,
-              labelStyle: { fontSize: 10 },
+              labelStyle: { fontSize: 13 },
             },
           }}
         />
@@ -97,7 +97,7 @@ const IecChart = () => {
         width: "100%",
         // maxWidth: 400,
         bgcolor: "background.paper",
-        mb: 2,
+        mb: 4,
         height:'100%'
       }}
     >
@@ -117,46 +117,46 @@ const IecChart = () => {
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 10 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
             Indication/ Sign Board (Installed)
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 10 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
             60%
           </Typography>
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 10 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
             Electricity
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 10 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
             89%
           </Typography>
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 10 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
             Gas
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 10 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
             78%
           </Typography>
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 10 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
             Water
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 10 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
             19%
           </Typography>
         </Box>
 
          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 10 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
             Cleanlines
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 10 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
             98%
           </Typography>
         </Box>
@@ -173,13 +173,13 @@ const IecChart = () => {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-      }}
+      }}  
     >
       <Typography
         variant="h6"
         sx={{
           fontWeight: 600,
-          mb: 1,
+          mb: 4,
           color: theme.palette.text.primary,
           fontFamily: "inherit",
           fontSize: 16,
@@ -200,8 +200,10 @@ const IecChart = () => {
                   variant="body1"
                   sx={{
                     fontWeight: 300,
-                    fontSize: "10px",
+                    fontSize: "13px",
                     marginBottom: "0px",
+                    fontFamily: 'inherit',
+                    color: "text.secondary",
                   }}
                 >
                   {metric.name}
@@ -219,7 +221,8 @@ const IecChart = () => {
                     sx={{
                       fontWeight: 600,
                       color: "black",
-                      fontSize: "10px",
+                      fontSize: "13px",
+                      fontFamily: 'inherit',
                     }}
                   >
                     {metric.value}

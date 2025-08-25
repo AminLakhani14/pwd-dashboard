@@ -96,15 +96,15 @@ const StockStatusDashboard = () => {
     { 
       field: 'item', 
       headerName: 'Medicine', 
-      width: '200',
+      width: '260',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CircleIcon sx={{ 
             color: params.row.status === 'Adequate' ? theme.palette.success.main : 
                   params.row.status === 'Critical' ? theme.palette.error.main : 
                   theme.palette.warning.main,
-            fontSize: '0.8rem',
-            mr: 1
+            fontSize: '6px',
+            mr: 1,
           }} />
           {params.value}
         </Box>
@@ -116,7 +116,7 @@ const StockStatusDashboard = () => {
       width: '200',
       renderCell: (params) => (
          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography fontWeight="500" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography fontWeight="400" sx={{ display: 'flex', alignItems: 'center' }}>
           {params.value.toLocaleString()}
         </Typography>
         </Box>
@@ -135,7 +135,7 @@ const StockStatusDashboard = () => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {diffDays < 90 ? (
-              <WarningIcon color="warning" sx={{ mr: 1, fontSize: '1rem' }} />
+              <WarningIcon color="warning" sx={{ mr: 1, fontSize: '6px', }} />
             ) : null}
             <Typography sx={{ display: 'flex', alignItems: 'center' }}>
               {expiry.toLocaleDateString()}
@@ -158,9 +158,9 @@ const StockStatusDashboard = () => {
           fontWeight: 500
         }}>
           {params.value === 'Adequate' ? (
-            <CheckCircleIcon sx={{ fontSize: '1rem', mr: 0.5 }} />
+            <CheckCircleIcon sx={{ fontSize: '6px', mr: 0.5 }} />
           ) : (
-            <ErrorIcon sx={{ fontSize: '1rem', mr: 0.5 }} />
+            <ErrorIcon sx={{ fontSize: '6px', mr: 0.5 }} />
           )}
           {params.value}
         </Box>
@@ -199,14 +199,16 @@ const StockStatusDashboard = () => {
           color: theme.palette.text.primary,
           display: 'flex',
           alignItems: 'center',
-          height: '100%'
+          height: '100%',
+          fontFamily: "inherit",
+          fontSize: 16,
         }}
       >
         <MedicalServicesIcon sx={{ mr: 1 }} />
         Stock Status of Contraceptives
       </Typography>
 
-      <Box sx={{ height: 635, width: '100%' }}>
+      <Box sx={{ height: 437, width: '100%' }}>
         <DataGrid
           rows={stockData}
           columns={columns}
