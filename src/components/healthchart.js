@@ -12,9 +12,9 @@ const HealthMetricsCard = () => {
 
   const metrics = [
     { name: "All Reports", value: 100, target: 100 },
-    { name: "RHS-A", value: 92, target: 85 },
-    { name: "MSU", value: 76, target: 70 },
-    { name: "FWC", value: 58, target: 65 },
+    { name: "RHS-A", value: 60, target: 85 },
+    { name: "MSU", value: 30, target: 70 },
+    { name: "FWC", value: 10, target: 65 },
   ];
 
   return (
@@ -62,7 +62,7 @@ const HealthMetricsCard = () => {
                 >
                   {metric.name}
                 </Typography>
-                <Box
+                 <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -79,7 +79,7 @@ const HealthMetricsCard = () => {
                       // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                     }}
                   >
-                    {metric.value}
+                    {metric.value} / {metric.value}%
                   </Typography>
                   {/* {exceedsTarget && <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: '1rem' }} />} */}
                 </Box>
@@ -95,7 +95,7 @@ const HealthMetricsCard = () => {
                     backgroundColor: theme.palette.grey[200],
                     "& .MuiLinearProgress-bar": {
                       borderRadius: "4px",
-                      backgroundColor: metric.value > 80 ? '#4caf50' : metric.value < 80 &&  metric.value > 60 ? '#ff9800' : '#f44336' ,
+                      backgroundColor: metric.value >= 60 ? '#4caf50' : metric.value < 60 &&  metric.value >= 30 ? '#ff9800' : '#f44336' ,
                       // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                     },
                   }}

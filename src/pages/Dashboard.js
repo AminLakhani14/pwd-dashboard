@@ -1,108 +1,21 @@
 import React, { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { Typography, Paper, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card } from "@mui/material";
+import { Typography, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Tooltip } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyMetricCard from "../components/KeyMetricCard";
 import StockStatusDashboard from "../components/StockStatusDashboard";
-import ContraceptivePieChart from "../components/ContraceptivePieChart";
-import FuturisticGraph from "../components/FuturisticGraph";
-import WeightLossChart from "../components/WeightLossChart";
-import EnrollmentTrendsChart from "../components/EnrollmentTrendsChart";
 import IecChart from "../components/iECChart";
-import { BarChart } from "@mui/x-charts";
-  import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { BarChart, PieChart } from "@mui/x-charts";
+import StackBars from "../components/StackBars";
 
 const Dashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-
-   const dataset = [
-  {
-    london: 59,
-    paris: 57,
-    newYork: 86,
-    seoul: 21,
-    month: 'Jan',
-  },
-  {
-    london: 50,
-    paris: 52,
-    newYork: 78,
-    seoul: 28,
-    month: 'Feb',
-  },
-  {
-    london: 47,
-    paris: 53,
-    newYork: 106,
-    seoul: 41,
-    month: 'Mar',
-  },
-  {
-    london: 54,
-    paris: 56,
-    newYork: 92,
-    seoul: 73,
-    month: 'Apr',
-  },
-  {
-    london: 57,
-    paris: 69,
-    newYork: 92,
-    seoul: 99,
-    month: 'May',
-  },
-  {
-    london: 60,
-    paris: 63,
-    newYork: 103,
-    seoul: 144,
-    month: 'June',
-  },
-  {
-    london: 59,
-    paris: 60,
-    newYork: 105,
-    seoul: 319,
-    month: 'July',
-  },
-  {
-    london: 65,
-    paris: 60,
-    newYork: 106,
-    seoul: 249,
-    month: 'Aug',
-  },
-  {
-    london: 51,
-    paris: 51,
-    newYork: 95,
-    seoul: 131,
-    month: 'Sept',
-  },
-  {
-    london: 60,
-    paris: 65,
-    newYork: 97,
-    seoul: 55,
-    month: 'Oct',
-  },
-  {
-    london: 67,
-    paris: 64,
-    newYork: 76,
-    seoul: 48,
-    month: 'Nov',
-  },
-  {
-    london: 61,
-    paris: 70,
-    newYork: 103,
-    seoul: 25,
-    month: 'Dec',
-  },
+  const data2 = [
+    { label: "Branded", value: 700 },
+    { label: "Un Branded", value: 300 },
   ];
+
   function valueFormatter(value) {
   return `${value}mm`;
 }
@@ -171,6 +84,14 @@ const Dashboard = () => {
     maxHeight: '90vh',
     overflowY: 'auto',
   };
+
+    const buildingStatusData = [
+    { id: 0, value: 560, label: "Hand Washing", color: "#0088FE" },
+    { id: 1, value: 189, label: "Decontamination", color: "#00C49F" },
+    { id: 2, value: 140, label: "Cleaning (Instruments)", color: "#FFBB28" },
+    { id: 3, value: 80, label: "High level disinfection", color: "#FF8042" },
+    { id: 4, value: 39, label: "Waste disposal", color: "#8884D8" },
+  ];
 
   return (
     <Container >
@@ -313,134 +234,125 @@ const Dashboard = () => {
         <KeyMetricCard />
       </Row>
 
-      <Row sx={{height:'100%' }}>
-          <Grid item xs={12} sm={12} md={6} lg={6} sx={{width:'76.5%',height:'100%',paddingLeft:'0px', marginTop:'8px'}}>
-            <div>
-              <StockStatusDashboard />
-              <div style={{display: 'flex', marginTop:'30px',height:'100%', }}>
-               <Card
-                    sx={{
-                      borderRadius: 2,
-                      boxShadow: 3,
-                      p: 3,
-                      width: "100%",
-                      // maxWidth: 400,
-                      bgcolor: "background.paper",
-                      mb: 4,
-                      height:'100%',
-                      marginRight:2
-
-                    }}
-                  >
-                    <BarChart
-                    dataset={dataset}
-                    yAxis={[{ scaleType: 'band', dataKey: 'month' }]}
-                    series={[{ dataKey: 'seoul', label: 'Seoul rainfall', valueFormatter }]}
-                    layout="horizontal"
-                    grid={{ vertical: true }}
-                    {...chartSetting}
-                  />
-            </Card>
+      <Row sx={{ height: "100%" }}>
+        <Grid item xs={12} sm={12} md={6} lg={6}
+          sx={{
+            width: "76.5%",
+            height: "100%",
+            paddingLeft: "0px",
+            marginTop: "8px",
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", height: "100%",justifyContent:'space-between' }}>
+              <div style={{width:"51%"}}>
               <Card
+                sx={{
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  p: 1,
+                  width: "100%",
+                  bgcolor: "background.paper",
+                  mb: 4,
+                  height: 290,
+                  marginRight: 2,
+                }}
+              >
+                <StackBars />
+              </Card>
+              </div>
+               <div style={{width:"46%",marginRight:'3px'}}>
+              <Card
+                sx={{
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  p: 3,
+                  width: "100%",
+                  bgcolor: "background.paper",
+                  mb: 4,
+                  height: 290,
+                }}
+              >
+                <Typography
+                  variant="h6"
                   sx={{
-                    borderRadius: 2,
-                    boxShadow: 3,
-                    p: 3,
-                    width: "100%",
-                    // maxWidth: 400,
-                    bgcolor: "background.paper",
-                    mb: 4,
-                    height:'100%'
+                    fontWeight: 600,
+                    mb: 2,
+                    color: "text.primary",
+                    textAlign: "left",
+                    fontFamily: "inherit",
+                    fontSize: 16,
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: "text.primary",
-                      textAlign: "left",
-                      fontFamily: 'inherit',
-                      fontSize: 16
-                    }}
-                  >
-                    Status of Building
-                  </Typography>
-            
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
-                        Indication/ Sign Board (Installed)
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        60%
-                      </Typography>
-                    </Box>
-            
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
-                        Electricity
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        89%
-                      </Typography>
-                    </Box>
-            
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
-                        Gas
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        78%
-                      </Typography>
-                    </Box>
-            
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
-                        Water
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        19%
-                      </Typography>
-                    </Box>
-            
-                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="body1" sx={{ color: "text.secondary", fontSize: 13 }}>
-                        Cleanlines
-                      </Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        98%
-                      </Typography>
-                    </Box>
+                  Technical Monitoring Checklist
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 3,
+                    flexWrap: isMobile ? "wrap" : "nowrap",
+                  }}
+                >
+                  <Box>
+
+                     <PieChart
+                      series={[
+                        {
+                          data: buildingStatusData,
+                          innerRadius: 30,
+                          outerRadius: 90,
+                          paddingAngle: 5,
+                          cornerRadius: 5,
+                          startAngle: -45,
+                          endAngle: 225,
+                          cx: 100,
+                          cy: 80,
+                          arcLabelMinAngle: 15,
+                        },
+                      ]}
+                      sx={{ "& .MuiChartsLegend-label": { fontSize: "10px !important" }, }}
+                      width={250}
+                      height={170}
+                      slotProps={{
+                        legend: {
+                          itemMarkWidth: 8,
+                          itemMarkHeight: 8,
+                           labelStyle: { 
+                            fontSize: 6, 
+                            fontWeight: 'normal',
+                          },
+                        },
+                      }}
+                    />
                   </Box>
-             </Card>
-             </div>
+                  </Box>
+              </Card>
+              </div>
             </div>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} sx={{width:'23.5%', height:'100%',paddingRight:'0px', marginTop:'8px'}}>
-            <div>
-              <IecChart/>
-            </div>
-          </Grid>
+            
+            {/* Stock Status of Contraceptives moved down */}
+            <StockStatusDashboard />
+          </div>
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          md={4}
+          lg={4}
+          sx={{
+            width: "23.5%",
+            height: "100%",
+            paddingRight: "0px",
+            marginTop: "8px",
+          }}
+        >
+          <div>
+            <IecChart />
+          </div>
+        </Grid>
       </Row>
-
-      {/* <Row>
-        <Col xs={12} className="mb-4">
-          <FuturisticGraph/>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={12} className="mt-3">
-          <WeightLossChart/>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col xs={12} className="mt-3">
-          <EnrollmentTrendsChart/>
-        </Col>
-      </Row> */}
     </Container>
   );
 };

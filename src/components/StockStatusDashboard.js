@@ -3,7 +3,6 @@ import { Box, Typography, Paper, Grid, useTheme, LinearProgress } from '@mui/mat
 import { 
   DataGrid, 
   GridToolbar, 
-  GridActionsCellItem 
 } from '@mui/x-data-grid';
 import { 
   Circle as CircleIcon,
@@ -12,8 +11,6 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import InfoIcon from '@mui/icons-material/Info';
 
 const StockStatusDashboard = () => {
   const theme = useTheme();

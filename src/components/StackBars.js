@@ -79,7 +79,7 @@ export default function StackBars() {
           }}
           slotProps={{
             legend: {
-              direction: 'row',
+              // direction: 'row',
               // position: { vertical: 'bottom', horizontal: 'middle' },
               itemMarkWidth: 8,
               itemMarkHeight: 8,
@@ -88,6 +88,7 @@ export default function StackBars() {
                 },
             },
           }}
+          sx={{ "& .MuiChartsLabelMark-root.MuiChartsLabelMark-square": { borderRadius: "10px !important" }, }}
           colors={['#4CAF50', '#FFC107', '#F44336']}
           tooltip={{
             trigger: 'item',
@@ -98,7 +99,7 @@ export default function StackBars() {
                 <div style={{ 
                   background: theme.palette.background.paper,
                   border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: '8px',
+                  borderRadius: '20px',
                 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
                     {item.fullForm}
