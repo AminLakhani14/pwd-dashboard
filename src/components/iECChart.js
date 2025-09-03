@@ -4,6 +4,7 @@ import { useState } from "react";
 import WarningIcon from "@mui/icons-material/Warning";
 import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const IecChart = () => {
   const theme = useTheme();
@@ -12,19 +13,14 @@ const IecChart = () => {
 
   const chartData = {
     "IEC Material": [
-      { id: 0, value: 10, label: "Material A" },
-      { id: 1, value: 15, label: "Material B" },
+      { id: 0, value: 157, label: "Material A" },
+      { id: 1, value: 28, label: "Material B" },
     ],
     "MEC Wheel": [
-      { id: 0, value: 12, label: "Wheel Type X" },
-      { id: 1, value: 18, label: "Wheel Type Y" },
+      { id: 0, value: 158, label: "Wheel Type X" },
+      { id: 1, value: 27, label: "Wheel Type Y" },
     ],
   };
-
-   const data2 = [
-    { label: "Branded", value: 700 },
-    { label: "Un Branded", value: 300 },
-  ];
 
   const handleChange = (event) => {
     setChartType(event.target.value);
@@ -35,37 +31,37 @@ const alerts = [
       type: "danger",
       title: "Karachi Center A",
       message: "Medicine expiring in 15 days",
-      // icon: <ErrorIcon />,
+      icon: <ErrorIcon />,
     },
     {
       type: "warning",
       title: "Hyderabad Center B",
       message: "Low contraceptive stock levels",
-      // icon: <WarningIcon />,
+      icon: <WarningIcon />,
     },
     {
       type: "good",
       title: "Sukkur Center C",
       message: "Equipment maintenance scheduled",
-      // icon: <CheckCircleIcon />,
+      icon: <CheckCircleIcon />,
     },
     {
       type: "danger",
       title: "Lahore Center D",
       message: "Critical equipment failure",
-      // icon: <ErrorIcon />,
+      icon: <ErrorIcon />,
     },
     {
       type: "warning",
       title: "Islamabad Center E",
       message: "Staff shortage reported",
-      // icon: <WarningIcon />,
+      icon: <WarningIcon />,
     },
     {
       type: "good",
       title: "Quetta Center F",
       message: "Monthly targets achieved",
-      // icon: <CheckCircleIcon />,
+      icon: <CheckCircleIcon />,
     },
   ];
 
@@ -73,25 +69,25 @@ const alerts = [
     switch (type) {
       case "danger":
         return {
-          // bgcolor: "#ffebee",
+          bgcolor: "#ffebee",
           borderLeft: "4px solid #f44336",
           iconColor: "#f44336",
         };
       case "warning":
         return {
-          // bgcolor: "#fff3e0",
+          bgcolor: "#fff3e0",
           borderLeft: "4px solid #ff9800",
           iconColor: "#ff9800",
         };
       case "good":
         return {
-          // bgcolor: "#e8f5e9",
+          bgcolor: "#e8f5e9",
           borderLeft: "4px solid #4caf50",
           iconColor: "#4caf50",
         };
       default:
         return {
-          // bgcolor: "#f5f5f5",
+          bgcolor: "#f5f5f5",
           borderLeft: "4px solid #9e9e9e",
           iconColor: "#9e9e9e",
         };
@@ -100,23 +96,23 @@ const alerts = [
 
  const dataset = [
   {
-    london: 59,
-    paris: 64,
+    new: 3911,
+    old: 2536,
     month: 'General Clients	',
   },
   {
-    london: 50,
-    paris: 64,
+    new: 7925,
+    old: 4434,
     month: 'F.P Clients	',
   },
   {
-    london: 47,
-    paris: 64,
+    new: 1002,
+    old: 804,
     month: 'MCH/RH',
   },
   {
-    london: 54,
-    paris: 64,
+    new: 1743,
+    old: 1373,
     month: 'C.S Cases',
   },
 ];
@@ -221,7 +217,7 @@ const alerts = [
             fontSize: 16,
           }}
         >
-          <WarningIcon color="warning" /> Urgent Alerts & Issues
+          <NotificationsIcon /> Urgent Alerts & Issues
         </Typography>
       </CardContent>
 
@@ -313,7 +309,7 @@ const alerts = [
         <BarChart
           dataset={dataset}
            margin={{ 
-            left: -30, 
+            left: -13,
             right: 0, 
             top: 20, 
             bottom: 30, 
@@ -323,8 +319,8 @@ const alerts = [
               angle: 14,
             }, }]}
           series={[
-            { dataKey: 'london', label: 'New', valueFormatter },
-            { dataKey: 'paris', label: 'Old', valueFormatter },
+            { dataKey: 'new', label: 'New', valueFormatter },
+            { dataKey: 'old', label: 'Old', valueFormatter },
           ]}
            yAxis= {[{width: 60}]}
         />

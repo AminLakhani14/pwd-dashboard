@@ -1,8 +1,6 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Avatar, Badge, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import SettingsIcon from '@mui/icons-material/Settings';
 import { useDispatch } from 'react-redux';
 import { toggleSidebar } from '../features/ui/uiSlice';
 import ThemeSwitcher from './ThemeSwitcher';
@@ -24,14 +22,6 @@ const TopNavbar = () => {
         </IconButton>
         <Box sx={{ flexGrow: 1 }} />
         <ThemeSwitcher />
-        <IconButton color="inherit" sx={{ mx: 1 }}>
-          <Badge badgeContent={4} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <IconButton color="inherit">
-          <SettingsIcon />
-        </IconButton>
         <Avatar alt="User Profile" src="https://i.pravatar.cc/150?img=3" sx={{ ml: 2, width: 40, height: 40 }} />
       </Toolbar>
     </AppBar>

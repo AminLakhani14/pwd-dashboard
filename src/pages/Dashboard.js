@@ -1,32 +1,16 @@
 import React, { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { Typography, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Tooltip } from "@mui/material";
+import { Typography, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Tooltip, Alert, Collapse, IconButton } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyMetricCard from "../components/KeyMetricCard";
 import StockStatusDashboard from "../components/StockStatusDashboard";
 import IecChart from "../components/iECChart";
-import { BarChart, PieChart } from "@mui/x-charts";
+import { PieChart } from "@mui/x-charts";
 import StackBars from "../components/StackBars";
-
+import CloseIcon from '@mui/icons-material/Close';
 const Dashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const data2 = [
-    { label: "Branded", value: 700 },
-    { label: "Un Branded", value: 300 },
-  ];
-
-  function valueFormatter(value) {
-  return `${value}mm`;
-}
-
-  const chartSetting = {
-  xAxis: [{ label: 'rainfall (mm)' }],
-  height: 400,
-  margin: { left: 0 },
-};
-
-  
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
     startDate: '',
@@ -38,8 +22,9 @@ const Dashboard = () => {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+ const [open2, setOpen2] = useState(true);
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
@@ -86,15 +71,39 @@ const Dashboard = () => {
   };
 
     const buildingStatusData = [
-    { id: 0, value: 560, label: "Hand Washing", color: "#0088FE" },
-    { id: 1, value: 189, label: "Decontamination", color: "#00C49F" },
-    { id: 2, value: 140, label: "Cleaning (Instruments)", color: "#FFBB28" },
-    { id: 3, value: 80, label: "High level disinfection", color: "#FF8042" },
-    { id: 4, value: 39, label: "Waste disposal", color: "#8884D8" },
+    { id: 0, value: 365, label: "Hand Washing", color: "#0088FE" },
+    { id: 1, value: 345, label: "Decontamination", color: "#00C49F" },
+    { id: 2, value: 366, label: "Cleaning (Instruments)", color: "#FFBB28" },
+    { id: 3, value: 346, label: "High level disinfection", color: "#FF8042" },
+    { id: 4, value: 20, label: "Waste disposal", color: "#8884D8" },
   ];
 
   return (
     <Container >
+      <Row>
+        <Box sx={{ width: '100%' }}>
+          <Collapse in={open2}>
+            <Alert
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOpen2(false);
+                  }}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              You are viewing the data from January 1, 2025, to September 3, 2025.
+            </Alert>
+          </Collapse>
+        </Box>
+      </Row>
+      
       <Row className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: isMobile ? '10px' : '0' }}>
         <Col xs={8} sm={9}>
           <Typography variant={isMobile ? "h5" : "h4"}>Dashboard</Typography>

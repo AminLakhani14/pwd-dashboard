@@ -7,18 +7,15 @@ import {
   Grid,
   useMediaQuery,
   useTheme,
-  Tooltip,
   LinearProgress,
 } from "@mui/material";
 import HealthMetricsCard from "./healthchart";
-import { pieArcLabelClasses, PieChart } from "@mui/x-charts";
 import "../index.css";
 import {
   PieChart as RePieChart,
   Pie,
   Cell,
   Tooltip as ReToolTip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -40,87 +37,97 @@ const dataset = [
 const attendanceData = [
   {
     label: "All Staff",
-    count: "1885",
+    count: "3286",
     percentage: "100%",
     color: "#2196F3",
     borderLeft: "none",
   },
   {
     label: "Present",
-    count: "1320",
-    percentage: "70%",
+    count: "1391",
+    percentage: "42.33%",
     color: "#4CAF50",
     borderLeft: "5px solid #4CAF50",
   },
   {
     label: "Absent",
-    count: "188",
-    percentage: "10%",
+    count: "185",
+    percentage: "5.63%",
     color: "#F44336",
     borderLeft: "5px solid #F44336",
   },
   {
     label: "Vacant",
-    count: "377",
-    percentage: "20%",
+    count: "1606",
+    percentage: "48.87%",
     color: "#9E9E9E",
     borderLeft: "5px solid #9E9E9E",
   },
   {
     label: "Leave",
-    count: "0",
-    percentage: "0%",
+    count: "104",
+    percentage: "3.16%",
     color: "#FF9800",
     borderLeft: "5px solid #FF9800",
   },
 ];
 const data = [
   {
-    name: "Open",
-    value: 33.33,
+    name: "Close",
+    value: 2,
     color: "#b3b3b3",
   },
   {
-    name: "Close",
-    value: 33.33,
+    name: "Open",
+    value: 339,
     color: "#0088FE",
+  },
+]
+
+const data3 = [
+  {
+    name: "Close",
+    value: 0,
+    color: "#b3b3b3",
+  },
+  {
+    name: "Open",
+    value: 20,
+    color: '#FFBB28',
   },
 ]
 const data2 = [
   {
-    name: "Open",
-    value: 90.67,
+    name: "Close",
+    value: 1,
     color: "#b3b3b3",
   },
   {
-    name: "Close",
-    value: 99.33,
+    name: "Open",
+    value: 42,
     color: "#FF8042",
   },
 ]
 const COLORS = ['#b3b3b3', '#0088FE'];
 const COLORS2 = ['#b3b3b3', '#FFBB28'];
 const COLORS3 = ['#b3b3b3', '#FF8042'];
-const CustomTooltip = ({ active, payload }) => {
+
+const CustomTooltip = ({ active, payload, total }) => {
   if (active && payload && payload.length) {
     const { name, value } = payload[0];
-    const fill = payload[0].payload.fill
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    const percentage = ((value / total) * 100).toFixed(0);
+    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+    
     return (
-      <div style={{ display:'flex', backgroundColor: 'white', padding: '10px',height:'40px',width:'max-content', border: '1px solid #ccc' }}>
-       <p style={{fontSize:'12px'}}> {`${name}: ${value} (${percentage}%)`}</p>
-        {/* <>
-  {fill} <p style={{color:'gray'}}>${name}</p> <p style={{fontWeight:'bold'}}>{value}</p>
-      </> */}
+      <div style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc' }}>
+        <p style={{fontSize:'12px'}}>{`${name}: ${value} (${percentage}%)`}</p>
       </div>
     );
   }
   return null;
 };
-export default function KeyMetricCard() {
-  const total = data.reduce((sum, item) => sum + item.value, 0);
 
+
+export default function KeyMetricCard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -297,6 +304,7 @@ export default function KeyMetricCard() {
                     flexWrap: isMobile ? "wrap" : "nowrap",
                   }}
                 >
+                 {/* FWC Pie Chart */}
                   <ResponsiveContainer width="25%" height="80%">
                     <RePieChart width={100}>
                       <Pie
@@ -313,21 +321,20 @@ export default function KeyMetricCard() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <ReToolTip style={{zIndex:'1'}}  content={<CustomTooltip />} />
+                      <ReToolTip style={{zIndex:'1'}} content={<CustomTooltip total={341} />} />
                     </RePieChart>
                     <Box sx={{ textAlign: "center" }}>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontSize: "10px", color: "gray" }}
-                      >
+                      <Typography variant="caption" sx={{ fontSize: "10px", color: "gray" }}>
                         FWC
                       </Typography>
                     </Box>
                   </ResponsiveContainer>
+
+                  {/* MSU Pie Chart */}
                   <ResponsiveContainer width="25%" height="80%">
                     <RePieChart width={100}>
                       <Pie
-                        data={data}
+                        data={data3}
                         dataKey="value"
                         cx="50%"
                         cy="50%"
@@ -336,22 +343,21 @@ export default function KeyMetricCard() {
                         startAngle={-90}
                         fill="#82ca9d"
                       >
-                        {data.map((entry, index) => (
+                        {data3.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
                         ))}
                       </Pie>
-                      <ReToolTip  content={<CustomTooltip />} />
+                      <ReToolTip content={<CustomTooltip total={20} />} />
                     </RePieChart>
                     <Box sx={{ textAlign: "center" }}>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontSize: "10px", color: "gray" }}
-                      >
+                      <Typography variant="caption" sx={{ fontSize: "10px", color: "gray" }}>
                         MSU
                       </Typography>
                     </Box>
                   </ResponsiveContainer>
-                   <ResponsiveContainer width="25%" height="80%">
+
+                  {/* RHS-A Pie Chart */}
+                  <ResponsiveContainer width="25%" height="80%">
                     <RePieChart width={100}>
                       <Pie
                         data={data2}
@@ -359,22 +365,19 @@ export default function KeyMetricCard() {
                         cx="50%"
                         cy="50%"
                         innerRadius={17}
-                        startAngle={-90}
                         outerRadius={33}
+                        startAngle={-90}
                         fill="#82ca9d"
                       >
                         {data2.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS3[index % COLORS3.length]} />
                         ))}
                       </Pie>
-                      <ReToolTip   content={<CustomTooltip />} />
+                      <ReToolTip content={<CustomTooltip total={43} />} />
                     </RePieChart>
                     <Box sx={{ textAlign: "center" }}>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontSize: "10px", color: "gray" }}
-                      >
-                         RHS-A
+                      <Typography variant="caption" sx={{ fontSize: "10px", color: "gray" }}>
+                        RHS-A
                       </Typography>
                     </Box>
                   </ResponsiveContainer>
@@ -420,7 +423,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    33.3%
+                    61.58%
                   </Typography>
                 </Box>
 
@@ -435,7 +438,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    33.3%
+                    31.64%
                   </Typography>
                 </Box>
 
@@ -450,7 +453,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    33.3%
+                    6.78%
                   </Typography>
                 </Box>
 
@@ -465,7 +468,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    60%
+                    83.51%
                   </Typography>
                 </Box>
 
@@ -480,7 +483,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    89%
+                    94.14%
                   </Typography>
                 </Box>
 
@@ -495,7 +498,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    78%
+                    50.53%
                   </Typography>
                 </Box>
 
@@ -510,7 +513,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    19%
+                    86.70%
                   </Typography>
                 </Box>
 
@@ -525,7 +528,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    98%
+                    92.02%
                   </Typography>
                 </Box>
 
@@ -540,7 +543,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    70%
+                    61.01%
                   </Typography>
                 </Box>
 
@@ -555,7 +558,7 @@ export default function KeyMetricCard() {
                     variant="body1"
                     sx={{ fontWeight: 600, fontSize: 10 }}
                   >
-                    30%
+                    38.98%
                   </Typography>
                 </Box>
               </Box>

@@ -2,8 +2,8 @@ import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const data = [
-  { name: 'Present', value: 80 },
-  { name: 'Absent', value: 20 },
+  { name: 'Open', value: 401 },
+  { name: 'Close', value: 3 },
 ];
 
 const COLORS = ['#4caf50', '#b3b3b3']; // Green for Present, Orange for Absent

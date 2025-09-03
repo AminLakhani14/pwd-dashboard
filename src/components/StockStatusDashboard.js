@@ -15,12 +15,11 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 const StockStatusDashboard = () => {
   const theme = useTheme();
 
-  // Sample data - replace with your actual data
   const stockData = [
     { 
       id: 1, 
       item: 'Condoms', 
-      currentStock: 12500, 
+      currentStock: 191711, 
       monthlyConsumption: 4000, 
       monthsRemaining: 3.1, 
       status: 'Adequate', 
@@ -30,27 +29,27 @@ const StockStatusDashboard = () => {
     { 
       id: 2, 
       item: 'COC', 
-      currentStock: 8200, 
+      currentStock: 127312, 
       monthlyConsumption: 3000, 
       monthsRemaining: 2.7, 
-      status: 'Low', 
+      status: 'Adequate', 
       expiryDate: '2024-08-30',
       lastDelivery: '2023-10-15'
     },
     { 
       id: 3, 
       item: 'POP', 
-      currentStock: 4500, 
+      currentStock: 85979, 
       monthlyConsumption: 1500, 
       monthsRemaining: 3.0, 
-      status: 'Adequate', 
+      status: 'Low', 
       expiryDate: '2024-06-22',
       lastDelivery: '2023-12-01'
     },
     { 
       id: 4, 
       item: 'ECP', 
-      currentStock: 1800, 
+      currentStock: 115945, 
       monthlyConsumption: 600, 
       monthsRemaining: 3.0, 
       status: 'Adequate', 
@@ -60,17 +59,17 @@ const StockStatusDashboard = () => {
     { 
       id: 5, 
       item: '3 Months Inj (Depo)', 
-      currentStock: 3200, 
+      currentStock: 130685, 
       monthlyConsumption: 1200, 
       monthsRemaining: 2.7, 
-      status: 'Low', 
+      status: 'Adequate', 
       expiryDate: '2024-04-05',
       lastDelivery: '2023-10-28'
     },
     { 
       id: 6, 
       item: '3 Month Inj (Sayana Press)', 
-      currentStock: 2500, 
+      currentStock: 120116, 
       monthlyConsumption: 800, 
       monthsRemaining: 3.1, 
       status: 'Adequate', 
@@ -80,10 +79,10 @@ const StockStatusDashboard = () => {
     { 
       id: 7, 
       item: 'IUCD (CT-380-A)', 
-      currentStock: 650, 
+      currentStock: 109759, 
       monthlyConsumption: 200, 
       monthsRemaining: 3.3, 
-      status: 'Adequate', 
+      status: 'Low', 
       expiryDate: '2025-01-05',
       lastDelivery: '2023-09-15'
     },

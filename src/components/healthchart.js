@@ -12,9 +12,9 @@ const HealthMetricsCard = () => {
 
   const metrics = [
     { name: "All Reports", value: 100, target: 100 },
-    { name: "RHS-A", value: 60, target: 85 },
-    { name: "MSU", value: 30, target: 70 },
-    { name: "FWC", value: 10, target: 65 },
+    { name: "FWC", value: 341, target: 100 },
+    { name: "RHS-A", value: 43, target: 85 },
+    { name: "MSU", value: 22, target: 70 },
   ];
 
   return (
@@ -79,7 +79,7 @@ const HealthMetricsCard = () => {
                       // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                     }}
                   >
-                    {metric.value} / {metric.value}%
+                    {metric.value} / {metric.target}%
                   </Typography>
                   {/* {exceedsTarget && <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: '1rem' }} />} */}
                 </Box>

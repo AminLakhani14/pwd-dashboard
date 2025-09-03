@@ -8,13 +8,13 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { Padding } from '@mui/icons-material';
 
 const furnitureData = [
-  { shortform: 'OT', fullForm: 'Office Table', good: 36, satisfactory: 8, poor: 4 }, 
-  { shortform: 'OC', fullForm: 'Office Chairs', good: 30, satisfactory: 1, poor: 6 }, 
-  { shortform: 'B', fullForm: 'Benches', good: 26, satisfactory: 5, poor: 4 }, 
-  { shortform: 'ET', fullForm: 'Examination Table', good: 23, satisfactory: 4, poor: 2 }, 
-  { shortform: 'IT', fullForm: 'Insertion Table', good: 35, satisfactory: 4, poor: 5 }, 
-  { shortform: 'RS', fullForm: 'Revolving Stool', good: 41, satisfactory: 2, poor: 5 }, 
-  { shortform: 'MC', fullForm: 'Medicine Cabinet', good: 48, satisfactory: 8, poor: 5 }, 
+  { shortform: 'OT', fullForm: 'Office Table', good: 133, satisfactory: 70, poor: 22 }, 
+  { shortform: 'OC', fullForm: 'Office Chairs', good: 121, satisfactory: 74, poor: 29 }, 
+  { shortform: 'B', fullForm: 'Benches', good: 132, satisfactory: 67, poor: 16 }, 
+  { shortform: 'ET', fullForm: 'Examination Table', good: 117, satisfactory: 81, poor: 13 }, 
+  { shortform: 'IT', fullForm: 'Insertion Table', good: 120, satisfactory: 68, poor: 13 }, 
+  { shortform: 'RS', fullForm: 'Revolving Stool', good: 109, satisfactory: 54, poor: 19 }, 
+  { shortform: 'MC', fullForm: 'Medicine Cabinet', good: 88, satisfactory: 85, poor: 30 }, 
 ];
 
 export default function StackBars() {
