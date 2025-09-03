@@ -13,6 +13,15 @@ import {
 import HealthMetricsCard from "./healthchart";
 import { pieArcLabelClasses, PieChart } from "@mui/x-charts";
 import "../index.css";
+import {
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  Tooltip as ReToolTip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
 import Statisticscard from "./Statisticscard";
 
 const dataset = [
@@ -65,11 +74,57 @@ const attendanceData = [
     borderLeft: "5px solid #FF9800",
   },
 ];
-
+const data = [
+  {
+    name: "Open",
+    value: 33.33,
+    color: "#b3b3b3",
+  },
+  {
+    name: "Close",
+    value: 33.33,
+    color: "#0088FE",
+  },
+]
+const data2 = [
+  {
+    name: "Open",
+    value: 90.67,
+    color: "#b3b3b3",
+  },
+  {
+    name: "Close",
+    value: 99.33,
+    color: "#FF8042",
+  },
+]
+const COLORS = ['#b3b3b3', '#0088FE'];
+const COLORS2 = ['#b3b3b3', '#FFBB28'];
+const COLORS3 = ['#b3b3b3', '#FF8042'];
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const { name, value } = payload[0];
+    const fill = payload[0].payload.fill
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    const percentage = ((value / total) * 100).toFixed(0);
+    return (
+      <div style={{ display:'flex', backgroundColor: 'white', padding: '10px',height:'40px',width:'max-content', border: '1px solid #ccc' }}>
+       <p style={{fontSize:'12px'}}> {`${name}: ${value} (${percentage}%)`}</p>
+        {/* <>
+  {fill} <p style={{color:'gray'}}>${name}</p> <p style={{fontWeight:'bold'}}>{value}</p>
+      </> */}
+      </div>
+    );
+  }
+  return null;
+};
 export default function KeyMetricCard() {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
 
   return (
     <Box
@@ -125,7 +180,7 @@ export default function KeyMetricCard() {
                     >
                       <Typography
                         variant="body2"
-                        sx={{ width: 180, fontSize: "0.75rem", color: "gray",paddingTop:'7px' }}
+                        sx={{ width: 180, fontSize: "0.75rem", color: "gray", paddingTop: '7px' }}
                       >
                         {item.month}
                       </Typography>
@@ -133,7 +188,7 @@ export default function KeyMetricCard() {
                         sx={{
                           display: "flex",
                           alignItems: "end",
-                          justifyContent:'end',
+                          justifyContent: 'end',
                           // marginTop: "0px",
                           marginBottom: "2px",
                         }}
@@ -152,22 +207,22 @@ export default function KeyMetricCard() {
                         </Typography>
                       </Box>
                     </Box>
-                     <Box sx={{ position: "relative", height: "8px" }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={item.rainfall}
-                      sx={{
-                        height: "8px",
-                        borderRadius: "4px",
-                        backgroundColor: theme.palette.grey[200],
-                        "& .MuiLinearProgress-bar": {
+                    <Box sx={{ position: "relative", height: "8px" }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={item.rainfall}
+                        sx={{
+                          height: "8px",
                           borderRadius: "4px",
-                          backgroundColor:'#4caf50'
-                          // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
-                        },
-                      }}
-                    />
-                  </Box>
+                          backgroundColor: theme.palette.grey[200],
+                          "& .MuiLinearProgress-bar": {
+                            borderRadius: "4px",
+                            backgroundColor: '#4caf50'
+                            // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
+                          },
+                        }}
+                      />
+                    </Box>
                   </Box>
                 ))}
               </Box>
@@ -238,49 +293,28 @@ export default function KeyMetricCard() {
                     display: "flex",
                     justifyContent: "center",
                     gap: 3,
+                    height:'40%',
                     flexWrap: isMobile ? "wrap" : "nowrap",
                   }}
                 >
-                  <Box sx={{ textAlign: "center", marginRight: "18px" }}>
-                    <PieChart
-                      series={[
-                        {
-                          innerRadius: 17,
-                          outerRadius: 33,
-                          data: [
-                            {
-                              label: "Rented",
-                              value: 33.33,
-                              color: "#b3b3b3",
-                            },
-                            {
-                              label: "Government",
-                              value: 33.33,
-                              color: "#0088FE",
-                            },
-                          ],
-                        },
-                      ]}
-                      sx={{
-                        [`& .${pieArcLabelClasses.root}`]: {
-                          fontWeight: "bold",
-                          fontSize: "7px",
-                        },
-                      }}
-
-                      margin={{ right: 5 }}
-                      width={isMobile ? 60 : 70}
-                      height={isMobile ? 60 : 70}
-                      slotProps={{
-                        legend: { hidden: true },
-                      }}
-                    >
-                      <Tooltip
-                        formatter={(value) => `${value}%`}
-                        labelFormatter={(label) => label}
-                        slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
-                      />
-                    </PieChart>
+                  <ResponsiveContainer width="25%" height="80%">
+                    <RePieChart width={100}>
+                      <Pie
+                        data={data}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={17}
+                        outerRadius={33}
+                        startAngle={-90}
+                        fill="#82ca9d"
+                      >
+                        {data.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <ReToolTip style={{zIndex:'1'}}  content={<CustomTooltip />} />
+                    </RePieChart>
                     <Box sx={{ textAlign: "center" }}>
                       <Typography
                         variant="caption"
@@ -289,47 +323,25 @@ export default function KeyMetricCard() {
                         FWC
                       </Typography>
                     </Box>
-                  </Box>
-
-                  <Box sx={{ textAlign: "center", marginRight: "18px" }}>
-                    <PieChart
-                      series={[
-                        {
-                          innerRadius: 17,
-                          outerRadius: 33,
-                          data: [
-                            {
-                              label: "Rented",
-                              value: 33.33,
-                              color: "#b3b3b3",
-                            },
-                            {
-                              label: "Government",
-                              value: 33.33,
-                              color: "#FFBB28",
-                            },
-                          ],
-                        },
-                      ]}
-                      sx={{
-                        [`& .${pieArcLabelClasses.root}`]: {
-                          fontWeight: "bold",
-                          fontSize: "7px",
-                        },
-                      }}
-                      margin={{ right: 5 }}
-                      width={isMobile ? 60 : 70}
-                      height={isMobile ? 60 : 70}
-                      slotProps={{
-                        legend: { hidden: true },
-                      }}
-                    >
-                      <Tooltip
-                        formatter={(value) => `${value}%`}
-                        labelFormatter={(label) => label}
-                        slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
-                      />
-                    </PieChart>
+                  </ResponsiveContainer>
+                  <ResponsiveContainer width="25%" height="80%">
+                    <RePieChart width={100}>
+                      <Pie
+                        data={data}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={17}
+                        outerRadius={33}
+                        startAngle={-90}
+                        fill="#82ca9d"
+                      >
+                        {data.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
+                        ))}
+                      </Pie>
+                      <ReToolTip  content={<CustomTooltip />} />
+                    </RePieChart>
                     <Box sx={{ textAlign: "center" }}>
                       <Typography
                         variant="caption"
@@ -338,55 +350,34 @@ export default function KeyMetricCard() {
                         MSU
                       </Typography>
                     </Box>
-                  </Box>
-                  <Box sx={{ textAlign: "center" }}>
-                    <PieChart
-                      series={[
-                        {
-                          innerRadius: 17,
-                          outerRadius: 33,
-                          data: [
-                            {
-                              label: "Unavailable",
-                              value: 90.67,
-                              color: "#b3b3b3",
-                            },
-                            {
-                              label: "Available",
-                              value: 99.33,
-                              color: "#FF8042",
-                            },
-                          ],
-                        },
-                      ]}
-                      sx={{
-                        [`& .${pieArcLabelClasses.root}`]: {
-                          fontWeight: "bold",
-                          fontSize: "7px",
-                        },
-                      }}
-                      margin={{ right: 5 }}
-                      width={isMobile ? 60 : 70}
-                      height={isMobile ? 60 : 70}
-                      slotProps={{
-                        legend: { hidden: true },
-                      }}
-                    >
-                      <Tooltip
-                        formatter={(value) => `${value}%`}
-                        labelFormatter={(label) => label}
-                        slotProps={{ tooltip: { sx: { fontSize: "0.7rem" } } }}
-                      />
-                    </PieChart>
+                  </ResponsiveContainer>
+                   <ResponsiveContainer width="25%" height="80%">
+                    <RePieChart width={100}>
+                      <Pie
+                        data={data2}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={17}
+                        startAngle={-90}
+                        outerRadius={33}
+                        fill="#82ca9d"
+                      >
+                        {data2.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS3[index % COLORS3.length]} />
+                        ))}
+                      </Pie>
+                      <ReToolTip   content={<CustomTooltip />} />
+                    </RePieChart>
                     <Box sx={{ textAlign: "center" }}>
                       <Typography
                         variant="caption"
                         sx={{ fontSize: "10px", color: "gray" }}
                       >
-                        RHS-A
+                         RHS-A
                       </Typography>
                     </Box>
-                  </Box>
+                  </ResponsiveContainer>
                 </Box>
               </Box>
             </CardContent>
