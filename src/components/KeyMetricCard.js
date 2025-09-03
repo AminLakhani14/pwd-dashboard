@@ -267,6 +267,7 @@ export default function KeyMetricCard() {
                           fontSize: "7px",
                         },
                       }}
+
                       margin={{ right: 5 }}
                       width={isMobile ? 60 : 70}
                       height={isMobile ? 60 : 70}
@@ -420,13 +421,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Government
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     33.3%
                   </Typography>
@@ -435,13 +436,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Rented
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     33.3%
                   </Typography>
@@ -450,13 +451,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Pvt (Free Of Cost)
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     33.3%
                   </Typography>
@@ -465,13 +466,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Indication/ Sign Board (Installed)
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     60%
                   </Typography>
@@ -480,13 +481,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Electricity
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     89%
                   </Typography>
@@ -495,13 +496,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Gas
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     78%
                   </Typography>
@@ -510,13 +511,13 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Water
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     19%
                   </Typography>
@@ -525,15 +526,45 @@ export default function KeyMetricCard() {
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     variant="body1"
-                    sx={{ color: "text.secondary", fontSize: 13 }}
+                    sx={{ color: "text.secondary", fontSize: 10 }}
                   >
                     Cleanlines
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontWeight: 600, fontSize: 13 }}
+                    sx={{ fontWeight: 600, fontSize: 10 }}
                   >
                     98%
+                  </Typography>
+                </Box>
+
+                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "text.secondary", fontSize: 10 }}
+                  >
+                    Branded
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{ fontWeight: 600, fontSize: 10 }}
+                  >
+                    70%
+                  </Typography>
+                </Box>
+
+                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "text.secondary", fontSize: 10 }}
+                  >
+                    Un Branded
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{ fontWeight: 600, fontSize: 10 }}
+                  >
+                    30%
                   </Typography>
                 </Box>
               </Box>

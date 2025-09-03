@@ -1,10 +1,13 @@
-import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, LinearProgress, Tooltip } from "@mui/material";
+import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, LinearProgress, Tooltip, useMediaQuery, CardContent } from "@mui/material";
 import { BarChart, pieArcLabelClasses, PieChart } from "@mui/x-charts";
 import { useState } from "react";
+import WarningIcon from "@mui/icons-material/Warning";
+import ErrorIcon from "@mui/icons-material/Error";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const IecChart = () => {
   const theme = useTheme();
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [chartType, setChartType] = useState("IEC Material");
 
   const chartData = {
@@ -27,9 +30,73 @@ const IecChart = () => {
     setChartType(event.target.value);
   };
 
-const chartSetting = {
+const alerts = [
+    {
+      type: "danger",
+      title: "Karachi Center A",
+      message: "Medicine expiring in 15 days",
+      // icon: <ErrorIcon />,
+    },
+    {
+      type: "warning",
+      title: "Hyderabad Center B",
+      message: "Low contraceptive stock levels",
+      // icon: <WarningIcon />,
+    },
+    {
+      type: "good",
+      title: "Sukkur Center C",
+      message: "Equipment maintenance scheduled",
+      // icon: <CheckCircleIcon />,
+    },
+    {
+      type: "danger",
+      title: "Lahore Center D",
+      message: "Critical equipment failure",
+      // icon: <ErrorIcon />,
+    },
+    {
+      type: "warning",
+      title: "Islamabad Center E",
+      message: "Staff shortage reported",
+      // icon: <WarningIcon />,
+    },
+    {
+      type: "good",
+      title: "Quetta Center F",
+      message: "Monthly targets achieved",
+      // icon: <CheckCircleIcon />,
+    },
+  ];
 
-};
+  const getAlertStyle = (type) => {
+    switch (type) {
+      case "danger":
+        return {
+          // bgcolor: "#ffebee",
+          borderLeft: "4px solid #f44336",
+          iconColor: "#f44336",
+        };
+      case "warning":
+        return {
+          // bgcolor: "#fff3e0",
+          borderLeft: "4px solid #ff9800",
+          iconColor: "#ff9800",
+        };
+      case "good":
+        return {
+          // bgcolor: "#e8f5e9",
+          borderLeft: "4px solid #4caf50",
+          iconColor: "#4caf50",
+        };
+      default:
+        return {
+          // bgcolor: "#f5f5f5",
+          borderLeft: "4px solid #9e9e9e",
+          iconColor: "#9e9e9e",
+        };
+    }
+  };
 
  const dataset = [
   {
@@ -121,72 +188,103 @@ const chartSetting = {
         </Box>
       </Card>
 
-      <Card
+     <Card
+      sx={{
+        borderRadius: 3,
+        boxShadow: 3,
+        height: "248px",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        marginTop: isMobile ? "10px" : "10px",
+        overflow: "hidden",
+        mb: 4,
+      }}
+    >
+      <CardContent
         sx={{
-          borderRadius: 2,
-          boxShadow: 3,
-          p: 3,
-          width: "100%",
-          bgcolor: "background.paper",
-          mb: 4,
-          height: 250,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          // p: 2,
+          pb: 0,
+          // backgroundColor: theme.palette.background.paper,
+          // borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
         <Typography
           variant="h6"
+          fontWeight={600}
+          gutterBottom
+          align="left"
           sx={{
             fontWeight: 600,
-            mb: 2,
-            color: "text.primary",
-            textAlign: "left",
-            fontFamily: 'inherit',
+            color: theme.palette.text.primary,
+            fontFamily: "inherit",
             fontSize: 16,
-            width: '100%'
           }}
         >
-          Status of Building
+          <WarningIcon color="warning" /> Urgent Alerts & Issues
         </Typography>
+      </CardContent>
 
-        <Box sx={{ height: 200, width: '100%', display: 'flex',  }}>
-          <PieChart
-            series={[
-              {
-                startAngle: -90,
-                endAngle: 90,
-                paddingAngle: 5,
-                innerRadius: 45,
-                outerRadius: 77,
-                cy: "75%",
-                cx: "50%",
-                data: data2,
-              },
-            ]}
-            sx={{
-              "& .MuiChartsLegend-root": { marginBlock: "0px !important" }
-            }}
-          width={150}
-          height={150}
-          slotProps={{
-              legend: {
-                direction: "row",
-                position: { vertical: "bottom", horizontal: "middle" },
-                itemMarkWidth: 8,
-                itemMarkHeight: 8,
-                labelStyle: { fontSize: 6 }, // Changed to 6px
-              },
-            }}
-        >
-          <Tooltip
-            formatter={(value) => `${value}`}
-            labelFormatter={(label) => label}
-            slotProps={{ tooltip: { sx: { fontSize: "0.7rem" }}}}
-          />
-        </PieChart>
-        </Box>
-      </Card>
+      <Box
+        sx={{
+          overflowY: "auto",
+          height: "100%",
+          p: 1,
+        }}
+      >
+        {alerts.map((alert, index) => {
+          const alertStyle = getAlertStyle(alert.type);
+          return (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                p: 1.5,
+                mb: 1,
+                borderRadius: 2,
+                ...alertStyle,
+              }}
+            >
+              <Box
+                sx={{
+                  color: alertStyle.iconColor,
+                  mr: 1.5,
+                  mt: 0.2,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {alert.icon}
+              </Box>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "12px",
+                    color: theme.palette.text.primary,
+                    mb: 0.3,
+                  }}
+                >
+                  {alert.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "12px",
+                    color: theme.palette.text.secondary,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {alert.message}
+                </Typography>
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+    </Card>
 
       <Paper
         elevation={2}

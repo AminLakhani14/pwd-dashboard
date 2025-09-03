@@ -348,7 +348,7 @@ const Dashboard = () => {
             marginTop: "8px",
           }}
         >
-          <div>
+           <div>
             <IecChart />
           </div>
         </Grid>
