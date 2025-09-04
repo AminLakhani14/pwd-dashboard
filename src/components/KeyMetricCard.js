@@ -22,15 +22,21 @@ import {
 import Statisticscard from "./Statisticscard";
 
 const dataset = [
-  { month: "Iud kits Count", rainfall: 21, total: 1000 },
-  { month: "B.P. Apparatus Count", rainfall: 28, total: 1000 },
-  { month: "Stethoscope Count", rainfall: 41, total: 1000 },
-  { month: "Thermometer Count", rainfall: 73, total: 1000 },
-  { month: "Weighting Machine Count", rainfall: 99, total: 1000 },
-  { month: "Stove Count", rainfall: 44, total: 1000 },
-  { month: "Autoclave Count", rainfall: 100, total: 1000 },
-  { month: "Sterlizer Count", rainfall: 80, total: 1000 },
-  { month: "Screen Count", rainfall: 10, total: 1000 },
+  { month: "Minilap Kits", rainfall: 1593, total: 2000, percentage: 79.65 },
+  { month: "Iud kits", rainfall: 708, total: 2000, percentage: 35.4 },
+  { month: "B.P. Apparatus", rainfall: 885, total: 2000, percentage: 44.25 },
+  { month: "Thermometer", rainfall: 531, total: 2000, percentage: 26.55 },
+  { month: "Weighting Machine", rainfall: 177, total: 2000, percentage: 17.7 },
+  { month: "Stove", rainfall: 177, total: 2000, percentage: 8.85 },
+  { month: "O.T. Lights", rainfall: 354, total: 2000, percentage: 8.85 },
+  { month: "Hydraulic Table", rainfall: 177, total: 2000, percentage: 8.85 },
+  { month: "Autoclave", rainfall: 177, total: 2000, percentage: 8.85 },
+  { month: "Oxygen Cylinder", rainfall: 177, total: 2000, percentage: 8.85 },
+  { month: "Aspirating Pumps", rainfall: 354, total: 2000, percentage: 17.7 },
+  { month: "Wheel Chair", rainfall: 177, total: 2000, percentage: 8.85 },
+  { month: "Stretcher", rainfall: 354, total: 2000, percentage: 17.7 },
+  { month: "Generator", rainfall: 177, total: 2000, percentage: 8.85 },
+  { month: "Screen", rainfall: 177, total: 2000, percentage: 8.85 },
 ];
 
 // Attendance data with both counts and percentages
@@ -196,7 +202,6 @@ export default function KeyMetricCard() {
                           display: "flex",
                           alignItems: "end",
                           justifyContent: 'end',
-                          // marginTop: "0px",
                           marginBottom: "2px",
                         }}
                       >
@@ -207,17 +212,16 @@ export default function KeyMetricCard() {
                             color: "black",
                             fontSize: "13px",
                             paddingTop: '7px',
-                            // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                           }}
                         >
-                          {item.rainfall}%
+                          {item.rainfall} / {item.percentage}%
                         </Typography>
                       </Box>
                     </Box>
                     <Box sx={{ position: "relative", height: "8px" }}>
                       <LinearProgress
-                        variant="determinate"
-                        value={item.rainfall}
+                        variant="determinate" // Changed from "buffer" to "determinate"
+                        value={item.percentage} // Use the actual percentage value
                         sx={{
                           height: "8px",
                           borderRadius: "4px",
@@ -225,7 +229,6 @@ export default function KeyMetricCard() {
                           "& .MuiLinearProgress-bar": {
                             borderRadius: "4px",
                             backgroundColor: '#4caf50'
-                            // exceedsTarget ? theme.palette.success.main : theme.palette.error.main,
                           },
                         }}
                       />
