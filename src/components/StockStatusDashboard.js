@@ -91,8 +91,8 @@ const StockStatusDashboard = () => {
   const columns = [
     { 
       field: 'item', 
-      headerName: 'Medicine', 
-      width: '260',
+      headerName: 'Commodities', 
+      width: '400',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CircleIcon sx={{ 
@@ -117,28 +117,6 @@ const StockStatusDashboard = () => {
         </Typography>
         </Box>
       )
-    },
-    { 
-      field: 'expiryDate', 
-      headerName: 'Expiry Date', 
-      width: '200',
-      renderCell: (params) => {
-        const expiry = new Date(params.value);
-        const today = new Date();
-        const diffTime = expiry - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {diffDays < 90 ? (
-              <WarningIcon color="warning" sx={{ mr: 1, fontSize: '6px', }} />
-            ) : null}
-            <Typography sx={{ display: 'flex', alignItems: 'center' }}>
-              {expiry.toLocaleDateString()}
-            </Typography>
-          </Box>
-        );
-      }
     },
     { 
       field: 'status', 

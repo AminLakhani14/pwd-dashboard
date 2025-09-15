@@ -13,12 +13,12 @@ const IecChart = () => {
 
   const chartData = {
     "IEC Material": [
-      { id: 0, value: 157, label: "Material A" },
-      { id: 1, value: 28, label: "Material B" },
+      { id: 0, value: 157, label: "Displayed" },
+      { id: 1, value: 28, label: "Non Displayed" },
     ],
     "MEC Wheel": [
-      { id: 0, value: 158, label: "Wheel Type X" },
-      { id: 1, value: 27, label: "Wheel Type Y" },
+      { id: 0, value: 158, label: "Available"  },
+      { id: 1, value: 27, label: "Not Available" },
     ],
   };
 
@@ -30,7 +30,7 @@ const alerts = [
     {
       type: "danger",
       title: "Karachi Center A",
-      message: "Medicine expiring in 15 days",
+      message: "Commodities expiring in 15 days",
       icon: <ErrorIcon />,
     },
     {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { Typography, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Tooltip, Alert, Collapse, IconButton } from "@mui/material";
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -37,11 +37,40 @@ const Dashboard = () => {
     handleClose();
   };
 
+  //  const postAttendanceData = async () => {
+  //     try {
+  //       const url = `http://demo.kcompute.com:8065/Designer/Grid2/${"55587"},${"FWC"},${"7122"},${"Karachi Central"},${"---Select All---"},${"2025-01-01"},${"2025-09-08"}`;
+        
+  //       const response = await fetch(url, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Accept': 'application/json',
+  //         },
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
+
+  //       const data = await response.json();
+  //       return data;
+  //     } catch (error) {
+  //       console.error('Error posting attendance data:', error);
+  //       throw error;
+  //     }
+  //   };
+
+
+  // useEffect(()=>{
+  //   postAttendanceData();
+  // },[]);
+
   const sdpTypes = [
-    { value: '1', label: 'Select SDP Type For All' },
-    { value: '2', label: 'Population Welfare Department - FWC' },
-    { value: '3', label: 'Population Welfare Department - MSU' },
-    { value: '4', label: 'Population Welfare Department - RHS-A' },
+    { value:'', label: 'Select SDP Type For All' },
+    { value: '55587, FWC,7122', label: 'Population Welfare Department - FWC' },
+    { value: '50484, MSU,7121', label: 'Population Welfare Department - MSU' },
+    { value: '50435, RHS,7120', label: 'Population Welfare Department - RHS-A' },
   ];
 
   const districts = [
@@ -61,7 +90,7 @@ const Dashboard = () => {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: isMobile ? '90%' : 400,
+    width: isMobile ? '90%' : 450,
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: isMobile ? 2 : 4,
@@ -132,6 +161,8 @@ const Dashboard = () => {
         onClose={handleClose}
         aria-labelledby="filter-modal-title"
         aria-describedby="filter-modal-description"
+        hideBackdrop
+        disableEscapeKeyDown
       >
         <Box sx={modalStyle}>
           <Typography id="filter-modal-title" variant="h6" component="h2" mb={2}>
