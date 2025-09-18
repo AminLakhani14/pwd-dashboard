@@ -21,7 +21,7 @@ const TopNavbar = () => {
           <MenuIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1 }} />
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> */}
         <Avatar alt="User Profile" src="https://i.pravatar.cc/150?img=3" sx={{ ml: 2, width: 40, height: 40 }} />
       </Toolbar>
     </AppBar>

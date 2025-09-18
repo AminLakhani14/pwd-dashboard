@@ -1,12 +1,12 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../app/Hooks';
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
 import LeftSidebar from './LeftSidebar';
 import TopNavbar from './TopNavbar';
 
 const Layout = () => {
-  const { isSidebarOpen } = useSelector((state) => state.ui);
+  const { isSidebarOpen } = useAppSelector((state) => state.ui);
   const sidebarWidth = isSidebarOpen ? '260px' : '80px';
 
   return (

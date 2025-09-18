@@ -25,7 +25,27 @@ const COLORS = ['#4caf50', '#b3b3b3'];
 
 const RADIAN = Math.PI / 180;
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value, total, index }) => {
+interface CustomizedLabelProps {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  value: number;
+  total: number;
+  index: number;
+}
+
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  value,
+  total,
+  index,
+}: CustomizedLabelProps) => {
   const radius = innerRadius + (outerRadius - innerRadius) + 30;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -41,13 +61,13 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, val
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
-        {`${percentage}%`} {percentage >= 70 ? 'Open' : 'Close'}
+        {`${percentage}%`} {Number(percentage) >= 70 ? 'Open' : 'Close'}
       </text>
     </g>
   );
 };
 
-const CustomTooltip = ({ active, payload }) => {
+const CustomTooltip = ({ active, payload }:any) => {
   if (active && payload && payload.length) {
     const { name, value } = payload[0];
     const total = pieData.reduce((sum, item) => sum + item.value, 0);
@@ -249,7 +269,7 @@ const sdpDetailsData = {
 };
 
 // Define columns for DataGrid
-const columns = [
+const columns: { field: string; headerName: string; width: number }[] = [
   { field: 'district', headerName: 'Name of District', width: 200 },
   { field: 'sdpType', headerName: 'SDP Type', width: 300 },
   { field: 'centerName', headerName: 'Center Name', width: 300 },
@@ -258,11 +278,11 @@ const columns = [
 
 export default function StatisticsCard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(null);
-  const total = pieData.reduce((sum, item) => sum + item.value, 0);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const total = pieData.reduce((sum: number, item: { value: number }) => sum + item.value, 0);
 
-  const handlePieClick = (data, index) => {
-    setSelectedStatus(pieData[index].name);
+  const handlePieClick = (_data: unknown, index: number) => {
+    setSelectedStatus(pieData[index]?.name ?? null);
     setDrawerOpen(true);
   };
 
@@ -272,7 +292,7 @@ export default function StatisticsCard() {
   };
 
   // Prevent drawer from closing on backdrop click or escape key
-  const handleDrawerClose = (event, reason) => {
+  const handleDrawerClose = (_event: React.SyntheticEvent | {}, reason?: string) => {
     if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
       return;
     }
@@ -289,7 +309,7 @@ export default function StatisticsCard() {
         }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart width={200}>
+            <PieChart width={200}>
             <Pie
               data={pieData}
               dataKey="value"
@@ -298,7 +318,7 @@ export default function StatisticsCard() {
               innerRadius={30}
               outerRadius={55}
               fill="#82ca9d"
-              label={(props) => renderCustomizedLabel({ ...props, total })}
+              label={(props: any) => renderCustomizedLabel({ ...props, total })}
               onClick={handlePieClick}
             >
               {pieData.map((entry, index) => (
@@ -314,9 +334,6 @@ export default function StatisticsCard() {
         anchor="right"
         open={drawerOpen}
         onClose={handleDrawerClose}
-        ModalProps={{
-          disableBackdropClick: true,
-        }}
         sx={{
           '& .MuiDrawer-paper': {
             width: '80%',
@@ -353,13 +370,16 @@ export default function StatisticsCard() {
             </Typography>
             <Box sx={{ height: 400, width: '100%' }}>
               <DataGrid
-                rows={sdpDetailsData[category].filter(row => !selectedStatus || row.status === selectedStatus)}
+                rows={
+                  (sdpDetailsData as Record<string, { id: number; district: string; sdpType: string; centerName: string; status: string; }[]>)[category]
+                    .filter((row: { status: string }) => !selectedStatus || row.status === selectedStatus)
+                }
                 columns={columns}
                 pageSizeOptions={[5, 10, 20]}
                 initialState={{
                   pagination: { paginationModel: { pageSize: 10 } },
                 }}
-                disableSelectionOnClick
+                disableRowSelectionOnClick
                 sx={{
                   '& .MuiDataGrid-columnHeaders': {
                     backgroundColor: '#f5f5f5',

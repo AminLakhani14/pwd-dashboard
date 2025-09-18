@@ -8,7 +8,7 @@ import { ThemeContext } from '../context/ThemeContextProvider';
 const ThemeSwitcher = () => {
   const { themeName, setThemeName } = useContext(ThemeContext);
 
-  const handleThemeChange = (event, newTheme) => {
+  const handleThemeChange = (_event: React.MouseEvent<HTMLElement>, newTheme: string | null) => {
     if (newTheme !== null) {
       setThemeName(newTheme);
     }

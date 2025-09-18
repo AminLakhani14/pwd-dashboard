@@ -1,12 +1,11 @@
 import React from 'react';
-import { Box, Typography, Paper, Grid, useTheme, LinearProgress } from '@mui/material';
+import { Box, Typography, Paper, useTheme } from '@mui/material';
 import { 
   DataGrid, 
   GridToolbar, 
 } from '@mui/x-data-grid';
 import { 
   Circle as CircleIcon,
-  Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
@@ -88,11 +87,13 @@ const StockStatusDashboard = () => {
     },
   ];
 
-  const columns = [
+  type RowType = { id: number; item: string; currentStock: number; monthlyConsumption: number; monthsRemaining: number; status: string; expiryDate: string; lastDelivery: string };
+
+  const columns: import('@mui/x-data-grid').GridColDef<RowType>[] = [
     { 
       field: 'item', 
       headerName: 'Commodities', 
-      width: '400',
+      width: 400,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CircleIcon sx={{ 
@@ -109,11 +110,11 @@ const StockStatusDashboard = () => {
     { 
       field: 'currentStock', 
       headerName: 'Stock Available', 
-      width: '200',
+      width: 200,
       renderCell: (params) => (
          <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography fontWeight="400" sx={{ display: 'flex', alignItems: 'center' }}>
-          {params.value.toLocaleString()}
+          {Number(params.value).toLocaleString()}
         </Typography>
         </Box>
       )
@@ -121,7 +122,7 @@ const StockStatusDashboard = () => {
     { 
       field: 'status', 
       headerName: 'Status', 
-      width: '200',
+      width: 200,
       renderCell: (params) => (
         <Box sx={{
           display: 'flex',
@@ -184,11 +185,11 @@ const StockStatusDashboard = () => {
 
       <Box sx={{ height: 437, width: '100%' }}>
         <DataGrid
-          rows={stockData}
+          rows={stockData as RowType[]}
           columns={columns}
           hideFooter
-          components={{
-            Toolbar: GridToolbar,
+          slots={{
+            toolbar: GridToolbar,
           }}
           sx={{
             border: 'none',

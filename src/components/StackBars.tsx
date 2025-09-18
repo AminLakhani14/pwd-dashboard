@@ -5,7 +5,7 @@ import {
   useTheme
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
-import { Padding } from '@mui/icons-material';
+ 
 
 const furnitureData = [
   { shortform: 'OT', fullForm: 'Office Table', good: 133, satisfactory: 70, poor: 22 }, 
@@ -79,44 +79,14 @@ export default function StackBars() {
           }}
           slotProps={{
             legend: {
-              // direction: 'row',
-              // position: { vertical: 'bottom', horizontal: 'middle' },
-              itemMarkWidth: 8,
-              itemMarkHeight: 8,
-              labelStyle: {
-                fontSize: 4,
-                },
+              sx: {
+                '& .MuiChartsLegend-label': { fontSize: 8 },
+              },
             },
           }}
           sx={{ "& .MuiChartsLabelMark-root.MuiChartsLabelMark-square": { borderRadius: "10px !important" }, }}
           colors={['#4CAF50', '#FFC107', '#F44336']}
-          tooltip={{
-            trigger: 'item',
-            content: ({ series, dataIndex }) => {
-              const item = furnitureData[dataIndex];
-              const total = item.good + item.poor + item.satisfactory;
-              return (
-                <div style={{ 
-                  background: theme.palette.background.paper,
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: '20px',
-                }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
-                    {item.fullForm}
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
-                    Good: {item.good} ({(item.good/total*100).toFixed(0)}%)
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
-                    Satisfactory: {item.satisfactory} ({(item.satisfactory/total*100).toFixed(0)}%)
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: 10, fontFamily: 'inherit', }}>
-                    Poor: {item.poor} ({(item.poor/total*100).toFixed(0)}%)
-                  </Typography>
-                </div>
-              );
-            },
-          }}
+          
         />
       </CardContent>
   );

@@ -22,7 +22,7 @@ const FuturisticContraceptivePieChart = () => {
     { name: 'IUCD (CT-380-A)', value: 2088, expiry: '2025-01-05', status: 'Adequate', color: '#1DE9B6' },
   ];
 
-  const renderActiveShape = (props) => {
+  const renderActiveShape = (props:any) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
 
     return (
@@ -102,8 +102,6 @@ const FuturisticContraceptivePieChart = () => {
                 outerRadius={120}
                 paddingAngle={2}
                 dataKey="value"
-                activeIndex={[0, 1, 2, 3, 4, 5, 6]}
-                activeShape={renderActiveShape}
               >
                 {stockData.map((entry, index) => (
                   <Cell 
@@ -184,7 +182,9 @@ const FuturisticContraceptivePieChart = () => {
           {stockData.map((item, index) => {
             const expiryDate = new Date(item.expiry);
             const today = new Date();
-            const diffDays = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+            const diffDays = Math.ceil(
+              (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+            );
             const isExpiringSoon = diffDays < 90;
 
             return (

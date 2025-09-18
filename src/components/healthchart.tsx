@@ -54,8 +54,8 @@ const HealthMetricsCard = () => {
     { name: "MSU", value: 22, percentage: 20, target: 100 },
   ];
 
-  const handleMetricClick = (metric) => {
-    setSelectedMetric(metric);
+  const handleMetricClick = (metric: string) => {
+    setSelectedMetric(metric as any);
     setOpen(true);
   };
 
@@ -162,7 +162,7 @@ const HealthMetricsCard = () => {
         onClose={() => {}} // Empty onClose to prevent closing via backdrop or escape
         disableEscapeKeyDown
         ModalProps={{
-          disableBackdropClick: true,
+          hideBackdrop: true,
         }}
         sx={{
           '& .MuiDrawer-paper': {
@@ -205,7 +205,7 @@ const HealthMetricsCard = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {metricsData[selectedMetric].map((row, index) => (
+                {(metricsData[selectedMetric] as Array<{ district: string; startDate: string; endDate: string; visits: number }>).map((row, index) => (
                   <TableRow key={index}>
                     <TableCell>{row.district}</TableCell>
                     <TableCell>{row.startDate}</TableCell>

@@ -4,14 +4,14 @@ import {
   CardContent,
   Typography,
   Box,
-  Grid,
   useMediaQuery,
   useTheme,
   LinearProgress,
   Drawer,
   IconButton
 } from "@mui/material";
-import { DataGrid } from '@mui/x-data-grid';
+import Grid from '@mui/material/Grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import HealthMetricsCard from "./healthchart";
 import "../index.css";
 import {
@@ -23,6 +23,23 @@ import {
 } from "recharts";
 import CloseIcon from "@mui/icons-material/Close";
 import Statisticscard from "./Statisticscard";
+
+type AttendanceStatus = 'Present' | 'Absent' | 'Vacant' | 'Leave';
+
+type PositionKey = 'wmo' | 'aa' | 'tn' | 'ott' | 'fwcouncilor' | 'fww' | 'fwwa' | 'driver' | 'help' | 'sweep';
+
+type ParsedRow = {
+  id: number;
+  date: string;
+  district: string;
+  center: string;
+} & Record<PositionKey, string>;
+
+type SdpRow = { district: string; sdpType: string; centerName: string; status: 'Open' | 'Close' };
+
+type TooltipPayloadItem = { name: string; value: number };
+
+type CustomTooltipProps = { active?: boolean; payload?: TooltipPayloadItem[]; total: number };
 
 // Sample rawRows data based on expected Excel format
 const rawRows = [
@@ -152,7 +169,7 @@ const rawRows = [
   "45803.00013888889,Sanghar,FWC Sinjhoro Sanghar,Vcant,Vcant,Present,Vcant,Leave,Present,Vcant,Present,,",
   "45803.00013888889,Sanghar,FWC Jhol Sanghar,Vcant,Present,Vcant,Present,Present,Vcant,Present,Vcant,,",
   "45852.00013888889,Sanghar,FWC Shahdadpur-II Sanghar,Vcant,Present,Vcant,Leave,Leave,Leave,Present,Present,,",
-  "45861.00013888889,Sanghar,FWC Allahyar Goth TDM Sanghar,Vcant,Present,Vcant,Present,Present,Present,Present,Present,,",
+  "45861.00013888889,Sanghar,FWC Allahyar Goth TDM Sanghar,Vcant,Present,Vcant,Present,Present,Present,Present,,",
   "45803.00013888889,Sanghar,FWC Tandoadam-III Sanghar,Vcant,Present,Vcant,Present,Present,Present,Present,Present,,",
   "45852.00013888889,Sanghar,FWC Rukan Buriro Sanghar,Vcant,Vcant,Vcant,Present,Present,Present,Vcant,Vcant,,",
   "45861.00013888889,Sanghar,FWC Gulzar Colony Tando Adam Sanghar,Vcant,Vcant,Present,Vcant,Present,Vcant,Present,Vcant,,",
@@ -293,42 +310,12 @@ const dataset = [
 
 // Attendance data with both counts and percentages
 const attendanceData = [
-  {
-    label: "All Staff",
-    count: "3286",
-    percentage: "100%",
-    color: "#2196F3",
-    borderLeft: "none",
-  },
-  {
-    label: "Present",
-    count: "1391",
-    percentage: "42.33%",
-    color: "#4CAF50",
-    borderLeft: "5px solid #4CAF50",
-  },
-  {
-    label: "Absent",
-    count: "185",
-    percentage: "5.63%",
-    color: "#F44336",
-    borderLeft: "5px solid #F44336",
-  },
-  {
-    label: "Vacant",
-    count: "1606",
-    percentage: "48.87%",
-    color: "#9E9E9E",
-    borderLeft: "5px solid #9E9E9E",
-  },
-  {
-    label: "Leave",
-    count: "104",
-    percentage: "3.16%",
-    color: "#FF9800",
-    borderLeft: "5px solid #FF9800",
-  },
-];
+  { label: "All Staff", count: "3286", percentage: "100%", color: "#2196F3", borderLeft: "none" },
+  { label: "Present", count: "1391", percentage: "42.33%", color: "#4CAF50", borderLeft: "5px solid #4CAF50" },
+  { label: "Absent", count: "185", percentage: "5.63%", color: "#F44336", borderLeft: "5px solid #F44336" },
+  { label: "Vacant", count: "1606", percentage: "48.87%", color: "#9E9E9E", borderLeft: "5px solid #9E9E9E" },
+  { label: "Leave", count: "104", percentage: "3.16%", color: "#FF9800", borderLeft: "5px solid #FF9800" },
+] as const;
 
 const data = [
   { name: "Close", value: 2, color: "#b3b3b3" },
@@ -349,7 +336,7 @@ const COLORS = ['#b3b3b3', '#0088FE'];
 const COLORS2 = ['#b3b3b3', '#FFBB28'];
 const COLORS3 = ['#b3b3b3', '#FF8042'];
 
-const CustomTooltip = ({ active, payload, total }) => {
+const CustomTooltip = ({ active, payload, total }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const { name, value } = payload[0];
     const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
@@ -362,7 +349,7 @@ const CustomTooltip = ({ active, payload, total }) => {
   return null;
 };
 
-function excelSerialToDate(serial) {
+function excelSerialToDate(serial: number) {
   const utc_days = Math.floor(serial - 25569);
   const utc_value = utc_days * 86400;
   const date_info = new Date(utc_value * 1000);
@@ -375,11 +362,11 @@ function excelSerialToDate(serial) {
   return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds).toLocaleDateString();
 }
 
-const positions = [
+const positions: PositionKey[] = [
   'wmo', 'aa', 'tn', 'ott', 'fwcouncilor', 'fww', 'fwwa', 'driver', 'help', 'sweep'
 ];
 
-const positionNames = {
+const positionNames: Record<PositionKey, string> = {
   wmo: 'Women Medical Officer',
   aa: 'Accounts Assistant',
   tn: 'Theater Nurse',
@@ -392,7 +379,7 @@ const positionNames = {
   sweep: 'Sweep'
 };
 
-const sdpData = {
+const sdpData: Record<'RHS-A' | 'MSU' | 'FWC', SdpRow[]> = {
   "RHS-A": [
     { district: "Badin", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A M.P.S Centre Badin", status: "Open" },
     { district: "Karachi West", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Qatar Hospital Karachi West", status: "Close" },
@@ -440,14 +427,19 @@ export default function KeyMetricCard() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const [sdpDrawerOpen, setSdpDrawerOpen] = useState(false);
   const [attendanceDrawerOpen, setAttendanceDrawerOpen] = useState(false);
-  const [selectedSdp, setSelectedSdp] = useState(null);
-  const [selectedAttendance, setSelectedAttendance] = useState(null);
-  const [parsedData, setParsedData] = useState([]);
-  const [groupedAttendance, setGroupedAttendance] = useState({});
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedSdp, setSelectedSdp] = useState<keyof typeof sdpData | null>(null);
+  const [selectedAttendance, setSelectedAttendance] = useState<AttendanceStatus | 'All Staff' | null>(null);
+  const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
+  const [groupedAttendance, setGroupedAttendance] = useState<Record<AttendanceStatus, Record<PositionKey, { id: string | number; district: string; center: string; status: AttendanceStatus }[]>>>({
+    Present: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+    Absent: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+    Vacant: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+    Leave: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+  });
+  const [selectedStatus, setSelectedStatus] = useState<'Open' | 'Close' | null>(null);
 
   useEffect(() => {
-    const data = rawRows.map((rawLine, index) => {
+    const data: ParsedRow[] = rawRows.map((rawLine, index) => {
       const line = rawLine.replace(/row\d+:\s*/, '').trim();
       const parts = line.split(',').map(s => s.trim());
       const numStatuses = 10;
@@ -474,51 +466,55 @@ export default function KeyMetricCard() {
         driver: statuses[7],
         help: statuses[8],
         sweep: statuses[9],
-      };
+      } as ParsedRow;
     });
     setParsedData(data);
 
-    const statuses = ['Present', 'Absent', 'Vacant', 'Leave'];
-    const grouped = {};
+    const statuses: AttendanceStatus[] = ['Present', 'Absent', 'Vacant', 'Leave'];
+    const grouped: Record<AttendanceStatus, Record<PositionKey, { id: string | number; district: string; center: string; status: AttendanceStatus }[]>> = {
+      Present: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+      Absent: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+      Vacant: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+      Leave: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
+    };
     statuses.forEach(status => {
-      grouped[status] = {};
       positions.forEach(pos => {
-        grouped[status][pos] = data.filter(row => row[pos] === status).map(row => ({
+        grouped[status][pos] = data.filter(row => (row as any)[pos] === status).map(row => ({
           id: row.id + pos,
           district: row.district,
           center: row.center,
-          status: status
+          status: status,
         }));
       });
     });
     setGroupedAttendance(grouped);
   }, []);
 
-  const allStaffColumns = [
+  const allStaffColumns: GridColDef<ParsedRow>[] = [
     { field: 'date', headerName: 'Date', width: 150 },
     { field: 'district', headerName: 'Name of District', width: 150 },
     { field: 'center', headerName: 'Center Name', width: 300, flex: 1 },
-    ...positions.map(pos => ({
-      field: pos,
+    ...positions.map((pos) => ({
+      field: pos as any,
       headerName: positionNames[pos],
-      width: 200
-    })),
+      width: 200,
+    })) as any,
   ];
 
-  const statusColumns = [
+  const statusColumns: GridColDef[] = [
     { field: 'district', headerName: 'Name of District', width: 200 },
     { field: 'center', headerName: 'Center Name', width: 400, flex: 1 },
-    { field: 'status', headerName: 'Status', width: 200, valueGetter: (params) => selectedAttendance || 'N/A' },
+    { field: 'status', headerName: 'Status', width: 200, valueGetter: () => selectedAttendance || 'N/A' },
   ];
 
-  const handlePieClick = (entry, index, event, sdpType) => {
-  const clickedStatus = entry?.name; // Safely get the name from the clicked entry
+  const handlePieClick = (entry: any, _index: number, _event: any, sdpType: keyof typeof sdpData) => {
+  const clickedStatus = entry?.name as 'Open' | 'Close' | undefined;
   setSelectedSdp(sdpType);
-  setSelectedStatus(clickedStatus);
+  setSelectedStatus(clickedStatus ?? null);
   setSdpDrawerOpen(true);
 };
 
-  const handleAttendanceClick = (attendanceType) => {
+  const handleAttendanceClick = (attendanceType: AttendanceStatus | 'All Staff') => {
     setSelectedAttendance(attendanceType);
     setAttendanceDrawerOpen(true);
   };
@@ -550,7 +546,7 @@ export default function KeyMetricCard() {
         alignItems="stretch"
         sx={{ flexWrap: "nowrap" }}
       >
-        <Grid item xs={12} sm={12} md={4} lg={4} sx={{ width: "40%" }}>
+        <Grid {...({ item: true, xs: 12, sm: 12, md: 4, lg: 4 } as any)} sx={{ width: "40%" }}>
           <HealthMetricsCard />
           <Card
             sx={{
@@ -634,7 +630,7 @@ export default function KeyMetricCard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={12} md={6} lg={6} sx={{ width: "36.5%" }}>
+        <Grid {...({ item: true, xs: 12, sm: 12, md: 6, lg: 6 } as any)} sx={{ width: "36.5%" }}>
           <Card
             sx={{
               borderRadius: 3,
@@ -699,81 +695,87 @@ export default function KeyMetricCard() {
                     flexWrap: isMobile ? "wrap" : "nowrap",
                   }}
                 >
-                  <ResponsiveContainer width="25%" height="80%">
-                    <RePieChart>
-                      <Pie
-                        data={data}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={17}
-                        outerRadius={33}
-                        startAngle={-90}
-                        fill="#82ca9d"
-                        onClick={(entry, index, event) => handlePieClick(entry, index, event, 'FWC')}
-                      >
-                        {data.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <ReToolTip style={{ zIndex: '1' }} content={<CustomTooltip total={341} />} />
-                    </RePieChart>
+                  <Box sx={{ width: '25%', height: '80%' }}>
+                    <ResponsiveContainer>
+                      <RePieChart>
+                        <Pie
+                          data={data}
+                          dataKey="value"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={17}
+                          outerRadius={33}
+                          startAngle={-90}
+                          fill="#82ca9d"
+                          onClick={(entry, index, event) => handlePieClick(entry, index, event, 'FWC')}
+                        >
+                          {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <ReToolTip content={(props: any) => <CustomTooltip {...props} total={341} />} />
+                      </RePieChart>
+                    </ResponsiveContainer>
                     <Box sx={{ textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontSize: "10px", color: "gray" }}>
                         FWC
                       </Typography>
                     </Box>
-                  </ResponsiveContainer>
-                  <ResponsiveContainer width="25%" height="80%">
-                    <RePieChart>
-                      <Pie
-                        data={data3}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={17}
-                        outerRadius={33}
-                        startAngle={-90}
-                        fill="#82ca9d"
-                        onClick={(entry, index, event) => handlePieClick(entry, index, event, 'MSU')}
-                      >
-                        {data3.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
-                        ))}
-                      </Pie>
-                      <ReToolTip content={<CustomTooltip total={20} />} />
-                    </RePieChart>
+                  </Box>
+                  <Box sx={{ width: '25%', height: '80%' }}>
+                    <ResponsiveContainer>
+                      <RePieChart>
+                        <Pie
+                          data={data3}
+                          dataKey="value"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={17}
+                          outerRadius={33}
+                          startAngle={-90}
+                          fill="#82ca9d"
+                          onClick={(entry, index, event) => handlePieClick(entry, index, event, 'MSU')}
+                        >
+                          {data3.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
+                          ))}
+                        </Pie>
+                        <ReToolTip content={(props: any) => <CustomTooltip {...props} total={20} />} />
+                      </RePieChart>
+                    </ResponsiveContainer>
                     <Box sx={{ textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontSize: "10px", color: "gray" }}>
                         MSU
                       </Typography>
                     </Box>
-                  </ResponsiveContainer>
-                  <ResponsiveContainer width="25%" height="80%">
-                    <RePieChart>
-                      <Pie
-                        data={data2}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={17}
-                        outerRadius={33}
-                        startAngle={-90}
-                        fill="#82ca9d"
-                        onClick={(entry, index, event) => handlePieClick(entry, index, event, 'RHS-A')}
-                      >
-                        {data2.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS3[index % COLORS3.length]} />
-                        ))}
-                      </Pie>
-                      <ReToolTip content={<CustomTooltip total={43} />} />
-                    </RePieChart>
+                  </Box>
+                  <Box sx={{ width: '25%', height: '80%' }}>
+                    <ResponsiveContainer>
+                      <RePieChart>
+                        <Pie
+                          data={data2}
+                          dataKey="value"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={17}
+                          outerRadius={33}
+                          startAngle={-90}
+                          fill="#82ca9d"
+                          onClick={(entry, index, event) => handlePieClick(entry, index, event, 'RHS-A')}
+                        >
+                          {data2.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS3[index % COLORS3.length]} />
+                          ))}
+                        </Pie>
+                        <ReToolTip content={(props: any) => <CustomTooltip {...props} total={43} />} />
+                      </RePieChart>
+                    </ResponsiveContainer>
                     <Box sx={{ textAlign: "center" }}>
                       <Typography variant="caption" sx={{ fontSize: "10px", color: "gray" }}>
                         RHS-A
                       </Typography>
                     </Box>
-                  </ResponsiveContainer>
+                  </Box>
                 </Box>
               </Box>
             </CardContent>
@@ -949,7 +951,7 @@ export default function KeyMetricCard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={12} md={4} lg={4} sx={{ width: "23.5%" }}>
+        <Grid {...({ item: true, xs: 12, sm: 12, md: 4, lg: 4 } as any)} sx={{ width: "23.5%" }}>
           <Card
             sx={{
               borderRadius: 3,
@@ -979,7 +981,7 @@ export default function KeyMetricCard() {
                 spacing={isMobile ? 1 : 2}
                 sx={{ height: "auto", justifyContent: "center", width: "100%" }}
               >
-                <Grid item xs={12} sm={6} md={12} sx={{ width: "100%" }}>
+                <Grid {...({ item: true, xs: 12, sm: 6, md: 12 } as any)} sx={{ width: "100%" }}>
                   <Box
                     sx={{
                       display: "flex",
@@ -1005,7 +1007,7 @@ export default function KeyMetricCard() {
                           width: "100%",
                           cursor: 'pointer',
                         }}
-                        onClick={() => handleAttendanceClick(item.label)}
+                        onClick={() => handleAttendanceClick(item.label as any)}
                       >
                         <Box
                           sx={{
@@ -1083,23 +1085,23 @@ export default function KeyMetricCard() {
           <>
             <div style={{ height: 600, width: '100%' }}>
               <DataGrid
-                rows={sdpData[selectedSdp].filter(row => !selectedStatus || row.status === selectedStatus)}
+                rows={(sdpData[selectedSdp] || []).filter((row) => !selectedStatus || row.status === selectedStatus)}
                 columns={[
                   { field: 'district', headerName: 'District', width: 150 },
                   { field: 'sdpType', headerName: 'SDP Type', width: 200 },
                   { field: 'centerName', headerName: 'Center Name', flex: 1 },
                   { field: 'status', headerName: 'Status', width: 100 },
                 ]}
-                getRowId={(row) => `${row.district}-${row.centerName}-${row.status}`} // Custom ID generation
+                getRowId={(row) => `${row.district}-${row.centerName}-${row.status}`}
                 pageSizeOptions={[5, 10]}
                 disableRowSelectionOnClick
               />
             </div>
             <Box sx={{ mt: 2 }}>
               <Typography>
-                Open: {sdpData[selectedSdp].filter(r => r.status === 'Open').length}, 
-                Closed: {sdpData[selectedSdp].filter(r => r.status === 'Close').length}, 
-                Percentage: {((sdpData[selectedSdp].filter(r => r.status === 'Open').length / sdpData[selectedSdp].length) * 100).toFixed(2)}%
+                Open: {(sdpData[selectedSdp] || []).filter((r) => r.status === 'Open').length}, 
+                Closed: {(sdpData[selectedSdp] || []).filter((r) => r.status === 'Close').length}, 
+                Percentage: {(((sdpData[selectedSdp] || []).filter((r) => r.status === 'Open').length / (sdpData[selectedSdp] || []).length) * 100).toFixed(2)}%
               </Typography>
             </Box>
           </>
@@ -1120,18 +1122,18 @@ export default function KeyMetricCard() {
           <div style={{ height: 600, width: '100%' }}>
             <DataGrid
               rows={parsedData}
-              columns={allStaffColumns}
+              columns={allStaffColumns as GridColDef[]}
               pageSizeOptions={[10, 25, 50]}
               disableRowSelectionOnClick
             />
           </div>
         ) : (
-          positions.map(pos => (
+          (positions as PositionKey[]).map((pos) => (
             <Box key={pos} sx={{ mb: 4 }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}><b>{positionNames[pos]}</b></Typography>
               <div style={{ height: 300, width: '100%' }}>
                 <DataGrid
-                  rows={groupedAttendance[selectedAttendance]?.[pos] || []}
+                  rows={selectedAttendance ? (groupedAttendance[selectedAttendance] || {})[pos] || [] : []}
                   columns={statusColumns}
                   pageSizeOptions={[5, 10, 25]}
                   disableRowSelectionOnClick

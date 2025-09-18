@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
-import { Typography, Grid, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Tooltip, Alert, Collapse, IconButton } from "@mui/material";
+import { Typography, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Alert, Collapse, IconButton } from "@mui/material";
+import Grid from '@mui/material/Grid';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyMetricCard from "../components/KeyMetricCard";
 import StockStatusDashboard from "../components/StockStatusDashboard";
@@ -8,6 +8,10 @@ import IecChart from "../components/iECChart";
 import { PieChart } from "@mui/x-charts";
 import StackBars from "../components/StackBars";
 import CloseIcon from '@mui/icons-material/Close';
+import axios from "axios";
+import { SdpDropdown } from "../Service/Init";
+import { useAppDispatch } from '../app/Hooks';
+import { Col, Container, Row } from "react-bootstrap";
 const Dashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -15,7 +19,7 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
-    sdpType: '1',
+    sdpType: '',
     district: '1',
     center: '1'
   });
@@ -23,8 +27,9 @@ const Dashboard = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
  const [open2, setOpen2] = useState(true);
+ const dispatch = useAppDispatch();
 
- const handleChange = (e) => {
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
@@ -37,34 +42,23 @@ const Dashboard = () => {
     handleClose();
   };
 
-  //  const postAttendanceData = async () => {
-  //     try {
-  //       const url = `http://demo.kcompute.com:8065/Designer/Grid2/${"55587"},${"FWC"},${"7122"},${"Karachi Central"},${"---Select All---"},${"2025-01-01"},${"2025-09-08"}`;
-        
-  //       const response = await fetch(url, {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           'Accept': 'application/json',
-  //         },
-  //       });
+   const postAttendanceData = async () => {
+  const url = `http://localhost:54050/Designer/Grid2/${"55587"},${"FWC"},${"7122"},${"Karachi Central"},${"---Select All---"},${"2025-01-01"},${"2025-09-08"}`;
+  
+  const response = await axios.post(url, null, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  });
+  
+  return response.data;
+};
+useEffect(() => {
+  postAttendanceData();
+  dispatch(SdpDropdown());
 
-  //       if (!response.ok) {
-  //         throw new Error(`HTTP error! status: ${response.status}`);
-  //       }
-
-  //       const data = await response.json();
-  //       return data;
-  //     } catch (error) {
-  //       console.error('Error posting attendance data:', error);
-  //       throw error;
-  //     }
-  //   };
-
-
-  // useEffect(()=>{
-  //   postAttendanceData();
-  // },[]);
+}, [dispatch]);
 
   const sdpTypes = [
     { value:'', label: 'Select SDP Type For All' },
@@ -97,12 +91,12 @@ const Dashboard = () => {
     borderRadius: '16px',
     maxHeight: '90vh',
     overflowY: 'auto',
-  };
+  } as const;
 
     const buildingStatusData = [
     { id: 0, value: 365, label: "Hand Washing", color: "#0088FE" },
     { id: 1, value: 345, label: "Decontamination", color: "#00C49F" },
-    { id: 2, value: 366, label: "Cleaning (Instruments)", color: "#FFBB28" },
+    { id: 2, value: 366, label: "Cleaning (Instruments)", color: "#82ca9d" },
     { id: 3, value: 346, label: "High level disinfection", color: "#FF8042" },
     { id: 4, value: 20, label: "Waste disposal", color: "#8884D8" },
   ];
@@ -275,7 +269,7 @@ const Dashboard = () => {
       </Row>
 
       <Row sx={{ height: "100%" }}>
-        <Grid item xs={12} sm={12} md={6} lg={6}
+        <Grid {...({ item: true, xs: 12, sm: 12, md: 6, lg: 6 } as any)}
           sx={{
             width: "76.5%",
             height: "100%",
@@ -356,12 +350,8 @@ const Dashboard = () => {
                       height={170}
                       slotProps={{
                         legend: {
-                          itemMarkWidth: 8,
-                          itemMarkHeight: 8,
-                           labelStyle: { 
-                            fontSize: 6, 
-                            fontWeight: 'normal',
-                          },
+                          // 'labelStyle' is not a valid prop, so we use sx to target the legend label class
+                          sx: { "& .MuiChartsLegend-label": { fontSize: 6, fontWeight: 'normal' } },
                         },
                       }}
                     />
@@ -375,12 +365,7 @@ const Dashboard = () => {
             <StockStatusDashboard />
           </div>
         </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={12}
-          md={4}
-          lg={4}
+        <Grid {...({ item: true, xs: 12, sm: 12, md: 4, lg: 4 } as any)}
           sx={{
             width: "23.5%",
             height: "100%",

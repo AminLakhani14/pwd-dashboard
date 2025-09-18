@@ -2,9 +2,14 @@ import React, { createContext, useState, useMemo } from 'react';
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { lightTheme, darkTheme, cyberTheme } from '../themes'; // Updated import
 
-export const ThemeContext = createContext();
+export interface ThemeContextType {
+  themeName: string;
+  setThemeName: (theme: string) => void;
+}
 
-const getTheme = (themeName) => {
+export const ThemeContext = createContext<ThemeContextType>({ themeName: 'light', setThemeName: () => {} });
+
+const getTheme = (themeName: string): any => {
   switch (themeName) {
     case 'dark':
       return darkTheme;
@@ -15,7 +20,7 @@ const getTheme = (themeName) => {
   }
 };
 
-export const ThemeContextProvider = ({ children }) => {
+export const ThemeContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [themeName, setThemeName] = useState('light');
 
   const theme = useMemo(() => getTheme(themeName), [themeName]);

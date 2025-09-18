@@ -1,13 +1,13 @@
 import React from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../app/Hooks';
 import { NavLink } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import BarChartIcon from '@mui/icons-material/BarChart';
 
 const LeftSidebar = () => {
-  const { isSidebarOpen } = useSelector((state) => state.ui);
+  const { isSidebarOpen } = useAppSelector((state) => state.ui);
 
   const navItems = [
     { to: '/', icon: <DashboardIcon />, text: 'Dashboard' },

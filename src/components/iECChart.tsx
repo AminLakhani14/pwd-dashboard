@@ -1,17 +1,22 @@
-import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, LinearProgress, Tooltip, useMediaQuery, CardContent } from "@mui/material";
-import { BarChart, pieArcLabelClasses, PieChart } from "@mui/x-charts";
+import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, useMediaQuery, CardContent } from "@mui/material";
+import { BarChart, PieChart } from "@mui/x-charts";
 import { useState } from "react";
 import WarningIcon from "@mui/icons-material/Warning";
 import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import type { SelectChangeEvent } from '@mui/material/Select';
+
+type ChartType = 'IEC Material' | 'MEC Wheel';
+
+type AlertType = 'danger' | 'warning' | 'good';
 
 const IecChart = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [chartType, setChartType] = useState("IEC Material");
+  const [chartType, setChartType] = useState<ChartType>("IEC Material");
 
-  const chartData = {
+  const chartData: Record<ChartType, { id: number; value: number; label: string }[]> = {
     "IEC Material": [
       { id: 0, value: 157, label: "Displayed" },
       { id: 1, value: 28, label: "Non Displayed" },
@@ -22,11 +27,11 @@ const IecChart = () => {
     ],
   };
 
-  const handleChange = (event) => {
-    setChartType(event.target.value);
+  const handleChange = (event: SelectChangeEvent) => {
+    setChartType(event.target.value as ChartType);
   };
 
-const alerts = [
+const alerts: { type: AlertType; title: string; message: string; icon: React.ReactElement }[] = [
     {
       type: "danger",
       title: "Karachi Center A",
@@ -65,7 +70,7 @@ const alerts = [
     },
   ];
 
-  const getAlertStyle = (type) => {
+  const getAlertStyle = (type: AlertType) => {
     switch (type) {
       case "danger":
         return {
@@ -98,12 +103,12 @@ const alerts = [
   {
     new: 3911,
     old: 2536,
-    month: 'General Clients	',
+    month: 'General Clients\t',
   },
   {
     new: 7925,
     old: 4434,
-    month: 'F.P Clients	',
+    month: 'F.P Clients\t',
   },
   {
     new: 1002,
@@ -116,9 +121,9 @@ const alerts = [
     month: 'C.S Cases',
   },
 ];
- function valueFormatter(value) {
-  return `${value}`;
-}
+ function valueFormatter(value: number | null) {
+  return value == null ? '' : `${value}`;
+ }
 
 
   return (
@@ -162,7 +167,7 @@ const alerts = [
                 outerRadius: 50,
                 paddingAngle: 2,
                 cornerRadius: 2,
-                highlightScope: { faded: "global", highlighted: "item" },
+                highlightScope: { fade: "global", highlight: "item" },
                 faded: { innerRadius: 20, additionalRadius: -10, color: "gray" },
               },
             ]}
@@ -172,12 +177,11 @@ const alerts = [
             width={170}
             height={120}
             slotProps={{
-              legend: {
-                direction: "row",
-                position: { vertical: "bottom", horizontal: "middle" },
-                itemMarkWidth: 8,
-                itemMarkHeight: 8,
-                labelStyle: { fontSize: 6 }, // Changed to 6px
+            legend: {
+                sx: {
+                  '& .MuiChartsLegend-label': { fontSize: 6 },
+                  '& .MuiChartsLegend-series': { gap: 0.5 },
+                },
               },
             }}
           />
