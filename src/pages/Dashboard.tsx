@@ -9,75 +9,203 @@ import { PieChart } from "@mui/x-charts";
 import StackBars from "../components/StackBars";
 import CloseIcon from '@mui/icons-material/Close';
 import axios from "axios";
-import { SdpDropdown } from "../Service/Init";
+import { CenterDropdown, dynamicAPI, SdpDropdown, SldieoutAPI, StaffPositionAPI } from "../Service/Init";
 import { useAppDispatch } from '../app/Hooks';
 import { Col, Container, Row } from "react-bootstrap";
+import { useSelector } from "react-redux";
+import { RootState } from "../app/store";
+import { updateStates } from "../Slice/InitSlice";
+import '../index.css'
+import { ToDatabaseFormat } from "../Global/globalFunctions";
+
 const Dashboard = () => {
   const theme = useTheme();
+  const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [open, setOpen] = useState(false);
+  
+  const getPreviousMonthDateRange = () => {
+    const now = new Date();
+    const firstDayOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastDayOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    
+    return {
+      startDate: firstDayOfPreviousMonth.toLocaleDateString('en-US'),
+      endDate: lastDayOfPreviousMonth.toLocaleDateString('en-US'),
+      month: (now.getMonth()).toString(),
+      year: now.getFullYear().toString()
+    };
+  };
+
+  const previousMonthRange = getPreviousMonthDateRange();
+
   const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
+    month: previousMonthRange.month,
+    year: previousMonthRange.year,
     sdpType: '',
     district: '1',
     center: '1'
   });
 
+  console.log(PWDdashboard,'PWDdashboard');
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
- const [open2, setOpen2] = useState(true);
- const dispatch = useAppDispatch();
+  const [open2, setOpen2] = useState(true);
+  const dispatch = useAppDispatch();
 
- const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  // Month options with ALL option
+  const months = [
+    { value: 'ALL', label: 'All Months' },
+    { value: '1', label: 'January' },
+    { value: '2', label: 'February' },
+    { value: '3', label: 'March' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'May' },
+    { value: '6', label: 'June' },
+    { value: '7', label: 'July' },
+    { value: '8', label: 'August' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' }
+  ];
+
+  // Year options (last 5 years and current year)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+
+  // Function to get first and last day of the month or year
+  const getDateRange = (month: string, year: string) => {
+    if (!month || !year) return { startDate: '', endDate: '' };
+    
+    const yearNum = parseInt(year);
+    
+    if (month === 'ALL') {
+      // For ALL option: January 1st to December 31st of selected year
+      const startDate = new Date(yearNum, 0, 1); // January 1st
+      const endDate = new Date(yearNum, 11, 31); // December 31st
+      
+      return {
+        startDate: startDate.toLocaleDateString('en-US'),
+        endDate: endDate.toLocaleDateString('en-US')
+      };
+    } else {
+      // For specific month: 1st to last day of the month
+      const monthNum = parseInt(month);
+      const startDate = new Date(yearNum, monthNum - 1, 1);
+      const endDate = new Date(yearNum, monthNum, 0);
+      
+      return {
+        startDate: startDate.toLocaleDateString('en-US'),
+        endDate: endDate.toLocaleDateString('en-US')
+      };
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value }:any = e.target;
     setFilters(prev => ({
       ...prev,
       [name]: value
     }));
-  };
+    
+    if (name === 'SDPdropdownValue' && value) {
+      dispatch(SdpDropdown(value));
+      dispatch(updateStates({ key: 'centerValue', value: '0' }));
+      dispatch(updateStates({ key: 'centerDropdown', value: [] }));
+    }
+
+    if (name === 'districtValue' && value) {
+      dispatch(CenterDropdown({
+        sdpType: PWDdashboard.SDPdropdownValue,
+        value: value
+      }));
+    }
+
+    dispatch(updateStates({ key: name, value: value }));
+  }
 
   const handleApplyFilters = () => {
-    console.log('Applied filters:', filters);
+    let districtData = PWDdashboard.SDPdropdownValue.split(",");
+      
+    // Get date range based on selected month and year
+    const dateRange = getDateRange(filters.month, filters.year);
+    
+    dispatch(dynamicAPI({
+      StartDate: ToDatabaseFormat(dateRange.startDate) || '',
+      EndDate: ToDatabaseFormat(dateRange.endDate) || '',
+      DistrictID: districtData[0] || '0',
+      DistrictName: PWDdashboard.districtValue,
+      CenterID: '',
+      CenterName: PWDdashboard.centerValue,
+      ProjectId: districtData[2] || '7122,7121,7120',
+      QuestionId: ''
+    }));
+
+    dispatch(SldieoutAPI({
+      StartDate: ToDatabaseFormat(dateRange.startDate) || '',
+      EndDate: ToDatabaseFormat(dateRange.endDate) || '',
+      DistrictID: districtData[0] || '0',
+      DistrictName: PWDdashboard.districtValue,
+      CenterID: '',
+      CenterName: PWDdashboard.centerValue,
+      ProjectId: districtData[2] || '7122,7121,7120',
+      QuestionId: ''
+    }));
+
+    dispatch(StaffPositionAPI({
+      StartDate: ToDatabaseFormat(dateRange.startDate) || '',
+      EndDate: ToDatabaseFormat(dateRange.endDate) || '',
+      DistrictID: districtData[0] || '0',
+      DistrictName: PWDdashboard.districtValue,
+      CenterID: '',
+      CenterName: PWDdashboard.centerValue,
+      ProjectId: districtData[2] || '7122,7121,7120',
+      QuestionId: ''
+    }));
+
     handleClose();
   };
-
-   const postAttendanceData = async () => {
-  const url = `http://localhost:54050/Designer/Grid2/${"55587"},${"FWC"},${"7122"},${"Karachi Central"},${"---Select All---"},${"2025-01-01"},${"2025-09-08"}`;
   
-  const response = await axios.post(url, null, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-  });
-  
-  return response.data;
-};
-useEffect(() => {
-  postAttendanceData();
-  dispatch(SdpDropdown());
+  useEffect(() => {
+    // Use previous month's date range by default
+    const defaultDateRange = getPreviousMonthDateRange();
+    
+    dispatch(dynamicAPI({
+      StartDate: ToDatabaseFormat(defaultDateRange.startDate) || '',
+      EndDate: ToDatabaseFormat(defaultDateRange.endDate) || '',
+      DistrictID: '',
+      DistrictName: '',
+      CenterID: '',
+      CenterName: '',
+      ProjectId: '7122,7121,7120',
+      QuestionId: ''
+    }));
 
-}, [dispatch]);
+    dispatch(SldieoutAPI({
+      StartDate: ToDatabaseFormat(defaultDateRange.startDate) || '',
+      EndDate: ToDatabaseFormat(defaultDateRange.endDate) || '',
+      DistrictID: '',
+      DistrictName: '',
+      CenterID: '',
+      CenterName: '',
+      ProjectId: '7122,7121,7120',
+      QuestionId: ''
+    }));
 
-  const sdpTypes = [
-    { value:'', label: 'Select SDP Type For All' },
-    { value: '55587, FWC,7122', label: 'Population Welfare Department - FWC' },
-    { value: '50484, MSU,7121', label: 'Population Welfare Department - MSU' },
-    { value: '50435, RHS,7120', label: 'Population Welfare Department - RHS-A' },
-  ];
+    dispatch(StaffPositionAPI({
+      StartDate: ToDatabaseFormat(defaultDateRange.startDate) || '',
+      EndDate: ToDatabaseFormat(defaultDateRange.endDate) || '',
+      DistrictID: '',
+      DistrictName: '',
+      CenterID: '',
+      CenterName: '',
+      ProjectId: '7122,7121,7120',
+      QuestionId: ''
+    }));
 
-  const districts = [
-    { value: '1', label: '---Select All---' },
-    { value: 'district2', label: 'District 2' },
-    { value: 'district3', label: 'District 3' },
-  ];
-
-  const centers = [
-    { value: '1', label: '---Select All---' },
-    { value: 'center2', label: 'Center 2' },
-    { value: 'center3', label: 'Center 3' },
-  ];
+  }, []);
 
   const modalStyle = {
     position: 'absolute',
@@ -93,7 +221,7 @@ useEffect(() => {
     overflowY: 'auto',
   } as const;
 
-    const buildingStatusData = [
+  const buildingStatusData = [
     { id: 0, value: 365, label: "Hand Washing", color: "#0088FE" },
     { id: 1, value: 345, label: "Decontamination", color: "#00C49F" },
     { id: 2, value: 366, label: "Cleaning (Instruments)", color: "#82ca9d" },
@@ -103,6 +231,11 @@ useEffect(() => {
 
   return (
     <Container >
+    {PWDdashboard.isLoading && (
+        <div className="loader-overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <Row>
         <Box sx={{ width: '100%' }}>
           <Collapse in={open2}>
@@ -121,7 +254,7 @@ useEffect(() => {
               }
               sx={{ mb: 2 }}
             >
-              You are viewing the data from January 1, 2025, to September 3, 2025.
+              You are viewing the data from {previousMonthRange.startDate} to {previousMonthRange.endDate}.
             </Alert>
           </Collapse>
         </Box>
@@ -164,40 +297,50 @@ useEffect(() => {
           </Typography>
           
           <TextField
+            select
             fullWidth
             margin="normal"
-            label="Start Date"
-            type="date"
-            name="startDate"
-            value={filters.startDate}
+            label="Month"
+            name="month"
+            value={filters.month}
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
             size={isMobile ? "small" : "medium"}
-          />
+          >
+            {months.map((month) => (
+              <MenuItem key={month.value} value={month.value}>
+                {month.label}
+              </MenuItem>
+            ))}
+          </TextField>
           
           <TextField
+            select
             fullWidth
             margin="normal"
-            label="End Date"
-            type="date"
-            name="endDate"
-            value={filters.endDate}
+            label="Year"
+            name="year"
+            value={filters.year}
             onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
             size={isMobile ? "small" : "medium"}
-          />
+          >
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </TextField>
           
           <TextField
             select
             fullWidth
             margin="normal"
             label="Type of SDP"
-            name="sdpType"
-            value={filters.sdpType}
+            name="SDPdropdownValue"
+            value={PWDdashboard.SDPdropdownValue}
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}
           >
-            {sdpTypes.map((option) => (
+             {PWDdashboard.SDPdropdown.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
@@ -209,14 +352,15 @@ useEffect(() => {
             fullWidth
             margin="normal"
             label="District"
-            name="district"
-            value={filters.district}
+            name="districtValue"
+            value={PWDdashboard.districtValue}
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}
           >
-            {districts.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
+           <MenuItem value="">---Select All---</MenuItem>
+            {PWDdashboard.districtDropdown.map((option) => (
+              <MenuItem key={option.Text} value={option.Text}>
+                {option.Text}
               </MenuItem>
             ))}
           </TextField>
@@ -226,14 +370,15 @@ useEffect(() => {
             fullWidth
             margin="normal"
             label="Center"
-            name="center"
-            value={filters.center}
+            name="centerValue"
+            value={PWDdashboard.centerValue}
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}
           >
-            {centers.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
+            <MenuItem value=" ">---Select All---</MenuItem>
+            {PWDdashboard.centerDropdown.map((option) => (
+              <MenuItem key={option.Text} value={option.Text}>
+                {option.Text}
               </MenuItem>
             ))}
           </TextField>
@@ -248,7 +393,7 @@ useEffect(() => {
                 fontSize: isMobile ? '0.75rem' : '0.875rem'
               }}
             >
-              Cancel
+              Cancel 
             </Button>
             <Button 
               variant="contained" 
@@ -350,7 +495,6 @@ useEffect(() => {
                       height={170}
                       slotProps={{
                         legend: {
-                          // 'labelStyle' is not a valid prop, so we use sx to target the legend label class
                           sx: { "& .MuiChartsLegend-label": { fontSize: 6, fontWeight: 'normal' } },
                         },
                       }}
@@ -361,7 +505,6 @@ useEffect(() => {
               </div>
             </div>
             
-            {/* Stock Status of Contraceptives moved down */}
             <StockStatusDashboard />
           </div>
         </Grid>
@@ -382,4 +525,4 @@ useEffect(() => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

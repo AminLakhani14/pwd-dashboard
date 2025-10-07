@@ -11,8 +11,8 @@ const LeftSidebar = () => {
 
   const navItems = [
     { to: '/', icon: <DashboardIcon />, text: 'Dashboard' },
-    { to: '/reports', icon: <AssessmentIcon />, text: 'Reports' },
-    { to: '/analytics', icon: <BarChartIcon />, text: 'Analytics' },
+    // { to: '/reports', icon: <AssessmentIcon />, text: 'Reports' },
+    // { to: '/analytics', icon: <BarChartIcon />, text: 'Analytics' },
   ];
 
   return (

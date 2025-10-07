@@ -23,6 +23,8 @@ import {
 } from "recharts";
 import CloseIcon from "@mui/icons-material/Close";
 import Statisticscard from "./Statisticscard";
+import { useSelector } from "react-redux";
+import { RootState } from "../app/store";
 
 type AttendanceStatus = 'Present' | 'Absent' | 'Vacant' | 'Leave';
 
@@ -35,7 +37,15 @@ type ParsedRow = {
   center: string;
 } & Record<PositionKey, string>;
 
-type SdpRow = { district: string; sdpType: string; centerName: string; status: 'Open' | 'Close' };
+type SdpRow = { 
+  id: string | number;
+  district: string; 
+  sdpType: string; 
+  centerName: string; 
+  status: 'Open' | 'Close';
+  asDate?: string;
+  premises?: string;
+};
 
 type TooltipPayloadItem = { name: string; value: number };
 
@@ -317,21 +327,6 @@ const attendanceData = [
   { label: "Leave", count: "104", percentage: "3.16%", color: "#FF9800", borderLeft: "5px solid #FF9800" },
 ] as const;
 
-const data = [
-  { name: "Close", value: 2, color: "#b3b3b3" },
-  { name: "Open", value: 339, color: "#0088FE" },
-];
-
-const data3 = [
-  { name: "Close", value: 0, color: "#b3b3b3" },
-  { name: "Open", value: 20, color: "#FFBB28" },
-];
-
-const data2 = [
-  { name: "Close", value: 1, color: "#b3b3b3" },
-  { name: "Open", value: 42, color: "#FF8042" },
-];
-
 const COLORS = ['#b3b3b3', '#0088FE'];
 const COLORS2 = ['#b3b3b3', '#FFBB28'];
 const COLORS3 = ['#b3b3b3', '#FF8042'];
@@ -379,47 +374,13 @@ const positionNames: Record<PositionKey, string> = {
   sweep: 'Sweep'
 };
 
-const sdpData: Record<'RHS-A' | 'MSU' | 'FWC', SdpRow[]> = {
-  "RHS-A": [
-    { district: "Badin", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A M.P.S Centre Badin", status: "Open" },
-    { district: "Karachi West", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Qatar Hospital Karachi West", status: "Close" },
-    { district: "Korangi", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Centre Ibrahim Hyderi Karachi Korangi", status: "Open" },
-    { district: "Korangi", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Centre SGH Korangi # 5 Karachi Korangi", status: "Open" },
-    { district: "Malir", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Saudabad Karachi Malir Town", status: "Open" },
-    { district: "Qambar Shahdadkot", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A CENTRE KAMBER Qambar Shahdadkot", status: "Open" },
-    { district: "Sanghar", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Center Shahdadpur Sanghar", status: "Open" },
-    { district: "Sanghar", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Center Tando Adam Sanghar", status: "Open" },
-    { district: "Shaheed Benazirabad", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A-Center Nawabshah Shaheed Benazirabad", status: "Open" },
-    { district: "Shaheed Benazirabad", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A-Center Sakrand Shaheed Benazirabad", status: "Open" },
-    { district: "Shikarpur", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Centre Civil Hospital Shikarpur", status: "Open" },
-    { district: "Sukkur", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A New Sukkur", status: "Open" },
-    { district: "Tando Muhammad Khan", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Centre Tando Muhammad Khan", status: "Open" },
-    { district: "Tharparkar", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Mithi Tharparkar \"Mithi\"", status: "Open" },
-    { district: "Karachi Central", sdpType: "Population Welfare Department - RHS-A", centerName: "RHS-A Abbasi Shaheed Karachi Central", status: "Open" }
-  ],
-  "MSU": [
-    { district: "Kashmore", sdpType: "Population Welfare Department - MSU", centerName: "MSU Center Civil Hospital Kandhkot Kashmore", status: "Open" },
-    { district: "Malir", sdpType: "Population Welfare Department - MSU", centerName: "MSU Saudabad Karachi Malir Town", status: "Open" },
-    { district: "Sanghar", sdpType: "Population Welfare Department - MSU", centerName: "MSU Center Shahdadpur Sanghar", status: "Open" },
-    { district: "Shaheed Benazirabad", sdpType: "Population Welfare Department - MSU", centerName: "MSU-Center Nawabshah Shaheed Benazirabad", status: "Open" },
-    { district: "Shaheed Benazirabad", sdpType: "Population Welfare Department - MSU", centerName: "MSU-Center Sakrand Shaheed Benazirabad", status: "Open" },
-    { district: "Karachi East", sdpType: "Population Welfare Department - MSU", centerName: "MSU-Centre, Dow Hospital, Ojha Campus Karachi East", status: "Open" }
-  ],
-  "FWC": [
-    { district: "Karachi West", sdpType: "Population Welfare Department - FWC", centerName: "FWC SGD Abidabad Baldia Karachi West", status: "Open" },
-    { district: "Karachi West", sdpType: "Population Welfare Department - FWC", centerName: "FWC UHU-15 Orangi Karachi West", status: "Open" },
-    { district: "Karachi West", sdpType: "Population Welfare Department - FWC", centerName: "FWC Banaras Colony Karachi West", status: "Open" },
-    { district: "Korangi", sdpType: "Population Welfare Department - FWC", centerName: "FWC Bhitai Colony E Sacter (New) Korangi", status: "Open" },
-    { district: "Malir", sdpType: "Population Welfare Department - FWC", centerName: "FWC SHAHNAWAZ GOTH Malir Town", status: "Open" },
-    { district: "Naushahro Feroze", sdpType: "Population Welfare Department - FWC", centerName: "FWC Naushahro Feroze-I", status: "Open" },
-    { district: "Qambar Shahdadkot", sdpType: "Population Welfare Department - FWC", centerName: "FWC KAMBER-I Qambar Shahdadkot", status: "Open" },
-    { district: "Sanghar", sdpType: "Population Welfare Department - FWC", centerName: "FWC Sinjhoro Sanghar", status: "Open" },
-    { district: "Shaheed Benazirabad", sdpType: "Population Welfare Department - FWC", centerName: "FWC Gyani Ward Evening Shaheed Benazirabad", status: "Open" },
-    { district: "Karachi Central", sdpType: "Population Welfare Department - FWC", centerName: "FWC Cental Govt. Dispensary FC Area Karachi Central", status: "Open" },
-    { district: "Karachi East", sdpType: "Population Welfare Department - FWC", centerName: "FWC-Centre, Dow Hospital, Ojha Campus Karachi East", status: "Open" },
-    { district: "Karachi South", sdpType: "Population Welfare Department - FWC", centerName: "FWC - P&T Colony Karachi South", status: "Open" }
-  ],
-};
+// Define columns for DataGrid
+const sdpColumns: GridColDef[] = [
+  { field: 'district', headerName: 'District', width: 150 },
+  { field: 'sdpType', headerName: 'SDP Type', width: 200 },
+  { field: 'centerName', headerName: 'Center Name', flex: 1 },
+  { field: 'status', headerName: 'Status', width: 100 },
+];
 
 export default function KeyMetricCard() {
   const theme = useTheme();
@@ -427,7 +388,7 @@ export default function KeyMetricCard() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const [sdpDrawerOpen, setSdpDrawerOpen] = useState(false);
   const [attendanceDrawerOpen, setAttendanceDrawerOpen] = useState(false);
-  const [selectedSdp, setSelectedSdp] = useState<keyof typeof sdpData | null>(null);
+  const [selectedSdp, setSelectedSdp] = useState<'RHS-A' | 'MSU' | 'FWC' | null>(null);
   const [selectedAttendance, setSelectedAttendance] = useState<AttendanceStatus | 'All Staff' | null>(null);
   const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
   const [groupedAttendance, setGroupedAttendance] = useState<Record<AttendanceStatus, Record<PositionKey, { id: string | number; district: string; center: string; status: AttendanceStatus }[]>>>({
@@ -437,6 +398,14 @@ export default function KeyMetricCard() {
     Leave: { wmo: [], aa: [], tn: [], ott: [], fwcouncilor: [], fww: [], fwwa: [], driver: [], help: [], sweep: [] },
   });
   const [selectedStatus, setSelectedStatus] = useState<'Open' | 'Close' | null>(null);
+  const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
+
+  // Get SDP data from Redux state
+  const sdpData = {
+    "RHS-A": PWDdashboard.RHSAOpenCloseRecord || [],
+    "MSU": PWDdashboard.MSUOpenCloseRecord || [],
+    "FWC": PWDdashboard.FWCOpenCloseRecord || []
+  };
 
   useEffect(() => {
     const data: ParsedRow[] = rawRows.map((rawLine, index) => {
@@ -507,12 +476,12 @@ export default function KeyMetricCard() {
     { field: 'status', headerName: 'Status', width: 200, valueGetter: () => selectedAttendance || 'N/A' },
   ];
 
-  const handlePieClick = (entry: any, _index: number, _event: any, sdpType: keyof typeof sdpData) => {
-  const clickedStatus = entry?.name as 'Open' | 'Close' | undefined;
-  setSelectedSdp(sdpType);
-  setSelectedStatus(clickedStatus ?? null);
-  setSdpDrawerOpen(true);
-};
+  const handlePieClick = (entry: any, _index: number, _event: any, sdpType: 'RHS-A' | 'MSU' | 'FWC') => {
+    const clickedStatus = entry?.name as 'Open' | 'Close' | undefined;
+    setSelectedSdp(sdpType);
+    setSelectedStatus(clickedStatus ?? null);
+    setSdpDrawerOpen(true);
+  };
 
   const handleAttendanceClick = (attendanceType: AttendanceStatus | 'All Staff') => {
     setSelectedAttendance(attendanceType);
@@ -699,7 +668,7 @@ export default function KeyMetricCard() {
                     <ResponsiveContainer>
                       <RePieChart>
                         <Pie
-                          data={data}
+                          data={PWDdashboard.FWCOpenClose}
                           dataKey="value"
                           cx="50%"
                           cy="50%"
@@ -709,8 +678,8 @@ export default function KeyMetricCard() {
                           fill="#82ca9d"
                           onClick={(entry, index, event) => handlePieClick(entry, index, event, 'FWC')}
                         >
-                          {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          {PWDdashboard.FWCOpenClose.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
                         <ReToolTip content={(props: any) => <CustomTooltip {...props} total={341} />} />
@@ -722,11 +691,12 @@ export default function KeyMetricCard() {
                       </Typography>
                     </Box>
                   </Box>
+
                   <Box sx={{ width: '25%', height: '80%' }}>
                     <ResponsiveContainer>
                       <RePieChart>
                         <Pie
-                          data={data3}
+                          data={PWDdashboard.MSUOpenClose}
                           dataKey="value"
                           cx="50%"
                           cy="50%"
@@ -736,8 +706,8 @@ export default function KeyMetricCard() {
                           fill="#82ca9d"
                           onClick={(entry, index, event) => handlePieClick(entry, index, event, 'MSU')}
                         >
-                          {data3.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
+                          {PWDdashboard.MSUOpenClose.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color || COLORS2[index % COLORS2.length]} />
                           ))}
                         </Pie>
                         <ReToolTip content={(props: any) => <CustomTooltip {...props} total={20} />} />
@@ -749,11 +719,12 @@ export default function KeyMetricCard() {
                       </Typography>
                     </Box>
                   </Box>
+
                   <Box sx={{ width: '25%', height: '80%' }}>
                     <ResponsiveContainer>
                       <RePieChart>
                         <Pie
-                          data={data2}
+                          data={PWDdashboard.RHSAOpenClose}
                           dataKey="value"
                           cx="50%"
                           cy="50%"
@@ -763,8 +734,8 @@ export default function KeyMetricCard() {
                           fill="#82ca9d"
                           onClick={(entry, index, event) => handlePieClick(entry, index, event, 'RHS-A')}
                         >
-                          {data2.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS3[index % COLORS3.length]} />
+                          {PWDdashboard.RHSAOpenClose.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color || COLORS3[index % COLORS3.length]} />
                           ))}
                         </Pie>
                         <ReToolTip content={(props: any) => <CustomTooltip {...props} total={43} />} />
@@ -1086,13 +1057,8 @@ export default function KeyMetricCard() {
             <div style={{ height: 600, width: '100%' }}>
               <DataGrid
                 rows={(sdpData[selectedSdp] || []).filter((row) => !selectedStatus || row.status === selectedStatus)}
-                columns={[
-                  { field: 'district', headerName: 'District', width: 150 },
-                  { field: 'sdpType', headerName: 'SDP Type', width: 200 },
-                  { field: 'centerName', headerName: 'Center Name', flex: 1 },
-                  { field: 'status', headerName: 'Status', width: 100 },
-                ]}
-                getRowId={(row) => `${row.district}-${row.centerName}-${row.status}`}
+                columns={sdpColumns}
+                getRowId={(row) => `${row.district}-${row.centerName}-${row.status}-${row.id}`}
                 pageSizeOptions={[5, 10]}
                 disableRowSelectionOnClick
               />

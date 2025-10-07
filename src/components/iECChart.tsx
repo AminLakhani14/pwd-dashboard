@@ -6,15 +6,26 @@ import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import type { SelectChangeEvent } from '@mui/material/Select';
+import { RootState } from "../app/store";
+import { useSelector } from "react-redux";
 
 type ChartType = 'IEC Material' | 'MEC Wheel';
 
 type AlertType = 'danger' | 'warning' | 'good';
 
+interface AlertItem {
+  Center: string;
+  District: string;
+  Message: string;
+  AlertLevel: string;
+  TotalStock: number;
+}
+
 const IecChart = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [chartType, setChartType] = useState<ChartType>("IEC Material");
+  const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
 
   const chartData: Record<ChartType, { id: number; value: number; label: string }[]> = {
     "IEC Material": [
@@ -31,44 +42,43 @@ const IecChart = () => {
     setChartType(event.target.value as ChartType);
   };
 
-const alerts: { type: AlertType; title: string; message: string; icon: React.ReactElement }[] = [
-    {
-      type: "danger",
-      title: "Karachi Center A",
-      message: "Commodities expiring in 15 days",
-      icon: <ErrorIcon />,
-    },
-    {
-      type: "warning",
-      title: "Hyderabad Center B",
-      message: "Low contraceptive stock levels",
-      icon: <WarningIcon />,
-    },
-    {
-      type: "good",
-      title: "Sukkur Center C",
-      message: "Equipment maintenance scheduled",
-      icon: <CheckCircleIcon />,
-    },
-    {
-      type: "danger",
-      title: "Lahore Center D",
-      message: "Critical equipment failure",
-      icon: <ErrorIcon />,
-    },
-    {
-      type: "warning",
-      title: "Islamabad Center E",
-      message: "Staff shortage reported",
-      icon: <WarningIcon />,
-    },
-    {
-      type: "good",
-      title: "Quetta Center F",
-      message: "Monthly targets achieved",
-      icon: <CheckCircleIcon />,
-    },
-  ];
+  // Map API alert levels to our AlertType
+  const getAlertTypeFromAPI = (alertLevel: string): AlertType => {
+    switch (alertLevel) {
+      case 'low':
+        return 'danger';
+      case 'medium':
+        return 'warning';
+      case 'perfect':
+        return 'good';
+      default:
+        return 'warning';
+    }
+  };
+
+  // Get icon based on alert level
+  const getAlertIcon = (alertLevel: string): React.ReactElement => {
+    switch (alertLevel) {
+      case 'low':
+        return <ErrorIcon />;
+      case 'medium':
+        return <WarningIcon />;
+      case 'perfect':
+        return <CheckCircleIcon />;
+      default:
+        return <WarningIcon />;
+    }
+  };
+
+  // Transform API data to our alert format
+  const alerts = PWDdashboard?.ContraceptivesAlert?.map((alert: AlertItem) => ({
+    type: getAlertTypeFromAPI(alert.AlertLevel),
+    title: alert.Center,
+    message: alert.Message,
+    icon: getAlertIcon(alert.AlertLevel),
+    district: alert.District,
+    totalStock: alert.TotalStock
+  })) || [];
 
   const getAlertStyle = (type: AlertType) => {
     switch (type) {
@@ -203,10 +213,7 @@ const alerts: { type: AlertType; title: string; message: string; icon: React.Rea
     >
       <CardContent
         sx={{
-          // p: 2,
           pb: 0,
-          // backgroundColor: theme.palette.background.paper,
-          // borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
         <Typography
@@ -232,57 +239,71 @@ const alerts: { type: AlertType; title: string; message: string; icon: React.Rea
           p: 1,
         }}
       >
-        {alerts.map((alert, index) => {
-          const alertStyle = getAlertStyle(alert.type);
-          return (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                p: 1.5,
-                mb: 1,
-                borderRadius: 2,
-                ...alertStyle,
-              }}
-            >
+        {alerts.length > 0 ? (
+          alerts.map((alert, index) => {
+            const alertStyle = getAlertStyle(alert.type);
+            return (
               <Box
+                key={index}
                 sx={{
-                  color: alertStyle.iconColor,
-                  mr: 1.5,
-                  mt: 0.2,
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "flex-start",
+                  p: 1.5,
+                  mb: 1,
+                  borderRadius: 2,
+                  ...alertStyle,
                 }}
               >
-                {alert.icon}
-              </Box>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography
-                  variant="subtitle2"
+                <Box
                   sx={{
-                    fontWeight: 600,
-                    fontSize: "12px",
-                    color: theme.palette.text.primary,
-                    mb: 0.3,
+                    color: alertStyle.iconColor,
+                    mr: 1.5,
+                    mt: 0.2,
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  {alert.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "12px",
-                    color: theme.palette.text.secondary,
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {alert.message}
-                </Typography>
+                  {alert.icon}
+                </Box>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "12px",
+                      color: theme.palette.text.primary,
+                      mb: 0.3,
+                    }}
+                  >
+                    {alert.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: "12px",
+                      color: theme.palette.text.secondary,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {alert.message}
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          );
-        })}
+            );
+          })
+        ) : (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              color: theme.palette.text.secondary,
+            }}
+          >
+            <Typography variant="body2">No alerts found</Typography>
+          </Box>
+        )}
       </Box>
     </Card>
 

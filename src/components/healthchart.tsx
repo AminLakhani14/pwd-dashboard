@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -6,8 +6,6 @@ import {
   LinearProgress,
   useTheme,
   Drawer,
-  Grid,
-  TextField,
   Table,
   TableBody,
   TableCell,
@@ -17,14 +15,34 @@ import {
   IconButton
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { useSelector } from "react-redux";
+import { RootState } from "../app/store";
+
+interface Metric {
+  name: string;
+  total: string;
+  value: number;
+  percentage: number;
+  target: number;
+}
+
+interface MetricsData {
+  [key: string]: Array<{
+    district: string;
+    startDate: string;
+    endDate: string;
+    visits: number;
+  }>;
+}
 
 const HealthMetricsCard = () => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
-  const [selectedMetric, setSelectedMetric] = useState(null);
+  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const PWDdashboard:any = useSelector((state: RootState) => state.PWDINITSLICE);
 
   // Sample data for each metric
-  const metricsData = {
+  const metricsData: MetricsData = {
     "All Reports": [
       { district: "District A", startDate: "2023-01-01", endDate: "2023-01-31", visits: 35 },
       { district: "District B", startDate: "2023-01-01", endDate: "2023-01-31", visits: 25 },
@@ -47,15 +65,8 @@ const HealthMetricsCard = () => {
     ]
   };
 
-  const metrics = [
-    { name: "All Reports", value: 406, percentage: 100, target: 100 },
-    { name: "FWC", value: 341, percentage: 80, target: 380 },
-    { name: "RHS-A", value: 43, percentage: 50, target: 100 },
-    { name: "MSU", value: 22, percentage: 20, target: 100 },
-  ];
-
   const handleMetricClick = (metric: string) => {
-    setSelectedMetric(metric as any);
+    setSelectedMetric(metric);
     setOpen(true);
   };
 
@@ -92,74 +103,82 @@ const HealthMetricsCard = () => {
         </Typography>
 
         <div style={{ top: "13%", position: "relative" }}>
-          {metrics.map((metric, index) => {
-            const progressValue = Math.min(metric.percentage, 100);
-            return (
-              <Box 
-                key={index} 
-                sx={{ mb: 3, height: "20px", cursor: "pointer" }}
-                onClick={() => handleMetricClick(metric.name)}
-              >
-                <Box
-                  sx={{ display: "flex", justifyContent: "space-between", mb: 0 }}
+          {PWDdashboard?.linearData && PWDdashboard.linearData.length > 0 ? (
+            PWDdashboard.linearData.map((metric: Metric, index: number) => {
+              const progressValue = Math.min(metric.percentage, 100);
+              return (
+                <Box 
+                  key={index} 
+                  sx={{ mb: 3, height: "20px", cursor: "pointer" }}
+                  onClick={() => handleMetricClick(metric.name)}
                 >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: 300,
-                      fontSize: "13px",
-                      marginBottom: "0px",
-                      color: "text.secondary",
-                    }}
-                  >
-                    {metric.name}
-                  </Typography>
                   <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginTop: "0px",
-                      marginBottom: "0px",
-                    }}
+                    sx={{ display: "flex", justifyContent: "space-between", mb: 0 }}
                   >
                     <Typography
                       variant="body1"
                       sx={{
-                        fontWeight: 600,
-                        color: "black",
+                        fontWeight: 300,
                         fontSize: "13px",
+                        marginBottom: "0px",
+                        color: "text.secondary",
                       }}
                     >
-                      {metric.value} / {metric.percentage}%
+                      {metric.name}
                     </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginTop: "0px",
+                        marginBottom: "0px",
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontWeight: 600,
+                          color: "black",
+                          fontSize: "13px",
+                        }}
+                      >
+                        {metric.value} / {metric.total}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ position: "relative", height: "8px" }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progressValue}
+                      sx={{
+                        height: "8px",
+                        borderRadius: "4px",
+                        backgroundColor: theme.palette.grey[200],
+                        "& .MuiLinearProgress-bar": {
+                          borderRadius: "4px",
+                          backgroundColor: metric.percentage >= 60 ? '#4caf50' : metric.percentage < 60 && metric.percentage >= 30 ? '#ff9800' : '#f44336',
+                        },
+                      }}
+                    />
                   </Box>
                 </Box>
-
-                <Box sx={{ position: "relative", height: "8px" }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={progressValue}
-                    sx={{
-                      height: "8px",
-                      borderRadius: "4px",
-                      backgroundColor: theme.palette.grey[200],
-                      "& .MuiLinearProgress-bar": {
-                        borderRadius: "4px",
-                        backgroundColor: metric.value >= 60 ? '#4caf50' : metric.value < 60 && metric.value >= 30 ? '#ff9800' : '#f44336',
-                      },
-                    }}
-                  />
-                </Box>
-              </Box>
-            );
-          })}
+              );
+            })
+          ) : (
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <Typography variant="body2" color="text.secondary">
+                No visit data available
+              </Typography>
+            </Box>
+          )}
         </div>
       </Paper>
 
       <Drawer
         anchor="right"
         open={open}
-        onClose={() => {}} // Empty onClose to prevent closing via backdrop or escape
+        onClose={handleClose}
         disableEscapeKeyDown
         ModalProps={{
           hideBackdrop: true,
@@ -193,7 +212,7 @@ const HealthMetricsCard = () => {
           </IconButton>
         </Box>
         
-        {selectedMetric && (
+        {selectedMetric && metricsData[selectedMetric] && (
           <TableContainer>
             <Table stickyHeader aria-label="visit details table">
               <TableHead>
@@ -205,7 +224,7 @@ const HealthMetricsCard = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(metricsData[selectedMetric] as Array<{ district: string; startDate: string; endDate: string; visits: number }>).map((row, index) => (
+                {metricsData[selectedMetric].map((row, index) => (
                   <TableRow key={index}>
                     <TableCell>{row.district}</TableCell>
                     <TableCell>{row.startDate}</TableCell>

@@ -10,84 +10,52 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import { RootState } from '../app/store';
+import { useSelector } from 'react-redux';
 
 const StockStatusDashboard = () => {
+  const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
   const theme = useTheme();
 
-  const stockData = [
-    { 
-      id: 1, 
-      item: 'Condoms', 
-      currentStock: 191711, 
-      monthlyConsumption: 4000, 
-      monthsRemaining: 3.1, 
-      status: 'Adequate', 
-      expiryDate: '2024-05-15',
-      lastDelivery: '2023-11-20'
-    },
-    { 
-      id: 2, 
-      item: 'COC', 
-      currentStock: 127312, 
-      monthlyConsumption: 3000, 
-      monthsRemaining: 2.7, 
-      status: 'Adequate', 
-      expiryDate: '2024-08-30',
-      lastDelivery: '2023-10-15'
-    },
-    { 
-      id: 3, 
-      item: 'POP', 
-      currentStock: 85979, 
-      monthlyConsumption: 1500, 
-      monthsRemaining: 3.0, 
-      status: 'Low', 
-      expiryDate: '2024-06-22',
-      lastDelivery: '2023-12-01'
-    },
-    { 
-      id: 4, 
-      item: 'ECP', 
-      currentStock: 115945, 
-      monthlyConsumption: 600, 
-      monthsRemaining: 3.0, 
-      status: 'Adequate', 
-      expiryDate: '2024-09-10',
-      lastDelivery: '2023-11-05'
-    },
-    { 
-      id: 5, 
-      item: '3 Months Inj (Depo)', 
-      currentStock: 130685, 
-      monthlyConsumption: 1200, 
-      monthsRemaining: 2.7, 
-      status: 'Adequate', 
-      expiryDate: '2024-04-05',
-      lastDelivery: '2023-10-28'
-    },
-    { 
-      id: 6, 
-      item: '3 Month Inj (Sayana Press)', 
-      currentStock: 120116, 
-      monthlyConsumption: 800, 
-      monthsRemaining: 3.1, 
-      status: 'Adequate', 
-      expiryDate: '2024-07-18',
-      lastDelivery: '2023-12-10'
-    },
-    { 
-      id: 7, 
-      item: 'IUCD (CT-380-A)', 
-      currentStock: 109759, 
-      monthlyConsumption: 200, 
-      monthsRemaining: 3.3, 
-      status: 'Low', 
-      expiryDate: '2025-01-05',
-      lastDelivery: '2023-09-15'
-    },
-  ];
+  // Transform contraceptiveStock data for DataGrid
+  const transformedStockData = PWDdashboard.contraceptiveStock?.map((item, index) => {
+    // Calculate status based on value (you can adjust these thresholds as needed)
+    let status = 'Adequate';
+    if (item.value < 10000) {
+      status = 'Critical';
+    } else if (item.value < 30000) {
+      status = 'Low';
+    }
 
-  type RowType = { id: number; item: string; currentStock: number; monthlyConsumption: number; monthsRemaining: number; status: string; expiryDate: string; lastDelivery: string };
+    // Calculate months remaining (placeholder calculation - adjust based on your business logic)
+    const monthlyConsumption = Math.round(item.value * 0.1); // 10% of stock as monthly consumption
+    const monthsRemaining = monthlyConsumption > 0 ? (item.value / monthlyConsumption).toFixed(1) : 'N/A';
+
+    return {
+      id: index + 1,
+      item: item.name,
+      currentStock: item.value,
+      monthlyConsumption: monthlyConsumption,
+      monthsRemaining: monthsRemaining,
+      status: status,
+      color: item.color,
+      // Add placeholder dates since they're not in the original data
+      expiryDate: '2024-12-31', // You might want to get this from actual data
+      lastDelivery: '2023-12-01', // You might want to get this from actual data
+    };
+  }) || [];
+
+  type RowType = { 
+    id: number; 
+    item: string; 
+    currentStock: number; 
+    monthlyConsumption: number; 
+    monthsRemaining: string; 
+    status: string; 
+    color: string;
+    expiryDate: string; 
+    lastDelivery: string; 
+  };
 
   const columns: import('@mui/x-data-grid').GridColDef<RowType>[] = [
     { 
@@ -112,10 +80,10 @@ const StockStatusDashboard = () => {
       headerName: 'Stock Available', 
       width: 200,
       renderCell: (params) => (
-         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography fontWeight="400" sx={{ display: 'flex', alignItems: 'center' }}>
-          {Number(params.value).toLocaleString()}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography fontWeight="400" sx={{ display: 'flex', alignItems: 'center' }}>
+            {Number(params.value).toLocaleString()}
+          </Typography>
         </Box>
       )
     },
@@ -141,18 +109,6 @@ const StockStatusDashboard = () => {
         </Box>
       )
     },
-    // {
-    //   field: 'actions',
-    //   type: 'actions',
-    //   width: 80,
-    //   getActions: (params) => [
-    //     <GridActionsCellItem
-    //       icon={<InfoIcon />}
-    //       label="View details"
-    //     //   onClick={() => handleViewDetails(params.row)}
-    //     />,
-    //   ],
-    // },
   ];
 
   return (
@@ -185,7 +141,7 @@ const StockStatusDashboard = () => {
 
       <Box sx={{ height: 437, width: '100%' }}>
         <DataGrid
-          rows={stockData as RowType[]}
+          rows={transformedStockData as RowType[]}
           columns={columns}
           hideFooter
           slots={{
@@ -207,7 +163,5 @@ const StockStatusDashboard = () => {
     </Paper>
   );
 };
-
-// Helper component for summary cards
 
 export default StockStatusDashboard;
