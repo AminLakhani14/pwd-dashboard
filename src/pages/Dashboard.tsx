@@ -1,39 +1,66 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Button, Modal, Box, TextField, MenuItem, useMediaQuery, useTheme, Card, Alert, Collapse, IconButton } from "@mui/material";
-import Grid from '@mui/material/Grid';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import {
+  Typography,
+  Button,
+  Modal,
+  Box,
+  TextField,
+  MenuItem,
+  useMediaQuery,
+  useTheme,
+  Card,
+  Alert,
+  Collapse,
+  IconButton,
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import KeyMetricCard from "../components/KeyMetricCard";
 import StockStatusDashboard from "../components/StockStatusDashboard";
 import IecChart from "../components/iECChart";
 import { PieChart } from "@mui/x-charts";
 import StackBars from "../components/StackBars";
-import CloseIcon from '@mui/icons-material/Close';
-import axios from "axios";
-import { CenterDropdown, dynamicAPI, SdpDropdown, SldieoutAPI, StaffPositionAPI } from "../Service/Init";
-import { useAppDispatch } from '../app/Hooks';
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  CenterDropdown,
+  dynamicAPI,
+  MonitoringVisitsReportAPI,
+  SdpDropdown,
+  SldieoutAPI,
+  StaffPositionAPI,
+} from "../Service/Init";
+import { useAppDispatch } from "../app/Hooks";
 import { Col, Container, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
 import { updateStates } from "../Slice/InitSlice";
-import '../index.css'
+import "../index.css";
 import { ToDatabaseFormat } from "../Global/globalFunctions";
 
 const Dashboard = () => {
   const theme = useTheme();
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [open, setOpen] = useState(false);
-  
+
   const getPreviousMonthDateRange = () => {
     const now = new Date();
-    const firstDayOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastDayOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    
+    const firstDayOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
+    );
+    const lastDayOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0
+    );
+
     return {
-      startDate: firstDayOfPreviousMonth.toLocaleDateString('en-US'),
-      endDate: lastDayOfPreviousMonth.toLocaleDateString('en-US'),
-      month: (now.getMonth()).toString(),
-      year: now.getFullYear().toString()
+      startDate: firstDayOfPreviousMonth.toLocaleDateString("en-US"),
+      endDate: lastDayOfPreviousMonth.toLocaleDateString("en-US"),
+      month: now.getMonth().toString(),
+      year: now.getFullYear().toString(),
     };
   };
 
@@ -42,12 +69,38 @@ const Dashboard = () => {
   const [filters, setFilters] = useState({
     month: previousMonthRange.month,
     year: previousMonthRange.year,
-    sdpType: '',
-    district: '1',
-    center: '1'
+    sdpType: "",
+    district: "1",
+    center: "1",
   });
 
-  console.log(PWDdashboard,'PWDdashboard');
+  const [currentFormattedDates, setCurrentFormattedDates] = useState({
+    start: formatDate(previousMonthRange.startDate),
+    end: formatDate(previousMonthRange.endDate),
+  });
+
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    const ordinal = (d: number) => {
+      if (d > 3 && d < 21) return d + 'th';
+      switch (d % 10) {
+        case 1: return d + "st";
+        case 2: return d + "nd";
+        case 3: return d + "rd";
+        default: return d + "th";
+      }
+    };
+    return `${ordinal(day)} ${month} ${year}`;
+  }
+
+  console.log(PWDdashboard, "PWDdashboard");
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -56,169 +109,215 @@ const Dashboard = () => {
 
   // Month options with ALL option
   const months = [
-    { value: 'ALL', label: 'All Months' },
-    { value: '1', label: 'January' },
-    { value: '2', label: 'February' },
-    { value: '3', label: 'March' },
-    { value: '4', label: 'April' },
-    { value: '5', label: 'May' },
-    { value: '6', label: 'June' },
-    { value: '7', label: 'July' },
-    { value: '8', label: 'August' },
-    { value: '9', label: 'September' },
-    { value: '10', label: 'October' },
-    { value: '11', label: 'November' },
-    { value: '12', label: 'December' }
+    { value: "ALL", label: "All Months" },
+    { value: "1", label: "January" },
+    { value: "2", label: "February" },
+    { value: "3", label: "March" },
+    { value: "4", label: "April" },
+    { value: "5", label: "May" },
+    { value: "6", label: "June" },
+    { value: "7", label: "July" },
+    { value: "8", label: "August" },
+    { value: "9", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
   ];
 
   // Year options (last 5 years and current year)
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 6 }, (_, i) => (currentYear - i).toString());
+  const years = Array.from({ length: 6 }, (_, i) =>
+    (currentYear - i).toString()
+  );
 
   // Function to get first and last day of the month or year
   const getDateRange = (month: string, year: string) => {
-    if (!month || !year) return { startDate: '', endDate: '' };
-    
+    if (!month || !year) return { startDate: "", endDate: "" };
+
     const yearNum = parseInt(year);
-    
-    if (month === 'ALL') {
+
+    if (month === "ALL") {
       // For ALL option: January 1st to December 31st of selected year
       const startDate = new Date(yearNum, 0, 1); // January 1st
       const endDate = new Date(yearNum, 11, 31); // December 31st
-      
+
       return {
-        startDate: startDate.toLocaleDateString('en-US'),
-        endDate: endDate.toLocaleDateString('en-US')
+        startDate: startDate.toLocaleDateString("en-US"),
+        endDate: endDate.toLocaleDateString("en-US"),
       };
     } else {
       // For specific month: 1st to last day of the month
       const monthNum = parseInt(month);
       const startDate = new Date(yearNum, monthNum - 1, 1);
       const endDate = new Date(yearNum, monthNum, 0);
-      
+
       return {
-        startDate: startDate.toLocaleDateString('en-US'),
-        endDate: endDate.toLocaleDateString('en-US')
+        startDate: startDate.toLocaleDateString("en-US"),
+        endDate: endDate.toLocaleDateString("en-US"),
       };
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value }:any = e.target;
-    setFilters(prev => ({
+    const { name, value }: any = e.target;
+    setFilters((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
-    if (name === 'SDPdropdownValue' && value) {
+
+    if (name === "SDPdropdownValue" && value) {
       dispatch(SdpDropdown(value));
-      dispatch(updateStates({ key: 'centerValue', value: '0' }));
-      dispatch(updateStates({ key: 'centerDropdown', value: [] }));
+      dispatch(updateStates({ key: "centerValue", value: "0" }));
+      dispatch(updateStates({ key: "centerDropdown", value: [] }));
     }
 
-    if (name === 'districtValue' && value) {
-      dispatch(CenterDropdown({
-        sdpType: PWDdashboard.SDPdropdownValue,
-        value: value
-      }));
+    if (name === "districtValue" && value) {
+      dispatch(
+        CenterDropdown({
+          sdpType: PWDdashboard.SDPdropdownValue,
+          value: value,
+        })
+      );
     }
 
     dispatch(updateStates({ key: name, value: value }));
-  }
+  };
 
   const handleApplyFilters = () => {
     let districtData = PWDdashboard.SDPdropdownValue.split(",");
-      
+
     // Get date range based on selected month and year
     const dateRange = getDateRange(filters.month, filters.year);
-    
-    dispatch(dynamicAPI({
-      StartDate: ToDatabaseFormat(dateRange.startDate) || '',
-      EndDate: ToDatabaseFormat(dateRange.endDate) || '',
-      DistrictID: districtData[0] || '0',
-      DistrictName: PWDdashboard.districtValue,
-      CenterID: '',
-      CenterName: PWDdashboard.centerValue,
-      ProjectId: districtData[2] || '7122,7121,7120',
-      QuestionId: ''
-    }));
 
-    dispatch(SldieoutAPI({
-      StartDate: ToDatabaseFormat(dateRange.startDate) || '',
-      EndDate: ToDatabaseFormat(dateRange.endDate) || '',
-      DistrictID: districtData[0] || '0',
-      DistrictName: PWDdashboard.districtValue,
-      CenterID: '',
-      CenterName: PWDdashboard.centerValue,
-      ProjectId: districtData[2] || '7122,7121,7120',
-      QuestionId: ''
-    }));
+    setCurrentFormattedDates({
+      start: formatDate(dateRange.startDate),
+      end: formatDate(dateRange.endDate),
+    });
 
-    dispatch(StaffPositionAPI({
-      StartDate: ToDatabaseFormat(dateRange.startDate) || '',
-      EndDate: ToDatabaseFormat(dateRange.endDate) || '',
-      DistrictID: districtData[0] || '0',
-      DistrictName: PWDdashboard.districtValue,
-      CenterID: '',
-      CenterName: PWDdashboard.centerValue,
-      ProjectId: districtData[2] || '7122,7121,7120',
-      QuestionId: ''
-    }));
+    dispatch(
+      dynamicAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    dispatch(
+      SldieoutAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    dispatch(
+      StaffPositionAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    dispatch(
+      MonitoringVisitsReportAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
 
     handleClose();
   };
-  
+
   useEffect(() => {
     // Use previous month's date range by default
     const defaultDateRange = getPreviousMonthDateRange();
-    
-    dispatch(dynamicAPI({
-      StartDate: ToDatabaseFormat(defaultDateRange.startDate) || '',
-      EndDate: ToDatabaseFormat(defaultDateRange.endDate) || '',
-      DistrictID: '',
-      DistrictName: '',
-      CenterID: '',
-      CenterName: '',
-      ProjectId: '7122,7121,7120',
-      QuestionId: ''
-    }));
 
-    dispatch(SldieoutAPI({
-      StartDate: ToDatabaseFormat(defaultDateRange.startDate) || '',
-      EndDate: ToDatabaseFormat(defaultDateRange.endDate) || '',
-      DistrictID: '',
-      DistrictName: '',
-      CenterID: '',
-      CenterName: '',
-      ProjectId: '7122,7121,7120',
-      QuestionId: ''
-    }));
+    dispatch(
+      dynamicAPI({
+        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+        DistrictID: "",
+        DistrictName: "",
+        CenterID: "",
+        CenterName: "",
+        ProjectId: "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
 
-    dispatch(StaffPositionAPI({
-      StartDate: ToDatabaseFormat(defaultDateRange.startDate) || '',
-      EndDate: ToDatabaseFormat(defaultDateRange.endDate) || '',
-      DistrictID: '',
-      DistrictName: '',
-      CenterID: '',
-      CenterName: '',
-      ProjectId: '7122,7121,7120',
-      QuestionId: ''
-    }));
+    dispatch(
+      SldieoutAPI({
+        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+        DistrictID: "",
+        DistrictName: "",
+        CenterID: "",
+        CenterName: "",
+        ProjectId: "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
 
-  }, []);
+    dispatch(
+      StaffPositionAPI({
+        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+        DistrictID: "",
+        DistrictName: "",
+        CenterID: "",
+        CenterName: "",
+        ProjectId: "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    dispatch(
+      MonitoringVisitsReportAPI({
+        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+        DistrictID: "",
+        DistrictName: "",
+        CenterID: "",
+        CenterName: "",
+        ProjectId: "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+  }, [dispatch]);
 
   const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: isMobile ? '90%' : 450,
-    bgcolor: 'background.paper',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: isMobile ? "90%" : 450,
+    bgcolor: "background.paper",
     boxShadow: 24,
     p: isMobile ? 2 : 4,
-    borderRadius: '16px',
-    maxHeight: '90vh',
-    overflowY: 'auto',
+    borderRadius: "16px",
+    maxHeight: "90vh",
+    overflowY: "auto",
   } as const;
 
   const buildingStatusData = [
@@ -230,14 +329,14 @@ const Dashboard = () => {
   ];
 
   return (
-    <Container >
-    {PWDdashboard.isLoading && (
+    <Container>
+      {PWDdashboard.isLoading && (
         <div className="loader-overlay">
           <div className="loader"></div>
         </div>
       )}
       <Row>
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ width: "100%" }}>
           <Collapse in={open2}>
             <Alert
               action={
@@ -254,28 +353,32 @@ const Dashboard = () => {
               }
               sx={{ mb: 2 }}
             >
-              You are viewing the data from {previousMonthRange.startDate} to {previousMonthRange.endDate}.
+              You are viewing the data from {currentFormattedDates.start} to{" "}
+              {currentFormattedDates.end}.
             </Alert>
           </Collapse>
         </Box>
       </Row>
-      
-      <Row className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: isMobile ? '10px' : '0' }}>
+
+      <Row
+        className="d-flex justify-content-between align-items-center mb-3"
+        style={{ marginTop: isMobile ? "10px" : "0" }}
+      >
         <Col xs={8} sm={9}>
           <Typography variant={isMobile ? "h5" : "h4"}>Dashboard</Typography>
         </Col>
         <Col xs={4} sm={3} className="d-flex justify-content-end">
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             startIcon={<FilterListIcon />}
             onClick={handleOpen}
             sx={{
-              borderRadius: '12px',
-              textTransform: 'none',
-              boxShadow: 'none',
-              backgroundColor: 'black',
-              fontSize: isMobile ? '0.75rem' : '0.875rem',
-              padding: isMobile ? '6px 12px' : '8px 16px'
+              borderRadius: "12px",
+              textTransform: "none",
+              boxShadow: "none",
+              backgroundColor: "black",
+              fontSize: isMobile ? "0.75rem" : "0.875rem",
+              padding: isMobile ? "6px 12px" : "8px 16px",
             }}
           >
             Filters
@@ -292,10 +395,15 @@ const Dashboard = () => {
         disableEscapeKeyDown
       >
         <Box sx={modalStyle}>
-          <Typography id="filter-modal-title" variant="h6" component="h2" mb={2}>
+          <Typography
+            id="filter-modal-title"
+            variant="h6"
+            component="h2"
+            mb={2}
+          >
             Filter Dashboard Data
           </Typography>
-          
+
           <TextField
             select
             fullWidth
@@ -312,7 +420,7 @@ const Dashboard = () => {
               </MenuItem>
             ))}
           </TextField>
-          
+
           <TextField
             select
             fullWidth
@@ -329,7 +437,7 @@ const Dashboard = () => {
               </MenuItem>
             ))}
           </TextField>
-          
+
           <TextField
             select
             fullWidth
@@ -340,13 +448,13 @@ const Dashboard = () => {
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}
           >
-             {PWDdashboard.SDPdropdown.map((option) => (
+            {PWDdashboard.SDPdropdown.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
             ))}
           </TextField>
-          
+
           <TextField
             select
             fullWidth
@@ -357,14 +465,14 @@ const Dashboard = () => {
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}
           >
-           <MenuItem value="">---Select All---</MenuItem>
+            <MenuItem value="">---Select All---</MenuItem>
             {PWDdashboard.districtDropdown.map((option) => (
               <MenuItem key={option.Text} value={option.Text}>
                 {option.Text}
               </MenuItem>
             ))}
           </TextField>
-          
+
           <TextField
             select
             fullWidth
@@ -382,25 +490,25 @@ const Dashboard = () => {
               </MenuItem>
             ))}
           </TextField>
-          
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-            <Button 
-              onClick={handleClose} 
-              sx={{ 
-                mr: 2, 
-                color: 'black', 
+
+          <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              onClick={handleClose}
+              sx={{
+                mr: 2,
+                color: "black",
                 boxShadow: "1px 1px 8px -1px rgb(160 160 160)",
-                fontSize: isMobile ? '0.75rem' : '0.875rem'
+                fontSize: isMobile ? "0.75rem" : "0.875rem",
               }}
             >
-              Cancel 
+              Cancel
             </Button>
-            <Button 
-              variant="contained" 
-              sx={{ 
-                backgroundColor: 'black',
-                fontSize: isMobile ? '0.75rem' : '0.875rem'
-              }} 
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "black",
+                fontSize: isMobile ? "0.75rem" : "0.875rem",
+              }}
               onClick={handleApplyFilters}
             >
               Apply Filters
@@ -414,112 +522,180 @@ const Dashboard = () => {
       </Row>
 
       <Row sx={{ height: "100%" }}>
-        <Grid {...({ item: true, xs: 12, sm: 12, md: 6, lg: 6 } as any)}
-          sx={{
-            width: "76.5%",
-            height: "100%",
-            paddingLeft: "0px",
-            marginTop: "8px",
-          }}
-        >
-          <div>
-            <div style={{ display: "flex", height: "100%",justifyContent:'space-between' }}>
-              <div style={{width:"51%"}}>
+        {isMobile ? (
+          // Mobile layout - stack vertically
+          <>
+            <Grid {...({ item: true, xs: 12 } as any)} sx={{ mb: 1 }}>
               <Card
                 sx={{
                   borderRadius: 2,
                   boxShadow: 3,
-                  p: 1,
+                  p: isMobile ? 0.5 : 1,
                   width: "100%",
                   bgcolor: "background.paper",
-                  mb: 4,
-                  height: 290,
-                  marginRight: 2,
+                  mb: 1,
+                  height: "auto",
                 }}
               >
                 <StackBars />
               </Card>
-              </div>
-               <div style={{width:"46%",marginRight:'3px'}}>
-              <Card
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  p: 3,
-                  width: "100%",
-                  bgcolor: "background.paper",
-                  mb: 4,
-                  height: 290,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: "text.primary",
-                    textAlign: "left",
-                    fontFamily: "inherit",
-                    fontSize: 16,
-                  }}
-                >
-                  Technical Monitoring Checklist
-                </Typography>
-                <Box
-                  sx={{
+            </Grid>
+            <Grid {...({ item: true, xs: 12 } as any)} sx={{ mb: 1 }}>
+              <IecChart />
+            </Grid>
+            <Grid {...({ item: true, xs: 12 } as any)}>
+              <StockStatusDashboard />
+            </Grid>
+          </>
+        ) : (
+          // Desktop layout - original
+          <>
+            <Grid
+              {...({ item: true, xs: 12, sm: 12, md: 6, lg: 6 } as any)}
+              sx={{
+                width: "76.5%",
+                height: "100%",
+                paddingLeft: "0px",
+                marginTop: "8px",
+              }}
+            >
+              <div>
+                <div
+                  style={{
                     display: "flex",
-                    justifyContent: "center",
-                    gap: 3,
-                    flexWrap: isMobile ? "wrap" : "nowrap",
+                    height: "100%",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Box>
-
-                     <PieChart
-                      series={[
-                        {
-                          data: buildingStatusData,
-                          innerRadius: 30,
-                          outerRadius: 90,
-                          paddingAngle: 5,
-                          cornerRadius: 5,
-                          startAngle: -45,
-                          endAngle: 225,
-                          cx: 100,
-                          cy: 80,
-                          arcLabelMinAngle: 15,
-                        },
-                      ]}
-                      sx={{ "& .MuiChartsLegend-label": { fontSize: "10px !important" }, }}
-                      width={250}
-                      height={170}
-                      slotProps={{
-                        legend: {
-                          sx: { "& .MuiChartsLegend-label": { fontSize: 6, fontWeight: 'normal' } },
-                        },
+                  <div style={{ width: "51%" }}>
+                    <Card
+                      sx={{
+                        borderRadius: 2,
+                        boxShadow: 3,
+                        p: 1,
+                        width: "100%",
+                        bgcolor: "background.paper",
+                        mb: 4,
+                        height: 290,
+                        marginRight: 2,
                       }}
-                    />
-                  </Box>
-                  </Box>
-              </Card>
+                    >
+                      <StackBars />
+                    </Card>
+                  </div>
+                  <div style={{ width: "46%", marginRight: "3px" }}>
+                    <Box sx={{ position: "relative" }}>
+                      <Card
+                        sx={{
+                          borderRadius: 2,
+                          boxShadow: 3,
+                          p: 3,
+                          width: "100%",
+                          bgcolor: "background.paper",
+                          mb: 4,
+                          height: 290,
+                          filter: "blur(3px)",
+                          opacity: 0.6,
+                        }}
+                      >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            mb: 2,
+                            color: "text.primary",
+                            textAlign: "left",
+                            fontFamily: "inherit",
+                            fontSize: 16,
+                          }}
+                        >
+                          Technical Monitoring Checklist
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: 3,
+                            flexWrap: isMobile ? "wrap" : "nowrap",
+                          }}
+                        >
+                          <Box>
+                            <PieChart
+                              series={[
+                                {
+                                  data: buildingStatusData,
+                                  innerRadius: 30,
+                                  outerRadius: 90,
+                                  paddingAngle: 5,
+                                  cornerRadius: 5,
+                                  startAngle: -45,
+                                  endAngle: 225,
+                                  cx: 100,
+                                  cy: 80,
+                                  arcLabelMinAngle: 15,
+                                },
+                              ]}
+                              sx={{
+                                "& .MuiChartsLegend-label": {
+                                  fontSize: "10px !important",
+                                },
+                              }}
+                              width={250}
+                              height={170}
+                              slotProps={{
+                                legend: {
+                                  sx: {
+                                    "& .MuiChartsLegend-label": {
+                                      fontSize: 6,
+                                      fontWeight: "normal",
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      </Card>
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#f4f4f4",
+                          zIndex: 1,
+                        }}
+                      >
+                        <Typography variant="h6" color="text.secondary">
+                        Coming Soon
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </div>
+                </div>
+
+                <StockStatusDashboard />
               </div>
-            </div>
-            
-            <StockStatusDashboard />
-          </div>
-        </Grid>
-        <Grid {...({ item: true, xs: 12, sm: 12, md: 4, lg: 4 } as any)}
-          sx={{
-            width: "23.5%",
-            height: "100%",
-            paddingRight: "0px",
-            marginTop: "8px",
-          }}
-        >
-           <div>
-            <IecChart />
-          </div>
-        </Grid>
+            </Grid>
+            <Grid
+              {...({ item: true, xs: 12, sm: 12, md: 4, lg: 4 } as any)}
+              sx={{
+                width: "23.5%",
+                height: "100%",
+                paddingRight: "0px",
+                marginTop: "8px",
+              }}
+            >
+              <div>
+                <IecChart />
+              </div>
+            </Grid>
+          </>
+        )}
       </Row>
     </Container>
   );

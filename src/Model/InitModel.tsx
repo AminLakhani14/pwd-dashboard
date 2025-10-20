@@ -37,4 +37,6 @@ RHSAOpenCloseRecord:[],
 ContraceptivesAlert:[],
 contraceptiveStock:[],
 attendanceRecord:[],
+MonitoringReportRecord:[],
+furnitureData:[],
 }

@@ -2,23 +2,18 @@ import * as React from 'react';
 import { 
   Typography,
   CardContent,
-  useTheme
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
- 
-
-const furnitureData = [
-  { shortform: 'OT', fullForm: 'Office Table', good: 133, satisfactory: 70, poor: 22 }, 
-  { shortform: 'OC', fullForm: 'Office Chairs', good: 121, satisfactory: 74, poor: 29 }, 
-  { shortform: 'B', fullForm: 'Benches', good: 132, satisfactory: 67, poor: 16 }, 
-  { shortform: 'ET', fullForm: 'Examination Table', good: 117, satisfactory: 81, poor: 13 }, 
-  { shortform: 'IT', fullForm: 'Insertion Table', good: 120, satisfactory: 68, poor: 13 }, 
-  { shortform: 'RS', fullForm: 'Revolving Stool', good: 109, satisfactory: 54, poor: 19 }, 
-  { shortform: 'MC', fullForm: 'Medicine Cabinet', good: 88, satisfactory: 85, poor: 30 }, 
-];
+import { useSelector } from 'react-redux';
+import { RootState } from '../app/store';
 
 export default function StackBars() {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
+  const furnitureData = PWDdashboard.furnitureData || [];
   
   return (
    
@@ -64,27 +59,29 @@ export default function StackBars() {
             dataKey: 'fullForm',
             scaleType: 'band',
             tickLabelStyle: { 
-              fontSize: 6.7,
-              angle: 12,
-              // textAnchor: 'start',
-              // fill: theme.palette.text.secondary
+              fontSize: isMobile ? 8 : 6.7,
+              angle: isMobile ? 0 : 12,
             },
           }]}
-          height={150}
+          height={isMobile ? 200 : 150}
           margin={{ 
-            left: -20, 
-            right: 0, 
-            top: 0.5, 
-            bottom: 0.3 
+            left: isMobile ? 40 : -20, 
+            right: isMobile ? 10 : 0, 
+            top: isMobile ? 10 : 0.5, 
+            bottom: isMobile ? 40 : 0.3 
           }}
           slotProps={{
             legend: {
               sx: {
-                '& .MuiChartsLegend-label': { fontSize: 8 },
+                '& .MuiChartsLegend-label': { fontSize: isMobile ? 10 : 8 },
               },
             },
           }}
-          sx={{ "& .MuiChartsLabelMark-root.MuiChartsLabelMark-square": { borderRadius: "10px !important" }, }}
+          sx={{ 
+            "& .MuiChartsLabelMark-root.MuiChartsLabelMark-square": { borderRadius: "10px !important" },
+            width: "100%",
+            overflow: "visible"
+          }}
           colors={['#4CAF50', '#FFC107', '#F44336']}
           
         />

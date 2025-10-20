@@ -11,8 +11,8 @@ const Layout = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <LeftSidebar />
-      <Box
+      {/* <LeftSidebar /> */}
+      {/* <Box
         component="main"
         className="main-content"
         sx={{
@@ -20,13 +20,13 @@ const Layout = () => {
           marginLeft: { xs: 0, lg: sidebarWidth }, // Apply margin only on large screens
           width: { xs: '100%', lg: `calc(100% - ${sidebarWidth})` }
         }}
-      >
-        <TopNavbar />
+      > */}
+        {/* <TopNavbar /> */}
         <Box component="div" p={{ xs: 2, sm: 3 }}>
            <Outlet />
         </Box>
       </Box>
-    </Box>
+    // </Box>
   );
 };
 

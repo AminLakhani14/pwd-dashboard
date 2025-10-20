@@ -12,9 +12,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton
+  IconButton,
+  Button
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
 
@@ -26,53 +29,110 @@ interface Metric {
   target: number;
 }
 
-interface MetricsData {
-  [key: string]: Array<{
-    district: string;
-    startDate: string;
-    endDate: string;
-    visits: number;
-  }>;
+interface MonitoringReportRecord {
+  sbjnum: number;
+  Created: string;
+  DeviceTimestamp: string;
+  Latitude: string;
+  Longitude: string;
+  SurveyorName: string;
+  District: string;
+  DistrictName: string;
+  CenterName: string;
+  Center: string;
+  DistrictFieldID: string;
+  CenterFieldId: string;
+  Project: string;
 }
 
 const HealthMetricsCard = () => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
-  const PWDdashboard:any = useSelector((state: RootState) => state.PWDINITSLICE);
-
-  // Sample data for each metric
-  const metricsData: MetricsData = {
-    "All Reports": [
-      { district: "District A", startDate: "2023-01-01", endDate: "2023-01-31", visits: 35 },
-      { district: "District B", startDate: "2023-01-01", endDate: "2023-01-31", visits: 25 },
-      { district: "District C", startDate: "2023-01-01", endDate: "2023-01-31", visits: 40 }
-    ],
-    "FWC": [
-      { district: "District A", startDate: "2023-01-01", endDate: "2023-01-31", visits: 150 },
-      { district: "District B", startDate: "2023-01-01", endDate: "2023-01-31", visits: 120 },
-      { district: "District C", startDate: "2023-01-01", endDate: "2023-01-31", visits: 71 }
-    ],
-    "RHS-A": [
-      { district: "District A", startDate: "2023-01-01", endDate: "2023-01-31", visits: 15 },
-      { district: "District B", startDate: "2023-01-01", endDate: "2023-01-31", visits: 18 },
-      { district: "District C", startDate: "2023-01-01", endDate: "2023-01-31", visits: 10 }
-    ],
-    "MSU": [
-      { district: "District A", startDate: "2023-01-01", endDate: "2023-01-31", visits: 8 },
-      { district: "District B", startDate: "2023-01-01", endDate: "2023-01-31", visits: 7 },
-      { district: "District C", startDate: "2023-01-01", endDate: "2023-01-31", visits: 7 }
-    ]
-  };
+  const [filteredData, setFilteredData] = useState<MonitoringReportRecord[]>([]);
+  const PWDdashboard: any = useSelector((state: RootState) => state.PWDINITSLICE);
 
   const handleMetricClick = (metric: string) => {
     setSelectedMetric(metric);
+    
+    if (PWDdashboard?.MonitoringReportRecord) {
+      let filteredRecords: MonitoringReportRecord[] = [];
+      
+      switch (metric) {
+        case "All Reports":
+          // Show all records
+          filteredRecords = PWDdashboard.MonitoringReportRecord;
+          break;
+        case "FWC":
+          // Filter records where Project is "FWC"
+          filteredRecords = PWDdashboard.MonitoringReportRecord.filter(
+            (record: MonitoringReportRecord) => record.Project === "FWC"
+          );
+          break;
+        case "RHS-A":
+          // Filter records where Project contains "RHS-A" or "RHS-S"
+          filteredRecords = PWDdashboard.MonitoringReportRecord.filter(
+            (record: MonitoringReportRecord) => 
+              record.Project.includes("RHS-A") || record.Project.includes("RHS-S")
+          );
+          break;
+        case "MSU":
+          // Filter records where Project is "MSU"
+          filteredRecords = PWDdashboard.MonitoringReportRecord.filter(
+            (record: MonitoringReportRecord) => record.Project === "MSU"
+          );
+          break;
+        default:
+          filteredRecords = [];
+      }
+      
+      setFilteredData(filteredRecords);
+    }
+    
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedMetric(null);
+    setFilteredData([]);
+  };
+
+  const handleViewRecord = async (record: MonitoringReportRecord) => {
+    try {
+      const apiUrl = `http://localhost:54050/Dashboard/Report?sbjnum=${record.sbjnum}&Heading=${encodeURIComponent(record.Project)}`;
+      const response = await fetch(apiUrl, { method: 'GET' });
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      let targetUrl: string | null = null;
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        targetUrl = data || null;
+      } else {
+        const text = await response.text();
+        targetUrl = (text || '').trim();
+      }
+
+      if (!targetUrl) {
+        throw new Error('No URL returned by API');
+      }
+
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open report link:', error);
+    }
+  };
+
+  const handleViewLocation = (record: MonitoringReportRecord) => {
+    const { Latitude, Longitude } = record;
+    if (Latitude && Longitude) {
+      const googleMapsUrl = `https://www.google.com/maps?q=${Latitude},${Longitude}`;
+      window.open(googleMapsUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -80,7 +140,7 @@ const HealthMetricsCard = () => {
       <Paper
         elevation={2}
         sx={{
-          p: 3,
+          p: window.innerWidth < 600 ? 2 : 3,
           borderRadius: "12px",
           backgroundColor: theme.palette.background.paper,
           width: "100%",
@@ -96,7 +156,7 @@ const HealthMetricsCard = () => {
             mb: 1,
             color: theme.palette.text.primary,
             fontFamily: "inherit",
-            fontSize: 16,
+            fontSize: window.innerWidth < 600 ? 14 : 16,
           }}
         >
           Total Number of Visits
@@ -119,7 +179,7 @@ const HealthMetricsCard = () => {
                       variant="body1"
                       sx={{
                         fontWeight: 300,
-                        fontSize: "13px",
+                        fontSize: window.innerWidth < 600 ? "11px" : "13px",
                         marginBottom: "0px",
                         color: "text.secondary",
                       }}
@@ -139,7 +199,7 @@ const HealthMetricsCard = () => {
                         sx={{
                           fontWeight: 600,
                           color: "black",
-                          fontSize: "13px",
+                          fontSize: window.innerWidth < 600 ? "11px" : "13px",
                         }}
                       >
                         {metric.value} / {metric.total}
@@ -186,7 +246,7 @@ const HealthMetricsCard = () => {
         sx={{
           '& .MuiDrawer-paper': {
             width: '80%',
-            maxWidth: 800,
+            maxWidth: 1000,
             bgcolor: 'background.paper',
             borderRadius: '8px 0 0 8px',
             boxShadow: 24,
@@ -205,36 +265,81 @@ const HealthMetricsCard = () => {
           pb: 2
         }}>
           <Typography id="drawer-title" variant="h6" component="h2">
-            {selectedMetric} - Visit Details
+            {selectedMetric} - Visit Details ({filteredData.length} records)
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
           </IconButton>
         </Box>
         
-        {selectedMetric && metricsData[selectedMetric] && (
+        {filteredData.length > 0 ? (
           <TableContainer>
             <Table stickyHeader aria-label="visit details table">
               <TableHead>
                 <TableRow>
-                  <TableCell>District</TableCell>
-                  <TableCell>Start Date</TableCell>
-                  <TableCell>End Date</TableCell>
-                  <TableCell align="right">Number of Visits</TableCell>
+                  <TableCell>Monitoring List</TableCell>
+                  <TableCell>District Name</TableCell>
+                  <TableCell>Center Name</TableCell>
+                  <TableCell>Date of Visit</TableCell>
+                  <TableCell>Officer Name</TableCell>
+                  <TableCell>Action</TableCell>
+                  <TableCell>Location</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {metricsData[selectedMetric].map((row, index) => (
+                {filteredData.map((record, index) => (
                   <TableRow key={index}>
-                    <TableCell>{row.district}</TableCell>
-                    <TableCell>{row.startDate}</TableCell>
-                    <TableCell>{row.endDate}</TableCell>
-                    <TableCell align="right">{row.visits}</TableCell>
+                    <TableCell>{record.Project}</TableCell>
+                    <TableCell>{record.DistrictName}</TableCell>
+                    <TableCell>{record.CenterName}</TableCell>
+                    <TableCell>{record.DeviceTimestamp}</TableCell>
+                    <TableCell>{record.SurveyorName}</TableCell>
+                    <TableCell>
+                      <IconButton 
+                        size="small"
+                        onClick={() => handleViewRecord(record)}
+                        sx={{ 
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          '&:hover': {
+                            backgroundColor: 'action.hover'
+                          }
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
+                      <IconButton 
+                        size="small"
+                        onClick={() => handleViewLocation(record)}
+                        disabled={!record.Latitude || !record.Longitude}
+                        sx={{ 
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          '&:hover': {
+                            backgroundColor: 'action.hover'
+                          },
+                          '&:disabled': {
+                            borderColor: 'action.disabled',
+                            color: 'action.disabled'
+                          }
+                        }}
+                      >
+                        <LocationOnIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+        ) : (
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <Typography variant="body2" color="text.secondary">
+              No data available for {selectedMetric}
+            </Typography>
+          </Box>
         )}
       </Drawer>
     </>

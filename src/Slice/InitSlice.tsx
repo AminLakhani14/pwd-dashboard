@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { CenterDropdown, SdpDropdown, SldieoutAPI, StaffPositionAPI, dynamicAPI } from '../Service/Init';
+import { CenterDropdown, MonitoringVisitsReportAPI, SdpDropdown, SldieoutAPI, StaffPositionAPI, dynamicAPI } from '../Service/Init';
 import { IActionKeyValueData, PWDInitINTERFACE } from '../Interface/InitInterface';
 import { PWDinitModel } from '../Model/InitModel';
 
@@ -232,6 +232,63 @@ const PWDINITSLICE = createSlice({
         
         state.RHSAOpenClose = rhsOpenCloseData;
 
+        // Furniture Position aggregation
+        const furnitureNames = [
+          { shortform: 'OT', fullForm: 'Office Table' },
+          { shortform: 'OC', fullForm: 'Office Chairs' },
+          { shortform: 'B', fullForm: 'Benches' },
+          { shortform: 'ET', fullForm: 'Examination Table' },
+          { shortform: 'IT', fullForm: 'Insertion Table' },
+          { shortform: 'RS', fullForm: 'Revolving Stool' },
+          { shortform: 'MC', fullForm: 'Medicine Cabinet' },
+          { shortform: 'ST', fullForm: 'Stretcher' }
+        ];
+
+        const conditionMap: { [key: number]: string } = {
+          1: 'N/A',
+          2: 'Good',
+          3: 'Satisfactory',
+          4: 'Poor'
+        };
+
+        let furnitureStats: any = {};
+        furnitureNames.forEach(item => {
+          furnitureStats[item.shortform] = {
+            shortform: item.shortform,
+            fullForm: item.fullForm,
+            good: 0,
+            satisfactory: 0,
+            poor: 0
+          };
+        });
+
+        if (action.payload.FuniturePosition && Array.isArray(action.payload.FuniturePosition)) {
+          action.payload.FuniturePosition.forEach((record: any) => {
+            const fp = record.FP ? record.FP.split(',').map(Number) : [];
+            const fpq = record.FPQ ? record.FPQ.split(',').map(Number) : [];
+            furnitureNames.forEach((furn, index) => {
+              if (index < fp.length && index < fpq.length) {
+                const condCode = fp[index];
+                const qty = fpq[index];
+                if (qty > 0 && condCode !== 1) {
+                  const condition = conditionMap[condCode];
+                  if (condition === 'Good') {
+                    furnitureStats[furn.shortform].good += qty;
+                  } else if (condition === 'Satisfactory') {
+                    furnitureStats[furn.shortform].satisfactory += qty;
+                  } else if (condition === 'Poor') {
+                    furnitureStats[furn.shortform].poor += qty;
+                  }
+                }
+              }
+            });
+          });
+        }
+
+        const furnitureDataArray = Object.values(furnitureStats);
+
+        state.furnitureData = furnitureDataArray;
+
       })
       .addCase(dynamicAPI.rejected, (state: PWDInitINTERFACE) => {
         state.isLoading = false;
@@ -380,6 +437,19 @@ const PWDINITSLICE = createSlice({
       })
 
       .addCase(StaffPositionAPI.rejected, (state: PWDInitINTERFACE) => {
+        state.isLoading = false;
+      });
+
+      builder
+      .addCase(MonitoringVisitsReportAPI.pending, (state: PWDInitINTERFACE) => {
+        state.isLoading = true;
+      })
+      .addCase(MonitoringVisitsReportAPI.fulfilled, (state: PWDInitINTERFACE, action) => {
+        state.isLoading = false;
+        state.MonitoringReportRecord = action.payload;
+      })
+
+      .addCase(MonitoringVisitsReportAPI.rejected, (state: PWDInitINTERFACE) => {
         state.isLoading = false;
       });
   },

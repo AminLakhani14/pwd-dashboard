@@ -49,7 +49,7 @@ export const dynamicAPI = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const url = `http://localhost:54050/Designer/GetDashboard`;
+      const url = 'http://localhost:54050/Designer/GetDashboard';
       
       // Create payload object
       const payload = {
@@ -87,7 +87,7 @@ export const SldieoutAPI = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try { 
-      const url = `http://localhost:54050/Dashboard/GetSdpsStatus`;
+      const url = 'http://localhost:54050/Dashboard/GetSdpsStatus';
       
       // Create payload object
       const payload = {
@@ -126,6 +126,44 @@ export const StaffPositionAPI = createAsyncThunk(
   ) => {
     try { 
       const url = `http://localhost:54050/Dashboard/StaffPosition`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const MonitoringVisitsReportAPI = createAsyncThunk(
+  'init/fetchMonitoringVisitsReport',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `http://localhost:54050/Dashboard/MonitoringVisitsReport`;
       
       // Create payload object
       const payload = {

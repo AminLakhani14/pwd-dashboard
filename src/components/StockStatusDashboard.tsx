@@ -1,8 +1,8 @@
 import React from 'react';
-import { Box, Typography, Paper, useTheme } from '@mui/material';
+import { Box, Typography, Paper, useTheme, useMediaQuery } from '@mui/material';
 import { 
   DataGrid, 
-  GridToolbar, 
+  GridToolbar,
 } from '@mui/x-data-grid';
 import { 
   Circle as CircleIcon,
@@ -10,16 +10,16 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import { RootState } from '../app/store';
 import { useSelector } from 'react-redux';
 
 const StockStatusDashboard = () => {
-  const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
+  // Specify the type for state if possible; otherwise, add a type assertion as a fix for typescript lint error.
+  const PWDdashboard = useSelector((state: any) => state.PWDINITSLICE);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Transform contraceptiveStock data for DataGrid
-  const transformedStockData = PWDdashboard.contraceptiveStock?.map((item, index) => {
-    // Calculate status based on value (you can adjust these thresholds as needed)
+  const transformedStockData = PWDdashboard.contraceptiveStock?.map((item: any, index: number) => {
     let status = 'Adequate';
     if (item.value < 10000) {
       status = 'Critical';
@@ -27,8 +27,7 @@ const StockStatusDashboard = () => {
       status = 'Low';
     }
 
-    // Calculate months remaining (placeholder calculation - adjust based on your business logic)
-    const monthlyConsumption = Math.round(item.value * 0.1); // 10% of stock as monthly consumption
+    const monthlyConsumption = Math.round(item.value * 0.1);
     const monthsRemaining = monthlyConsumption > 0 ? (item.value / monthlyConsumption).toFixed(1) : 'N/A';
 
     return {
@@ -39,30 +38,17 @@ const StockStatusDashboard = () => {
       monthsRemaining: monthsRemaining,
       status: status,
       color: item.color,
-      // Add placeholder dates since they're not in the original data
-      expiryDate: '2024-12-31', // You might want to get this from actual data
-      lastDelivery: '2023-12-01', // You might want to get this from actual data
+      expiryDate: '2024-12-31',
+      lastDelivery: '2023-12-01',
     };
   }) || [];
 
-  type RowType = { 
-    id: number; 
-    item: string; 
-    currentStock: number; 
-    monthlyConsumption: number; 
-    monthsRemaining: string; 
-    status: string; 
-    color: string;
-    expiryDate: string; 
-    lastDelivery: string; 
-  };
-
-  const columns: import('@mui/x-data-grid').GridColDef<RowType>[] = [
+  const columns = [
     { 
       field: 'item', 
       headerName: 'Commodities', 
-      width: 400,
-      renderCell: (params) => (
+      width: isMobile ? 150 : 400,
+      renderCell: (params: any) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <CircleIcon sx={{ 
             color: params.row.status === 'Adequate' ? theme.palette.success.main : 
@@ -71,27 +57,37 @@ const StockStatusDashboard = () => {
             fontSize: '6px',
             mr: 1,
           }} />
-          {params.value}
+          <Typography sx={{ 
+            fontSize: isMobile ? '0.7rem' : '0.875rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {params.value}
+          </Typography>
         </Box>
       )
     },
     { 
       field: 'currentStock', 
       headerName: 'Stock Available', 
-      width: 200,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography fontWeight="400" sx={{ display: 'flex', alignItems: 'center' }}>
-            {Number(params.value).toLocaleString()}
-          </Typography>
-        </Box>
+      width: isMobile ? 100 : 200,
+      renderCell: (params: any) => (
+        <Typography 
+          fontWeight="400" 
+          sx={{ 
+            fontSize: isMobile ? '0.7rem' : '0.875rem'
+          }}
+        >
+          {Number(params.value).toLocaleString()}
+        </Typography>
       )
     },
     { 
       field: 'status', 
       headerName: 'Status', 
-      width: 200,
-      renderCell: (params) => (
+      width: isMobile ? 80 : 200,
+      renderCell: (params: any) => (
         <Box sx={{
           display: 'flex',
           alignItems: 'center',
@@ -105,7 +101,11 @@ const StockStatusDashboard = () => {
           ) : (
             <ErrorIcon sx={{ fontSize: '6px', mr: 0.5 }} />
           )}
-          {params.value}
+          <Typography sx={{ 
+            fontSize: isMobile ? '0.7rem' : '0.875rem'
+          }}>
+            {params.value}
+          </Typography>
         </Box>
       )
     },
@@ -115,33 +115,40 @@ const StockStatusDashboard = () => {
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: isMobile ? 1 : 3,
         borderRadius: '16px',
         backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
-        height: '100%'
+        height: '100%',
+        width: '100%',
+        overflow: 'hidden'
       }}
     >
       <Typography
         variant="h6"
         sx={{
           fontWeight: 600,
-          mb: 2,
+          mb: isMobile ? 1 : 2,
+          mt: isMobile ? -1 : 0,
           color: theme.palette.text.primary,
           display: 'flex',
           alignItems: 'center',
-          height: '100%',
+          height: 'fit-content',
           fontFamily: "inherit",
-          fontSize: 16,
+          fontSize: isMobile ? 14 : 16,
         }}
       >
         <MedicalServicesIcon sx={{ mr: 1 }} />
         Stock Status of Contraceptives
       </Typography>
 
-      <Box sx={{ height: 437, width: '100%' }}>
+      <Box sx={{ 
+        height: isMobile ? 250 : 437, 
+        width: '100%',
+        overflow: 'hidden'
+      }}>
         <DataGrid
-          rows={transformedStockData as RowType[]}
+          rows={transformedStockData}
           columns={columns}
           hideFooter
           slots={{
@@ -156,10 +163,13 @@ const StockStatusDashboard = () => {
               backgroundColor: theme.palette.grey[100],
               borderBottom: `1px solid ${theme.palette.divider}`,
             },
+            '& .MuiDataGrid-root': {
+              overflow: 'hidden'
+            },
+            fontSize: isMobile ? '0.7rem' : '0.875rem',
           }}
         />
       </Box>
-
     </Paper>
   );
 };

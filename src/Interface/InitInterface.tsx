@@ -28,6 +28,8 @@ export interface PWDInitINTERFACE {
     ContraceptivesAlert:Array<any>;
     contraceptiveStock:Array<any>;
     attendanceRecord:Array<any>;
+    MonitoringReportRecord:Array<any>;
+    furnitureData:Array<any>;
 }
 
 export interface ISDPdropdown {

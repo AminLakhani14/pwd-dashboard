@@ -138,71 +138,94 @@ const IecChart = () => {
 
   return (
     <>
-      <Card
-        sx={{
-          borderRadius: 3,
-          boxShadow: 3,
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          p: 2,
-          mb: 4,
-        }}
-      >
-        <FormControl fullWidth sx={{ mb: 2 }} size="small">
-          <Select
-            value={chartType}
-            onChange={handleChange}
-            displayEmpty
-            inputProps={{ "aria-label": "Select chart type" }}
-          >
-            <MenuItem value="IEC Material">IEC Material</MenuItem>
-            <MenuItem value="MEC Wheel">MEC Wheel</MenuItem>
-          </Select>
-        </FormControl>
+      <Box sx={{ position: "relative" }}>
+        <Card
+          sx={{
+            borderRadius: 3,
+            boxShadow: 3,
+            height: isMobile ? "auto" : "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            p: isMobile ? 1 : 2,
+            mb: 4,
+            filter: "blur(3px)",
+            opacity: 0.6,
+          }}
+        >
+          <FormControl fullWidth sx={{ mb: 2 }} size="small">
+            <Select
+              value={chartType}
+              onChange={handleChange}
+              displayEmpty
+              inputProps={{ "aria-label": "Select chart type" }}
+            >
+              <MenuItem value="IEC Material">IEC Material</MenuItem>
+              <MenuItem value="MEC Wheel">MEC Wheel</MenuItem>
+            </Select>
+          </FormControl>
 
-        <Box sx={{ 
-          height: 203,
-          width: '100%',
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}>
-          <PieChart
-            series={[
-              {
-                data: chartData[chartType],
-                innerRadius: 20,
-                outerRadius: 50,
-                paddingAngle: 2,
-                cornerRadius: 2,
-                highlightScope: { fade: "global", highlight: "item" },
-                faded: { innerRadius: 20, additionalRadius: -10, color: "gray" },
-              },
-            ]}
-            sx={{
-               "& .MuiChartsSurface-root": { marginTop:'20px',marginBottom:'30px' }
-            }}
-            width={170}
-            height={120}
-            slotProps={{
-            legend: {
-                sx: {
-                  '& .MuiChartsLegend-label': { fontSize: 6 },
-                  '& .MuiChartsLegend-series': { gap: 0.5 },
+          <Box sx={{ 
+            height: isMobile ? 250 : 203,
+            width: '100%',
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            overflow: "hidden"
+          }}>
+            <PieChart
+              series={[
+                {
+                  data: chartData[chartType],
+                  innerRadius: isMobile ? 30 : 20,
+                  outerRadius: isMobile ? 70 : 50,
+                  paddingAngle: 2,
+                  cornerRadius: 2,
+                  highlightScope: { fade: "global", highlight: "item" },
+                  faded: { innerRadius: 20, additionalRadius: -10, color: "gray" },
                 },
-              },
-            }}
-          />
+              ]}
+              sx={{
+                 "& .MuiChartsSurface-root": { marginTop:'20px',marginBottom:'30px' }
+              }}
+              width={isMobile ? 250 : 170}
+              height={isMobile ? 150 : 120}
+              slotProps={{
+              legend: {
+                  sx: {
+                    '& .MuiChartsLegend-label': { fontSize: isMobile ? 8 : 6 },
+                    '& .MuiChartsLegend-series': { gap: 0.5 },
+                  },
+                },
+              }}
+            />
+          </Box>
+        </Card>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f4f4f4",
+            zIndex: 1,
+          }}
+        >
+          <Typography variant="h6" color="text.secondary">
+           Coming Soon
+        </Typography>
         </Box>
-      </Card>
+      </Box>
 
      <Card
       sx={{
         borderRadius: 3,
         boxShadow: 3,
-        height: "248px",
+        height: isMobile ? "auto" : "248px",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -237,6 +260,7 @@ const IecChart = () => {
           overflowY: "auto",
           height: "100%",
           p: 1,
+          overflowX: "hidden",
         }}
       >
         {alerts.length > 0 ? (
@@ -270,7 +294,7 @@ const IecChart = () => {
                     variant="subtitle2"
                     sx={{
                       fontWeight: 600,
-                      fontSize: "12px",
+                      fontSize: isMobile ? "14px" : "12px",
                       color: theme.palette.text.primary,
                       mb: 0.3,
                     }}
@@ -280,7 +304,7 @@ const IecChart = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      fontSize: "12px",
+                      fontSize: isMobile ? "13px" : "12px",
                       color: theme.palette.text.secondary,
                       lineHeight: 1.3,
                     }}
@@ -307,49 +331,76 @@ const IecChart = () => {
       </Box>
     </Card>
 
-      <Paper
-        elevation={2}
-        sx={{
-          p: 2.5,
-          borderRadius: "12px",
-          backgroundColor: theme.palette.background.paper,
-          width: "100%",
-          height: 245,
-          display: "flex",
-          flexDirection: "column",
-        }}  
-      >
-        <Typography
-          variant="h6"
+      <Box sx={{ position: "relative" }}>
+        <Paper
+          elevation={2}
           sx={{
-            fontWeight: 600,
-            mb: 2,
-            color: theme.palette.text.primary,
-            fontFamily: "inherit",
-            fontSize: 16,
+            p: isMobile ? 1.5 : 2.5,
+            borderRadius: "12px",
+            backgroundColor: theme.palette.background.paper,
+            width: "100%",
+            height: isMobile ? "auto" : 245,
+            display: "flex",
+            flexDirection: "column",
+            filter: "blur(3px)",
+            opacity: 0.6,
+          }}  
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+              color: theme.palette.text.primary,
+              fontFamily: "inherit",
+              fontSize: isMobile ? 14 : 16,
+            }}
+          >
+            Performance of SDP
+          </Typography>
+          <BarChart
+            dataset={dataset}
+             margin={{ 
+              left: isMobile ? 40 : -13,
+              right: isMobile ? 10 : 0, 
+              top: isMobile ? 10 : 20, 
+              bottom: isMobile ? 40 : 30, 
+            }}
+            xAxis={[{ dataKey: 'month',  tickLabelStyle: { 
+                fontSize: isMobile ? 8 : 7,
+                angle: isMobile ? 0 : 14,
+              }, }]}
+            series={[
+              { dataKey: 'new', label: 'New', valueFormatter },
+              { dataKey: 'old', label: 'Old', valueFormatter },
+            ]}
+             yAxis= {[{width: isMobile ? 80 : 60}]}
+            height={isMobile ? 200 : undefined}
+            sx={{
+              width: "100%",
+              overflow: "visible"
+            }}
+          />
+        </Paper>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f4f4f4",
+            zIndex: 1,
           }}
         >
-          Performance of SDP
+          <Typography variant="h6" color="text.secondary">
+           Coming Soon
         </Typography>
-        <BarChart
-          dataset={dataset}
-           margin={{ 
-            left: -13,
-            right: 0, 
-            top: 20, 
-            bottom: 30, 
-          }}
-          xAxis={[{ dataKey: 'month',  tickLabelStyle: { 
-              fontSize: 7,
-              angle: 14,
-            }, }]}
-          series={[
-            { dataKey: 'new', label: 'New', valueFormatter },
-            { dataKey: 'old', label: 'Old', valueFormatter },
-          ]}
-           yAxis= {[{width: 60}]}
-        />
-      </Paper>
+        </Box>
+      </Box>
     </>
   );
 };
