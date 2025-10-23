@@ -666,13 +666,14 @@ const Dashboard = () => {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          backgroundColor: "#f4f4f4",
+                          // backgroundColor: "#f4f4f4",
                           zIndex: 1,
+                          filter: "blur(2px)",
                         }}
                       >
-                        <Typography variant="h6" color="text.secondary">
+                        {/* <Typography variant="h6" color="text.secondary">
                         Coming Soon
-                        </Typography>
+                        </Typography> */}
                       </Box>
                     </Box>
                   </div>

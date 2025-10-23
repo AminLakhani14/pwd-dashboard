@@ -100,7 +100,7 @@ const HealthMetricsCard = () => {
 
   const handleViewRecord = async (record: MonitoringReportRecord) => {
     try {
-      const apiUrl = `http://localhost:54050/Dashboard/Report?sbjnum=${record.sbjnum}&Heading=${encodeURIComponent(record.Project)}`;
+      const apiUrl = `https://pwd.kcompute.com/Dashboard/Report?sbjnum=${record.sbjnum}&Heading=${encodeURIComponent(record.Project)}`;
       const response = await fetch(apiUrl, { method: 'GET' });
       if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);

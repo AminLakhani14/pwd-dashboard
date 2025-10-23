@@ -539,7 +539,7 @@ export default function KeyMetricCard() {
                 display: "flex",
                 flexDirection: "column",
                 marginTop: isMobile ? "10px" : "20px",
-                filter: "blur(3px)",
+                filter: "blur(2px)",
                 opacity: 0.6,
               }}
             >
@@ -627,13 +627,14 @@ export default function KeyMetricCard() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "#f4f4f4",
+                // backgroundColor: "#f4f4f4",
                 zIndex: 1,
+                filter: "blur(2px)",
               }}
             >
-              <Typography variant="h6" color="text.secondary">
+              {/* <Typography variant="h6" color="text.secondary">
               Coming Soon
-              </Typography>
+              </Typography> */}
             </Box>
           </Box>
         </Grid>
@@ -1026,13 +1027,14 @@ export default function KeyMetricCard() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "#f4f4f4",
+                // backgroundColor: "#f4f4f4",
                 zIndex: 1,
+                filter: "blur(3px)",
               }}
             >
-              <Typography variant="h6" color="text.secondary">
+              {/* <Typography variant="h6" color="text.secondary">
                 Coming Soon
-              </Typography>
+              </Typography> */}
             </Box>
           </Box>
         </Grid>
