@@ -25,6 +25,7 @@ import {
   CenterDropdown,
   dynamicAPI,
   MonitoringVisitsReportAPI,
+  OfficerVisitReportAPI,
   SdpDropdown,
   SldieoutAPI,
   StaffPositionAPI,
@@ -36,6 +37,7 @@ import { RootState } from "../app/store";
 import { updateStates } from "../Slice/InitSlice";
 import "../index.css";
 import { ToDatabaseFormat } from "../Global/globalFunctions";
+import ReportData from "../components/ReportData";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -246,6 +248,8 @@ const Dashboard = () => {
       })
     );
 
+    dispatch(OfficerVisitReportAPI());
+
     handleClose();
   };
 
@@ -304,6 +308,8 @@ const Dashboard = () => {
         QuestionId: "",
       })
     );
+
+     dispatch(OfficerVisitReportAPI());
   }, [dispatch]);
 
   const modalStyle = {
@@ -521,7 +527,7 @@ const Dashboard = () => {
         <KeyMetricCard />
       </Row>
 
-      <Row sx={{ height: "100%" }}>
+      <Row sx={{ height: "100%" }} className="mb-3">
         {isMobile ? (
           // Mobile layout - stack vertically
           <>
@@ -698,6 +704,11 @@ const Dashboard = () => {
           </>
         )}
       </Row>
+
+      <Row>
+        <ReportData />
+      </Row>
+
     </Container>
   );
 };

@@ -39,4 +39,5 @@ contraceptiveStock:[],
 attendanceRecord:[],
 MonitoringReportRecord:[],
 furnitureData:[],
+officeGridRecord:[],
 }

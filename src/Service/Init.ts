@@ -1,3 +1,4 @@
+import axios from "axios";
 import { PostService } from "../GerneralService/Service";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -181,6 +182,22 @@ export const MonitoringVisitsReportAPI = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+
+export const OfficerVisitReportAPI = createAsyncThunk(
+  'init/fetchOfficerVisitReport',
+  async () => {
+    try { 
+      const url = `http://localhost:54050/Dashboard/OfficerVisitReport`;
+      
+      const response = await axios.get(url);
+      
+      return response.data;
+    } catch (error: any) {
+      return 'Request failed';
     }
   }
 );

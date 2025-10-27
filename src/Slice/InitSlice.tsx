@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { CenterDropdown, MonitoringVisitsReportAPI, SdpDropdown, SldieoutAPI, StaffPositionAPI, dynamicAPI } from '../Service/Init';
+import { CenterDropdown, MonitoringVisitsReportAPI, OfficerVisitReportAPI, SdpDropdown, SldieoutAPI, StaffPositionAPI, dynamicAPI } from '../Service/Init';
 import { IActionKeyValueData, PWDInitINTERFACE } from '../Interface/InitInterface';
 import { PWDinitModel } from '../Model/InitModel';
 
@@ -450,6 +450,88 @@ const PWDINITSLICE = createSlice({
       })
 
       .addCase(MonitoringVisitsReportAPI.rejected, (state: PWDInitINTERFACE) => {
+        state.isLoading = false;
+      });
+
+      builder
+      .addCase(OfficerVisitReportAPI.pending, (state: PWDInitINTERFACE) => {
+        state.isLoading = true;
+      })
+      .addCase(OfficerVisitReportAPI.fulfilled, (state: PWDInitINTERFACE, action) => {
+        state.isLoading = false;
+        
+        const transformOfficerVisitData = (data: any[]) => {
+          if (!data || !Array.isArray(data)) return [];
+
+          return data.map((item: any) => {
+            // Parse the count values
+            const parseCount = (countString: string) => {
+              const [totalStr, visitedStr] = countString.split('/');
+              return {
+                total: parseInt(totalStr) || 0,
+                visited: parseInt(visitedStr) || 0
+              };
+            };
+
+            const rhs = parseCount(item.RHSCountVisited || "0/0");
+            const fwc = parseCount(item.FWCCountVisited || "0/0");
+            const msu = parseCount(item.MSUCountVisited || "0/0");
+
+            // Calculate totals
+            const totalCenters = rhs.total + fwc.total + msu.total;
+            const totalVisited = rhs.visited + fwc.visited + msu.visited;
+            
+            // Calculate percentage
+            const percentage = totalCenters > 0 ? (totalVisited / totalCenters) * 100 : 0;
+
+
+            console.log('totalCenters', totalCenters);
+            console.log('totalVisited', totalVisited);
+            console.log('percentage', percentage);
+
+            // Determine star rating based on percentage
+            let stars = 0;
+            if (percentage >= 50) {
+              stars = 5;
+            } else if (percentage >= 40) {
+              stars = 4;
+            } else if (percentage >= 30) {
+              stars = 3;
+            } else if (percentage >= 20) {
+              stars = 2;
+            } else if (percentage >= 10) {
+              stars = 1;
+            }
+            // Below 10% gets 0 stars
+
+            return {
+              district: item.District || 'N/A',
+              officerName: item.OfficerName || 'N/A',
+              designationName: item.DesignationName || 'N/A',
+              rhsCountVisited: item.RHSCountVisited || '0/0',
+              fwcCountVisited: item.FWCCountVisited || '0/0',
+              msuCountVisited: item.MSUCountVisited || '0/0',
+              totalDistinctCentersVisited: `${totalCenters}/${totalVisited}`,
+              percentage: Math.round(percentage),
+              stars: stars,
+              // You can also include the parsed numbers separately if needed
+              _parsed: {
+                rhs,
+                fwc,
+                msu,
+                totalCenters,
+                totalVisited
+              }
+            };
+          });
+        };
+
+        const transformedData = transformOfficerVisitData(action.payload);
+        console.log('Transformed Officer Visit Data:', transformedData);
+        
+        state.officeGridRecord = transformedData;
+      })
+      .addCase(OfficerVisitReportAPI.rejected, (state: PWDInitINTERFACE) => {
         state.isLoading = false;
       });
   },

@@ -30,6 +30,7 @@ export interface PWDInitINTERFACE {
     attendanceRecord:Array<any>;
     MonitoringReportRecord:Array<any>;
     furnitureData:Array<any>;
+    officeGridRecord:Array<any>;
 }
 
 export interface ISDPdropdown {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Paper, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, Paper, useTheme, useMediaQuery, IconButton, Button } from '@mui/material';
 import { 
   DataGrid, 
   GridToolbar,
@@ -7,7 +7,8 @@ import {
 import { 
   Circle as CircleIcon,
   CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import { useSelector } from 'react-redux';
@@ -107,6 +108,28 @@ const StockStatusDashboard = () => {
             {params.value}
           </Typography>
         </Box>
+      )
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: isMobile ? 70 : 100,
+      sortable: false,
+      renderCell: (params: any) => (
+         <Button
+          variant="contained"
+          // onClick={handleOpen}
+          sx={{
+            borderRadius: "12px",
+            textTransform: "none",
+            boxShadow: "none",
+            backgroundColor: "gray",
+            fontSize: isMobile ? "0.75rem" : "0.875rem",
+            padding: isMobile ? "6px 12px" : "8px 16px",
+          }}
+        >
+          View
+        </Button>
       )
     },
   ];
