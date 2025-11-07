@@ -2,9 +2,9 @@ import { Idropdown, PWDInitINTERFACE } from "../Interface/InitInterface";
 
 const sdpTypes: Idropdown[] = [
     { value:'', label: 'Select SDP Type For All' },
-    { value: '55587, FWC,7122', label: 'Population Welfare Department - FWC' },
-    { value: '50484, MSU,7121', label: 'Population Welfare Department - MSU' },
-    { value: '50435, RHS,7120', label: 'Population Welfare Department - RHS-A' },
+    // { value: '55587, FWC,7122', label: 'Population Welfare Department - FWC' },
+    // { value: '50484, MSU,7121', label: 'Population Welfare Department - MSU' },
+    // { value: '50435, RHS,7120', label: 'Population Welfare Department - RHS-A' },
   ];
 
 export const PWDinitModel: PWDInitINTERFACE = {
@@ -40,4 +40,12 @@ attendanceRecord:[],
 MonitoringReportRecord:[],
 furnitureData:[],
 officeGridRecord:[],
+viewStockOfContraceptiveRecord:[],
+furnitureGridData:[],
+equipmentStockData:[],
+equipmentGridData:[],
+buildingStatusData: [],
+technicalGridData: [],
+IECMaterialChartData: undefined,
+performanceSdpDataset: [],
 }

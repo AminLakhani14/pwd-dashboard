@@ -12,6 +12,7 @@ import {
   Alert,
   Collapse,
   IconButton,
+  Drawer,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -29,6 +30,15 @@ import {
   SdpDropdown,
   SldieoutAPI,
   StaffPositionAPI,
+  StockOfContraceptiveAPI,
+  DetailStockOfContraceptiveAPI,
+  EquiptmentPositionDetailAPI,
+  TechnicalMonitoringDetailAPI,
+  TechnicalMonitoringStockAPI,
+  EquiptmentPositionStockAPI,
+  PerformaceOfSdpAPI,
+  IECMatrialDetailAPI,
+  IECMatrialStockAPI,
 } from "../Service/Init";
 import { useAppDispatch } from "../app/Hooks";
 import { Col, Container, Row } from "react-bootstrap";
@@ -39,11 +49,29 @@ import "../index.css";
 import { ToDatabaseFormat } from "../Global/globalFunctions";
 import ReportData from "../components/ReportData";
 
+// Add this import for the data grid
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+
 const Dashboard = () => {
   const theme = useTheme();
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+
+  // Debug: Log the technicalGridData to see its structure
+  useEffect(() => {
+    console.log("technicalGridData:", PWDdashboard.technicalGridData);
+    console.log("buildingStatusData:", PWDdashboard.buildingStatusData);
+    
+    // Log the structure of first item if available
+    if (PWDdashboard.technicalGridData && PWDdashboard.technicalGridData.length > 0) {
+      console.log("First technicalGridData item structure:", Object.keys(PWDdashboard.technicalGridData[0]));
+      console.log("First technicalGridData item:", PWDdashboard.technicalGridData[0]);
+    }
+  }, [PWDdashboard.technicalGridData, PWDdashboard.buildingStatusData]);
 
   const getPreviousMonthDateRange = () => {
     const now = new Date();
@@ -102,8 +130,6 @@ const Dashboard = () => {
     return `${ordinal(day)} ${month} ${year}`;
   }
 
-  console.log(PWDdashboard, "PWDdashboard");
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [open2, setOpen2] = useState(true);
@@ -160,6 +186,39 @@ const Dashboard = () => {
     }
   };
 
+  const handlePieChartClick = (
+    _event: React.MouseEvent,
+    params: { dataIndex?: number }
+  ) => {
+    if (
+      params?.dataIndex === undefined ||
+      !PWDdashboard.buildingStatusData?.length ||
+      !PWDdashboard.technicalGridData?.length
+    )
+      return;
+
+    const clickedIdx = params.dataIndex;
+    const clickedSegment = PWDdashboard.buildingStatusData[clickedIdx];
+    const clickedLabel = clickedSegment?.label?.trim(); // e.g. "Decontamination"
+
+    if (!clickedLabel) return;
+
+    setSelectedCategory(clickedLabel);
+
+    const raw = PWDdashboard.technicalGridData;
+
+    // ---------------------------------------------------------
+    // Keep ONLY rows that have a NON-EMPTY value for the column
+    // ---------------------------------------------------------
+    const filtered = raw.filter((row: any) => {
+      const val = row[clickedLabel];
+      return val != null && val !== "";
+    });
+
+    setFilteredData(filtered);
+    setDrawerOpen(true);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value }: any = e.target;
     setFilters((prev) => ({
@@ -185,18 +244,20 @@ const Dashboard = () => {
     dispatch(updateStates({ key: name, value: value }));
   };
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = async () => {
+    handleClose();
     let districtData = PWDdashboard.SDPdropdownValue.split(",");
 
     // Get date range based on selected month and year
     const dateRange = getDateRange(filters.month, filters.year);
+    dispatch(updateStates({ key: "isLoading", value: true }));
 
     setCurrentFormattedDates({
       start: formatDate(dateRange.startDate),
       end: formatDate(dateRange.endDate),
     });
 
-    dispatch(
+    await dispatch(
       dynamicAPI({
         StartDate: ToDatabaseFormat(dateRange.startDate) || "",
         EndDate: ToDatabaseFormat(dateRange.endDate) || "",
@@ -209,7 +270,7 @@ const Dashboard = () => {
       })
     );
 
-    dispatch(
+    await dispatch(
       SldieoutAPI({
         StartDate: ToDatabaseFormat(dateRange.startDate) || "",
         EndDate: ToDatabaseFormat(dateRange.endDate) || "",
@@ -222,7 +283,7 @@ const Dashboard = () => {
       })
     );
 
-    dispatch(
+    await dispatch(
       StaffPositionAPI({
         StartDate: ToDatabaseFormat(dateRange.startDate) || "",
         EndDate: ToDatabaseFormat(dateRange.endDate) || "",
@@ -235,8 +296,24 @@ const Dashboard = () => {
       })
     );
 
-    dispatch(
-      MonitoringVisitsReportAPI({
+    await dispatch(
+       StockOfContraceptiveAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+    
+
+    await dispatch(OfficerVisitReportAPI());
+
+    await dispatch(
+      DetailStockOfContraceptiveAPI({
         StartDate: ToDatabaseFormat(dateRange.startDate) || "",
         EndDate: ToDatabaseFormat(dateRange.endDate) || "",
         DistrictID: districtData[0] || "0",
@@ -248,69 +325,323 @@ const Dashboard = () => {
       })
     );
 
-    dispatch(OfficerVisitReportAPI());
+    await dispatch(
+      EquiptmentPositionDetailAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
 
-    handleClose();
+    await dispatch(
+      EquiptmentPositionStockAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    await dispatch(
+      TechnicalMonitoringDetailAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    await dispatch(
+      TechnicalMonitoringStockAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    await dispatch(
+      IECMatrialStockAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    await dispatch(
+      IECMatrialDetailAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+
+    await dispatch(
+      PerformaceOfSdpAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
+    await dispatch(updateStates({ key: "isLoading", value: false }));
+
   };
 
   useEffect(() => {
-    // Use previous month's date range by default
-    const defaultDateRange = getPreviousMonthDateRange();
-
-    dispatch(
-      dynamicAPI({
-        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
-        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
-        DistrictID: "",
-        DistrictName: "",
-        CenterID: "",
-        CenterName: "",
-        ProjectId: "7122,7121,7120",
-        QuestionId: "",
-      })
-    );
-
-    dispatch(
-      SldieoutAPI({
-        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
-        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
-        DistrictID: "",
-        DistrictName: "",
-        CenterID: "",
-        CenterName: "",
-        ProjectId: "7122,7121,7120",
-        QuestionId: "",
-      })
-    );
-
-    dispatch(
-      StaffPositionAPI({
-        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
-        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
-        DistrictID: "",
-        DistrictName: "",
-        CenterID: "",
-        CenterName: "",
-        ProjectId: "7122,7121,7120",
-        QuestionId: "",
-      })
-    );
-
-    dispatch(
-      MonitoringVisitsReportAPI({
-        StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
-        EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
-        DistrictID: "",
-        DistrictName: "",
-        CenterID: "",
-        CenterName: "",
-        ProjectId: "7122,7121,7120",
-        QuestionId: "",
-      })
-    );
-
-     dispatch(OfficerVisitReportAPI());
+    const fetchAllData = async () => {
+      const defaultDateRange = getPreviousMonthDateRange();
+      dispatch(updateStates({ key: "isLoading", value: true }));
+  
+      try {
+        await Promise.all([
+          dispatch(
+            dynamicAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            SldieoutAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            StaffPositionAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            MonitoringVisitsReportAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(OfficerVisitReportAPI()),
+          dispatch(
+            StockOfContraceptiveAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            DetailStockOfContraceptiveAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            EquiptmentPositionDetailAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            EquiptmentPositionStockAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            TechnicalMonitoringDetailAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            TechnicalMonitoringStockAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            IECMatrialStockAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            IECMatrialDetailAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
+            PerformaceOfSdpAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          )
+        ]);
+  
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        dispatch(updateStates({ key: "isLoading", value: false }));
+      }
+    };
+  
+    fetchAllData();
   }, [dispatch]);
+  const getColumns = (): GridColDef[] => {
+    if (!filteredData.length) return [];
+
+    const identifierKeys = ["asDate", "projectName", "district", "center"];
+    const clickedKey = selectedCategory;               // e.g. "Decontamination"
+
+    const columns: GridColDef[] = [];
+
+    // ---- identifier columns (always shown) ----
+    identifierKeys.forEach((key) => {
+      if (filteredData[0].hasOwnProperty(key)) {
+        columns.push({
+          field: key,
+          headerName: key,
+          flex: 1,
+          minWidth: 130,
+        });
+      }
+    });
+
+    // ---- the clicked checklist column (the only one we care about) ----
+    if (filteredData[0].hasOwnProperty(clickedKey)) {
+      columns.push({
+        field: clickedKey,
+        headerName: clickedKey,
+        flex: 1,
+        minWidth: 150,
+        renderCell: (params) => {
+          const raw = params.value?.toString().trim().toLowerCase();
+          if (["yes", "no"].includes(raw)) {
+            return (
+              <span
+                style={{
+                  color: raw === "yes" ? "green" : "red",
+                  fontWeight: "bold",
+                }}
+              >
+                {params.value}
+              </span>
+            );
+          }
+          return params.value ?? "-";
+        },
+      });
+    }
+
+    return columns;
+  };
 
   const modalStyle = {
     position: "absolute",
@@ -325,14 +656,6 @@ const Dashboard = () => {
     maxHeight: "90vh",
     overflowY: "auto",
   } as const;
-
-  const buildingStatusData = [
-    { id: 0, value: 365, label: "Hand Washing", color: "#0088FE" },
-    { id: 1, value: 345, label: "Decontamination", color: "#00C49F" },
-    { id: 2, value: 366, label: "Cleaning (Instruments)", color: "#82ca9d" },
-    { id: 3, value: 346, label: "High level disinfection", color: "#FF8042" },
-    { id: 4, value: 20, label: "Waste disposal", color: "#8884D8" },
-  ];
 
   return (
     <Container>
@@ -523,6 +846,55 @@ const Dashboard = () => {
         </Box>
       </Modal>
 
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: isMobile ? "100%" : "80%",
+            maxWidth: "1200px",
+          },
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+            <Typography variant="h5">
+              Technical Monitoring – {selectedCategory}
+            </Typography>
+            <IconButton onClick={() => setDrawerOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {filteredData.length > 0 ? (
+            <Box sx={{ height: "80vh", width: "100%" }}>
+              <DataGrid
+                rows={filteredData.map((r, i) => ({ ...r, id: r.id ?? i }))}
+                columns={getColumns()}
+                pageSizeOptions={[10, 25, 50]}
+                initialState={{
+                  pagination: { paginationModel: { page: 0, pageSize: 10 } },
+                }}
+                sx={{
+                  "& .MuiDataGrid-cell": { borderBottom: "1px solid #f0f0f0" },
+                  "& .MuiDataGrid-columnHeaders": { backgroundColor: "#f5f5f5" },
+                }}
+              />
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: "center", mt: 4 }}>
+              <Typography variant="body1" gutterBottom>
+                No records found for <strong>{selectedCategory}</strong>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total technical rows loaded: {PWDdashboard.technicalGridData?.length ?? 0}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Drawer>
+
       <Row>
         <KeyMetricCard />
       </Row>
@@ -600,8 +972,6 @@ const Dashboard = () => {
                           bgcolor: "background.paper",
                           mb: 4,
                           height: 290,
-                          filter: "blur(3px)",
-                          opacity: 0.6,
                         }}
                       >
                         <Typography
@@ -629,9 +999,9 @@ const Dashboard = () => {
                             <PieChart
                               series={[
                                 {
-                                  data: buildingStatusData,
+                                  data: PWDdashboard.buildingStatusData || [],
                                   innerRadius: 30,
-                                  outerRadius: 90,
+                                  outerRadius: 80,
                                   paddingAngle: 5,
                                   cornerRadius: 5,
                                   startAngle: -45,
@@ -641,9 +1011,16 @@ const Dashboard = () => {
                                   arcLabelMinAngle: 15,
                                 },
                               ]}
+                              onItemClick={handlePieChartClick}
                               sx={{
                                 "& .MuiChartsLegend-label": {
                                   fontSize: "10px !important",
+                                },
+                                "& .MuiPieArc-root": {
+                                  cursor: "pointer",
+                                  "&:hover": {
+                                    opacity: 0.8,
+                                  },
                                 },
                               }}
                               width={250}
@@ -662,25 +1039,6 @@ const Dashboard = () => {
                           </Box>
                         </Box>
                       </Card>
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          // backgroundColor: "#f4f4f4",
-                          zIndex: 1,
-                          filter: "blur(2px)",
-                        }}
-                      >
-                        {/* <Typography variant="h6" color="text.secondary">
-                        Coming Soon
-                        </Typography> */}
-                      </Box>
                     </Box>
                   </div>
                 </div>

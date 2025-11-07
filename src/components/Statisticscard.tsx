@@ -136,6 +136,18 @@ export default function StatisticsCard() {
     return transformedData;
   }, [PWDdashboard.openclose]);
 
+  // Filter categories that have records
+  const categoriesWithData = useMemo(() => {
+    return Object.keys(sdpDetailsData).filter(category => {
+      const categoryData = sdpDetailsData[category];
+      // Only show category if it has records and if selectedStatus is provided, filter by status
+      if (selectedStatus) {
+        return categoryData.some(row => row.status === selectedStatus);
+      }
+      return categoryData.length > 0;
+    });
+  }, [sdpDetailsData, selectedStatus]);
+
   const handlePieClick = (_data: unknown, index: number) => {
     setSelectedStatus(PWDdashboard.AllOpenClose[index]?.name ?? null);
     setDrawerOpen(true);
@@ -218,35 +230,57 @@ export default function StatisticsCard() {
           </IconButton>
         </Box>
         
-        {Object.keys(sdpDetailsData).map((category) => (
-          <Box key={category} sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              {category}
-            </Typography>
-            <Box sx={{ height: 400, width: '100%' }}>
-              <DataGrid
-                rows={
-                  sdpDetailsData[category]
-                    .filter((row: { status: string }) => !selectedStatus || row.status === selectedStatus)
-                }
-                columns={columns}
-                pageSizeOptions={[5, 10, 20]}
-                initialState={{
-                  pagination: { paginationModel: { pageSize: 10 } },
-                }}
-                disableRowSelectionOnClick
-                sx={{
-                  '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#f5f5f5',
-                  },
-                  '& .MuiDataGrid-cell': {
-                    borderBottom: '1px solid #e0e0e0',
-                  },
-                }}
-              />
-            </Box>
-          </Box>
-        ))}
+        {/* Only show categories that have data */}
+        {categoriesWithData.length > 0 ? (
+          categoriesWithData.map((category) => {
+            const filteredData = sdpDetailsData[category].filter(
+              (row: { status: string }) => !selectedStatus || row.status === selectedStatus
+            );
+
+            // Only render if there are records after filtering
+            if (filteredData.length === 0) {
+              return null;
+            }
+
+            return (
+              <Box key={category} sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  {category} ({filteredData.length} records)
+                </Typography>
+                <Box sx={{ height: 400, width: '100%' }}>
+                  <DataGrid
+                    rows={filteredData}
+                    columns={columns}
+                    pageSizeOptions={[5, 10, 20]}
+                    initialState={{
+                      pagination: { paginationModel: { pageSize: 10 } },
+                    }}
+                    disableRowSelectionOnClick
+                    sx={{
+                      '& .MuiDataGrid-columnHeaders': {
+                        backgroundColor: '#f5f5f5',
+                      },
+                      '& .MuiDataGrid-cell': {
+                        borderBottom: '1px solid #e0e0e0',
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            );
+          })
+        ) : (
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              textAlign: 'center', 
+              color: 'text.secondary',
+              mt: 4
+            }}
+          >
+            No records found for {selectedStatus ? `"${selectedStatus}" status` : 'the selected criteria'}
+          </Typography>
+        )}
       </Drawer>
     </>
   );

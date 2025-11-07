@@ -72,22 +72,28 @@ type CustomTooltipProps = {
   total: number;
 };
 
-const dataset = [
-  { month: "Minilap Kits", rainfall: 1593, total: 2000, percentage: 79.65 },
-  { month: "Iud kits", rainfall: 708, total: 2000, percentage: 35.4 },
-  { month: "B.P. Apparatus", rainfall: 885, total: 2000, percentage: 44.25 },
-  { month: "Thermometer", rainfall: 531, total: 2000, percentage: 26.55 },
-  { month: "Weighting Machine", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "Stove", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "O.T. Lights", rainfall: 354, total: 2000, percentage: 17.7 },
-  { month: "Hydraulic Table", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "Autoclave", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "Oxygen Cylinder", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "Aspirating Pumps", rainfall: 354, total: 2000, percentage: 17.7 },
-  { month: "Wheel Chair", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "Stretcher", rainfall: 354, total: 2000, percentage: 17.7 },
-  { month: "Generator", rainfall: 177, total: 2000, percentage: 8.85 },
-  { month: "Screen", rainfall: 177, total: 2000, percentage: 8.85 },
+const getEquipmentColumns = (selectedEquipment: string): GridColDef[] => [
+  { field: "asDate", headerName: "Date", width: 120 },
+  { field: "projectName", headerName: "Project Name", width: 250 },
+  { field: "district", headerName: "District", width: 150 },
+  { field: "center", headerName: "Center", width: 200, flex: 1 },
+  { 
+    field: selectedEquipment, 
+    headerName: selectedEquipment, 
+    width: 150,
+    renderCell: (params: any) => (
+      <Typography 
+        sx={{ 
+          color: params.value === 'Good' ? '#4CAF50' : 
+                params.value === 'Satisfactory' ? '#FFC107' : 
+                params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+          fontWeight: 500
+        }}
+      >
+        {params.value}
+      </Typography>
+    )
+  },
 ];
 
 const COLORS = ["#b3b3b3", "#0088FE"];
@@ -175,6 +181,8 @@ export default function KeyMetricCard() {
     AttendanceStatus | "All Staff" | null
   >(null);
   const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
+  const [selectedEquipment, setSelectedEquipment] = useState<string | null>(null);
+  const [equipmentDrawerOpen, setEquipmentDrawerOpen] = useState(false);
   const [groupedAttendance, setGroupedAttendance] = useState<
     Record<
       AttendanceStatus,
@@ -243,6 +251,33 @@ export default function KeyMetricCard() {
   );
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
 
+  // Get equipment data from Redux state
+  const equipmentData = PWDdashboard.equipmentStockData || [];
+  const equipmentGridData = PWDdashboard.equipmentGridData || [];
+  const sdpDropdownValue = PWDdashboard.SDPdropdownValue || "";
+
+  // Filter equipment data to exclude N/A items (where percentage is 0)
+  const filteredEquipmentData = equipmentData.filter(item => 
+    parseFloat(item.percentage) > 0
+  );
+
+  // Determine which SDP to show based on dropdown value
+  const getSdpToShow = () => {
+    if (!sdpDropdownValue) return "all"; // Show all if empty
+    
+    if (sdpDropdownValue.includes("55587") && sdpDropdownValue.includes("FWC")) {
+      return "FWC";
+    } else if (sdpDropdownValue.includes("50484") && sdpDropdownValue.includes("MSU")) {
+      return "MSU";
+    } else if (sdpDropdownValue.includes("RHS-A")) {
+      return "RHS-A";
+    }
+    
+    return "all"; // Default to showing all
+  };
+
+  const sdpToShow = getSdpToShow();
+
   // Calculate attendance statistics from Redux data
   const calculateAttendanceStats = () => {
     const attendanceRecords: AttendanceRecord[] =
@@ -297,6 +332,296 @@ export default function KeyMetricCard() {
   };
 
   const stats = calculateAttendanceStats();
+
+    // Handle equipment item click
+  const handleEquipmentClick = (equipmentName: string) => {
+    setSelectedEquipment(equipmentName);
+    setEquipmentDrawerOpen(true);
+  };
+
+  const handleCloseEquipmentDrawer = () => {
+    setEquipmentDrawerOpen(false);
+    setSelectedEquipment(null);
+  };
+
+  const equipmentColumns: GridColDef[] = [
+    { field: "asDate", headerName: "Date", width: 120 },
+    { field: "projectName", headerName: "Project Name", width: 250 },
+    { field: "district", headerName: "District", width: 150 },
+    { field: "center", headerName: "Center", width: 200, flex: 1 },
+    { 
+      field: "Minilap Kits", 
+      headerName: "Minilap Kits", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "IUD Kits", 
+      headerName: "IUD Kits", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "BP Apparatus", 
+      headerName: "BP Apparatus", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Stethoscope", 
+      headerName: "Stethoscope", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Thermometer", 
+      headerName: "Thermometer", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Weighting Machine", 
+      headerName: "Weighting Machine", 
+      width: 140,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Stove", 
+      headerName: "Stove", 
+      width: 100,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "OT Lights", 
+      headerName: "OT Lights", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Hydrolic Table", 
+      headerName: "Hydrolic Table", 
+      width: 130,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Autoclave", 
+      headerName: "Autoclave", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Oxygen Cylinder", 
+      headerName: "Oxygen Cylinder", 
+      width: 140,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Aspirating Pumps", 
+      headerName: "Aspirating Pumps", 
+      width: 150,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Wheel Chair", 
+      headerName: "Wheel Chair", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Stretcher", 
+      headerName: "Stretcher", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Generators", 
+      headerName: "Generators", 
+      width: 120,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: "Screen", 
+      headerName: "Screen", 
+      width: 100,
+      renderCell: (params: any) => (
+        <Typography 
+          sx={{ 
+            color: params.value === 'Good' ? '#4CAF50' : 
+                  params.value === 'Satisfactory' ? '#FFC107' : 
+                  params.value === 'Poor' ? '#F44336' : '#9E9E9E',
+            fontWeight: 500
+          }}
+        >
+          {params.value}
+        </Typography>
+      )
+    },
+  ];
 
   const attendanceData = [
     {
@@ -478,6 +803,21 @@ export default function KeyMetricCard() {
     },
   ];
 
+  // Filter equipment grid data for selected equipment - exclude N/A records
+  const filteredEquipmentGridData = React.useMemo(() => {
+    if (!selectedEquipment || !equipmentGridData.length) return [];
+    
+    return equipmentGridData
+      .filter(item => {
+        const equipmentCondition = item[selectedEquipment];
+        return equipmentCondition && equipmentCondition !== 'N/A';
+      })
+      .map((item, index) => ({
+        ...item,
+        id: index, // Add unique id for DataGrid
+      }));
+  }, [selectedEquipment, equipmentGridData]);
+
   const handlePieClick = (
     entry: any,
     _index: number,
@@ -506,6 +846,90 @@ export default function KeyMetricCard() {
   const handleCloseAttendanceDrawer = () => {
     setAttendanceDrawerOpen(false);
     setSelectedAttendance(null);
+  };
+
+  const handleLinearProgressClick = (event: React.MouseEvent, equipmentName: string) => {
+    event.stopPropagation(); // Prevent triggering the parent click
+    handleEquipmentClick(equipmentName);
+  };
+
+
+  // Render pie chart based on SDP type with different sizes
+  const renderPieChart = (sdpType: "FWC" | "MSU" | "RHS-A", isSingleChart: boolean = false) => {
+    const dataMap = {
+      "FWC": PWDdashboard.FWCOpenClose,
+      "MSU": PWDdashboard.MSUOpenClose,
+      "RHS-A": PWDdashboard.RHSAOpenClose
+    };
+
+    const colorMap = {
+      "FWC": COLORS,
+      "MSU": COLORS2,
+      "RHS-A": COLORS3
+    };
+
+    const data = dataMap[sdpType];
+    const colors = colorMap[sdpType];
+
+    // Size configuration for single vs multiple charts
+    const chartSize = isSingleChart ? {
+      containerWidth: "60%", // Bigger container for single chart
+      innerRadius: 35, // Bigger inner radius
+      outerRadius: 70, // Bigger outer radius
+      fontSize: "12px" // Bigger font for label
+    } : {
+      containerWidth: "25%", // Normal size for multiple charts
+      innerRadius: 17,
+      outerRadius: 33,
+      fontSize: "10px"
+    };
+
+    return (
+      <Box sx={{ width: chartSize.containerWidth, height: isSingleChart ? "100%" : "80%" }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <RePieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              cx="50%"
+              cy="50%"
+              innerRadius={chartSize.innerRadius}
+              outerRadius={chartSize.outerRadius}
+              startAngle={-90}
+              fill="#82ca9d"
+              onClick={(entry, index, event) =>
+                handlePieClick(entry, index, event, sdpType)
+              }
+            >
+              {data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={
+                    entry.color || colors[index % colors.length]
+                  }
+                />
+              ))}
+            </Pie>
+            <ReToolTip
+              content={(props: any) => (
+                <CustomTooltip 
+                  {...props} 
+                  total={data.reduce((sum, item) => sum + item.value, 0)} 
+                />
+              )}
+            />
+          </RePieChart>
+        </ResponsiveContainer>
+        <Box sx={{ textAlign: "center", mt: isSingleChart ? 1 : 0 }}>
+          <Typography
+            variant="caption"
+            sx={{ fontSize: chartSize.fontSize, color: "gray", fontWeight: isSingleChart ? 600 : "normal" }}
+          >
+            {sdpType}
+          </Typography>
+        </Box>
+      </Box>
+    );
   };
 
   return (
@@ -539,8 +963,6 @@ export default function KeyMetricCard() {
                 display: "flex",
                 flexDirection: "column",
                 marginTop: isMobile ? "10px" : "20px",
-                filter: "blur(2px)",
-                opacity: 0.6,
               }}
             >
               <CardContent sx={{ flexGrow: 1, p: isMobile ? 1 : 2 }}>
@@ -560,85 +982,85 @@ export default function KeyMetricCard() {
                   Equipment Position/Condition
                 </Typography>
                 <Box sx={{ height: 230, overflow: "auto" }}>
-                  {dataset.map((item, index) => (
-                    <Box key={index} sx={{ mb: 0.3 }}>
-                      <Box
-                        sx={{ display: "flex", justifyContent: "space-between" }}
-                      >
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            width: 180,
-                            fontSize: "0.75rem",
-                            color: "gray",
-                            paddingTop: "7px",
-                          }}
-                        >
-                          {item.month}
-                        </Typography>
+                  {filteredEquipmentData.length > 0 ? (
+                    filteredEquipmentData.map((item, index) => (
+                      <Box key={index} sx={{ mb: 0.3 }}>
                         <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "end",
-                            justifyContent: "end",
-                            marginBottom: "2px",
-                          }}
+                          sx={{ display: "flex", justifyContent: "space-between" }}
                         >
                           <Typography
-                            variant="body1"
+                            variant="body2"
                             sx={{
-                              fontWeight: 600,
-                              color: "black",
-                              fontSize: "13px",
+                              width: 180,
+                              fontSize: "0.75rem",
+                              color: "gray",
                               paddingTop: "7px",
                             }}
                           >
-                            {item.rainfall} / {item.percentage}%
+                            {item.name}
                           </Typography>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "end",
+                              justifyContent: "end",
+                              marginBottom: "2px",
+                            }}
+                          >
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                fontWeight: 600,
+                                color: "black",
+                                fontSize: "13px",
+                                paddingTop: "7px",
+                              }}
+                            >
+                              {item.current} / ({item.percentage}%)
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box sx={{ position: "relative", height: "8px" }}
+                        onClick={(e) => handleLinearProgressClick(e, item.name)}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={item.percentage}
+                            sx={{
+                              height: "8px",
+                              borderRadius: "4px",
+                              backgroundColor: theme.palette.grey[200],
+                              "& .MuiLinearProgress-bar": {
+                                borderRadius: "4px",
+                                backgroundColor: item.color || "#4caf50",
+                              },
+                              cursor: 'pointer',
+                            }}
+                          />
                         </Box>
                       </Box>
-                      <Box sx={{ position: "relative", height: "8px" }}>
-                        <LinearProgress
-                          variant="determinate"
-                          value={item.percentage}
-                          sx={{
-                            height: "8px",
-                            borderRadius: "4px",
-                            backgroundColor: theme.palette.grey[200],
-                            "& .MuiLinearProgress-bar": {
-                              borderRadius: "4px",
-                              backgroundColor: "#4caf50",
-                            },
-                          }}
-                        />
-                      </Box>
+                    ))
+                  ) : (
+                    <Box 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        height: '100%',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        No equipment data available
+                      </Typography>
                     </Box>
-                  ))}
+                  )}
                 </Box>
               </CardContent>
             </Card>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                // backgroundColor: "#f4f4f4",
-                zIndex: 1,
-                filter: "blur(2px)",
-              }}
-            >
-              {/* <Typography variant="h6" color="text.secondary">
-              Coming Soon
-              </Typography> */}
-            </Box>
           </Box>
         </Grid>
 
+        {/* Rest of the code remains the same */}
         <Grid
           {...({ item: true, xs: 12, sm: 12, md: 6, lg: 6 } as any)}
           sx={{ width: isMobile ? "100%" : "36.5%" }}
@@ -677,174 +1099,66 @@ export default function KeyMetricCard() {
                   height: "calc(100% - 40px)",
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    mb: 1,
-                    flexDirection: "column",
-                    alignItems: "center",
-                    height: isMobile ? "140px" : "150px",
-                    marginTop: "-10px",
-                  }}
-                >
-                  <Statisticscard />
-                  <Box sx={{ textAlign: "center" }}>
-                    <Typography
-                      variant="caption"
-                      sx={{ fontSize: "10px", color: "gray" }}
+                {/* Show Statisticscard only when showing all SDPs */}
+                {sdpToShow === "all" && (
+                  <>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        mb: 1,
+                        flexDirection: "column",
+                        alignItems: "center",
+                        height: isMobile ? "140px" : "150px",
+                        marginTop: "-10px",
+                      }}
                     >
-                      Open / Close Status
-                    </Typography>
-                  </Box>
-                </Box>
+                      <Statisticscard />
+                      <Box sx={{ textAlign: "center" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontSize: "10px", color: "gray" }}
+                        >
+                          Open / Close Status
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </>
+                )}
+                
                 <Box
                   sx={{
                     display: "flex",
                     justifyContent: "center",
                     gap: 3,
-                    height: "40%",
+                    height: sdpToShow === "all" ? "40%" : "85%",
                     flexWrap: isMobile ? "wrap" : "nowrap",
+                    alignItems: "center",
                   }}
                 >
-                  <Box sx={{ width: "25%", height: "80%" }}>
-                    <ResponsiveContainer>
-                      <RePieChart>
-                        <Pie
-                          data={PWDdashboard.FWCOpenClose}
-                          dataKey="value"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={17}
-                          outerRadius={33}
-                          startAngle={-90}
-                          fill="#82ca9d"
-                          onClick={(entry, index, event) =>
-                            handlePieClick(entry, index, event, "FWC")
-                          }
-                        >
-                          {PWDdashboard.FWCOpenClose.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={
-                                entry.color || COLORS[index % COLORS.length]
-                              }
-                            />
-                          ))}
-                        </Pie>
-                        <ReToolTip
-                          content={(props: any) => (
-                            <CustomTooltip 
-                              {...props} 
-                              total={PWDdashboard.FWCOpenClose.reduce((sum, item) => sum + item.value, 0)} 
-                            />
-                          )}
-                        />
-                      </RePieChart>
-                    </ResponsiveContainer>
-                    <Box sx={{ textAlign: "center" }}>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontSize: "10px", color: "gray" }}
-                      >
-                        FWC
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ width: "25%", height: "80%" }}>
-                    <ResponsiveContainer>
-                      <RePieChart>
-                        <Pie
-                          data={PWDdashboard.MSUOpenClose}
-                          dataKey="value"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={17}
-                          outerRadius={33}
-                          startAngle={-90}
-                          fill="#82ca9d"
-                          onClick={(entry, index, event) =>
-                            handlePieClick(entry, index, event, "MSU")
-                          }
-                        >
-                          {PWDdashboard.MSUOpenClose.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={
-                                entry.color || COLORS2[index % COLORS2.length]
-                              }
-                            />
-                          ))}
-                        </Pie>
-                        <ReToolTip
-                          content={(props: any) => (
-                            <CustomTooltip 
-                              {...props} 
-                              total={PWDdashboard.MSUOpenClose.reduce((sum, item) => sum + item.value, 0)} 
-                            />
-                          )}
-                        />
-                      </RePieChart>
-                    </ResponsiveContainer>
-                    <Box sx={{ textAlign: "center" }}>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontSize: "10px", color: "gray" }}
-                      >
-                        MSU
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ width: "25%", height: "80%" }}>
-                    <ResponsiveContainer>
-                      <RePieChart>
-                        <Pie
-                          data={PWDdashboard.RHSAOpenClose}
-                          dataKey="value"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={17}
-                          outerRadius={33}
-                          startAngle={-90}
-                          fill="#82ca9d"
-                          onClick={(entry, index, event) =>
-                            handlePieClick(entry, index, event, "RHS-A")
-                          }
-                        >
-                          {PWDdashboard.RHSAOpenClose.map((entry, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={
-                                entry.color || COLORS3[index % COLORS3.length]
-                              }
-                            />
-                          ))}
-                        </Pie>
-                        <ReToolTip
-                          content={(props: any) => (
-                            <CustomTooltip 
-                              {...props} 
-                              total={PWDdashboard.RHSAOpenClose.reduce((sum, item) => sum + item.value, 0)} 
-                            />
-                          )}
-                        />
-                      </RePieChart>
-                    </ResponsiveContainer>
-                    <Box sx={{ textAlign: "center" }}>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontSize: "10px", color: "gray" }}
-                      >
-                        RHS-A
-                      </Typography>
-                    </Box>
-                  </Box>
+                  {/* Show pie charts based on sdpToShow */}
+                  {sdpToShow === "all" ? (
+                    // Show all pie charts (normal size)
+                    <>
+                      {renderPieChart("FWC", false)}
+                      {renderPieChart("MSU", false)}
+                      {renderPieChart("RHS-A", false)}
+                    </>
+                  ) : sdpToShow === "FWC" ? (
+                    // Show only FWC (bigger size)
+                    renderPieChart("FWC", true)
+                  ) : sdpToShow === "MSU" ? (
+                    // Show only MSU (bigger size)
+                    renderPieChart("MSU", true)
+                  ) : sdpToShow === "RHS-A" ? (
+                    // Show only RHS-A (bigger size)
+                    renderPieChart("RHS-A", true)
+                  ) : null}
                 </Box>
               </Box>
             </CardContent>
           </Card>
+          {/* Rest of the building status card remains the same */}
           <Box sx={{ position: "relative" }}>
             <Card
               sx={{
@@ -1039,6 +1353,7 @@ export default function KeyMetricCard() {
           </Box>
         </Grid>
 
+        {/* Rest of the attendance section remains the same */}
         <Grid
           {...({ item: true, xs: 12, sm: 12, md: 4, lg: 4 } as any)}
           sx={{ width: isMobile ? "100%" : "23.5%" }}
@@ -1105,21 +1420,7 @@ export default function KeyMetricCard() {
                         fontWeight="bold"
                         sx={{ color: attendanceData[0].color }}
                       >
-                        {attendanceData[0].percentage}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "text.secondary" }}
-                      >
-                        Count: {attendanceData[0].count}
+                        {attendanceData[0].count}
                       </Typography>
                     </Box>
                   </Box>
@@ -1255,7 +1556,7 @@ export default function KeyMetricCard() {
                               fontWeight="bold"
                               sx={{ color: item.color }}
                             >
-                              {item.percentage}
+                              {item.label === "All Staff" ? item.count : item.percentage}
                             </Typography>
                           </Box>
                           <Box
@@ -1265,28 +1566,30 @@ export default function KeyMetricCard() {
                               alignItems: "center",
                             }}
                           >
-                            <Typography
-                              variant="caption"
-                              sx={{ color: "text.secondary" }}
-                            >
-                              Count: {item.count}
-                            </Typography>
                             {item.label !== "All Staff" && (
-                              <Box sx={{ width: "60%" }}>
-                                <LinearProgress
-                                  variant="determinate"
-                                  value={parseFloat(item.percentage)}
-                                  sx={{
-                                    height: 6,
-                                    borderRadius: 3,
-                                    backgroundColor: theme.palette.grey[200],
-                                    "& .MuiLinearProgress-bar": {
-                                      backgroundColor: item.color,
+                              <>
+                                <Typography
+                                  variant="caption"
+                                  sx={{ color: "text.secondary" }}
+                                >
+                                  Count: {item.count}
+                                </Typography>
+                                <Box sx={{ width: "60%" }}>
+                                  <LinearProgress
+                                    variant="determinate"
+                                    value={parseFloat(item.percentage)}
+                                    sx={{
+                                      height: 6,
                                       borderRadius: 3,
-                                    },
-                                  }}
-                                />
-                              </Box>
+                                      backgroundColor: theme.palette.grey[200],
+                                      "& .MuiLinearProgress-bar": {
+                                        backgroundColor: item.color,
+                                        borderRadius: 3,
+                                      },
+                                    }}
+                                  />
+                                </Box>
+                              </>
                             )}
                           </Box>
                         </Box>
@@ -1300,6 +1603,7 @@ export default function KeyMetricCard() {
         </Grid>
       </Grid>
 
+      {/* Rest of the drawer components remain the same */}
       <Drawer
         anchor="right"
         open={sdpDrawerOpen}
@@ -1376,13 +1680,142 @@ export default function KeyMetricCard() {
       </Drawer>
 
       <Drawer
+          anchor="right"
+          open={attendanceDrawerOpen}
+          onClose={handleCloseAttendanceDrawer}
+          sx={{
+            "& .MuiDrawer-paper": {
+              width: "80%",
+              maxWidth: 1200,
+              p: 4,
+              maxHeight: "100vh",
+              overflow: "auto",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+              pb: 2,
+              borderBottom: "1px solid #e0e0e0",
+            }}
+          >
+            <Typography variant="h6">
+              {selectedAttendance === "All Staff"
+                ? "All Staff"
+                : selectedAttendance
+                ? selectedAttendance.charAt(0).toUpperCase() +
+                  selectedAttendance.slice(1)
+                : ""}{" "}
+              - Detailed Breakdown
+            </Typography>
+            <IconButton onClick={handleCloseAttendanceDrawer}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          {selectedAttendance === "All Staff" ? (
+            <div style={{ height: 600, width: "100%" }}>
+              <DataGrid
+                rows={parsedData}
+                columns={allStaffColumns as GridColDef[]}
+                pageSizeOptions={[10, 25, 50]}
+                disableRowSelectionOnClick
+              />
+            </div>
+          ) : (
+            <>
+              {selectedAttendance && (
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 2, color: "text.secondary" }}
+                >
+                  Total Records for{" "}
+                  {selectedAttendance.charAt(0).toUpperCase() +
+                    selectedAttendance.slice(1)}
+                  :{" "}
+                  {Object.values(
+                    groupedAttendance[
+                      selectedAttendance.toLowerCase() as AttendanceStatus
+                    ] || {}
+                  ).reduce(
+                    (acc: any, posData: any) => acc + (posData?.length || 0),
+                    0
+                  )}
+                </Typography>
+              )}
+              
+              {/* Only show positions that have records */}
+              {(positions as PositionKey[]).map((pos) => {
+                const statusKey = (
+                  selectedAttendance as string
+                )?.toLowerCase() as AttendanceStatus;
+                const positionData =
+                  (groupedAttendance[statusKey] || {})[pos] || [];
+                
+                // Only render if there are records for this position
+                if (positionData.length === 0) {
+                  return null;
+                }
+                
+                return (
+                  <Box key={pos} sx={{ mb: 4 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ mb: 1, fontWeight: "bold" }}
+                    >
+                      {positionNames[pos]} -{" "}
+                      {selectedAttendance
+                        ? selectedAttendance.charAt(0).toUpperCase() +
+                          selectedAttendance.slice(1)
+                        : ""}{" "}
+                      ({positionData.length} records)
+                    </Typography>
+                    <div style={{ height: 300, width: "100%" }}>
+                      <DataGrid
+                        rows={positionData}
+                        columns={statusColumns}
+                        pageSizeOptions={[5, 10, 25]}
+                        disableRowSelectionOnClick
+                      />
+                    </div>
+                  </Box>
+                );
+              })}
+              
+              {/* Show message if no records found for any position */}
+              {selectedAttendance && 
+                Object.values(
+                  groupedAttendance[
+                    selectedAttendance.toLowerCase() as AttendanceStatus
+                  ] || {}
+                ).every((posData: any) => posData.length === 0) && (
+                <Typography
+                  variant="body1"
+                  sx={{ 
+                    textAlign: "center", 
+                    color: "text.secondary",
+                    mt: 4
+                  }}
+                >
+                  No records found for {selectedAttendance} status
+                </Typography>
+              )}
+            </>
+          )}
+        </Drawer>
+
+        <Drawer
         anchor="right"
-        open={attendanceDrawerOpen}
-        onClose={handleCloseAttendanceDrawer}
+        open={equipmentDrawerOpen}
+        onClose={handleCloseEquipmentDrawer}
         sx={{
           "& .MuiDrawer-paper": {
             width: "80%",
-            maxWidth: 1200,
+            maxWidth: 1000,
             p: 4,
             maxHeight: "100vh",
             overflow: "auto",
@@ -1400,79 +1833,48 @@ export default function KeyMetricCard() {
           }}
         >
           <Typography variant="h6">
-            {selectedAttendance === "All Staff"
-              ? "All Staff"
-              : selectedAttendance
-              ? selectedAttendance.charAt(0).toUpperCase() +
-                selectedAttendance.slice(1)
-              : ""}{" "}
-            - Detailed Breakdown
+            {selectedEquipment} - Condition Details ({filteredEquipmentGridData.length} records)
           </Typography>
-          <IconButton onClick={handleCloseAttendanceDrawer}>
+          <IconButton onClick={handleCloseEquipmentDrawer}>
             <CloseIcon />
           </IconButton>
         </Box>
-        {selectedAttendance === "All Staff" ? (
+        
+        {filteredEquipmentGridData.length > 0 ? (
           <div style={{ height: 600, width: "100%" }}>
             <DataGrid
-              rows={parsedData}
-              columns={allStaffColumns as GridColDef[]}
+              rows={filteredEquipmentGridData}
+              columns={getEquipmentColumns(selectedEquipment!)}
               pageSizeOptions={[10, 25, 50]}
               disableRowSelectionOnClick
+              sx={{
+                '& .MuiDataGrid-cell': {
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: theme.palette.grey[100],
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                },
+              }}
             />
           </div>
         ) : (
-          <>
-            {selectedAttendance && (
-              <Typography
-                variant="body2"
-                sx={{ mb: 2, color: "text.secondary" }}
-              >
-                Total Records for{" "}
-                {selectedAttendance.charAt(0).toUpperCase() +
-                  selectedAttendance.slice(1)}
-                :{" "}
-                {Object.values(
-                  groupedAttendance[
-                    selectedAttendance.toLowerCase() as AttendanceStatus
-                  ] || {}
-                ).reduce(
-                  (acc: any, posData: any) => acc + (posData?.length || 0),
-                  0
-                )}
-              </Typography>
-            )}
-            {(positions as PositionKey[]).map((pos) => {
-              const statusKey = (
-                selectedAttendance as string
-              )?.toLowerCase() as AttendanceStatus;
-              const positionData =
-                (groupedAttendance[statusKey] || {})[pos] || [];
-              return (
-                <Box key={pos} sx={{ mb: 4 }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ mb: 1, fontWeight: "bold" }}
-                  >
-                    {positionNames[pos]} -{" "}
-                    {selectedAttendance
-                      ? selectedAttendance.charAt(0).toUpperCase() +
-                        selectedAttendance.slice(1)
-                      : ""}{" "}
-                    ({positionData.length} records)
-                  </Typography>
-                  <div style={{ height: 300, width: "100%" }}>
-                    <DataGrid
-                      rows={positionData}
-                      columns={statusColumns}
-                      pageSizeOptions={[5, 10, 25]}
-                      disableRowSelectionOnClick
-                    />
-                  </div>
-                </Box>
-              );
-            })}
-          </>
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              height: '200px',
+              flexDirection: 'column'
+            }}
+          >
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No Data Available
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              No records found for {selectedEquipment} with available condition data.
+            </Typography>
+          </Box>
         )}
       </Drawer>
     </Box>

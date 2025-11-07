@@ -7,7 +7,7 @@ export const SdpDropdown = createAsyncThunk(
   'init/fetchSdpDropdown',
   async (value: string, { rejectWithValue }) => {
     try {
-      const url = `http://localhost:54050/Designer/GetDistictById/${value}`;
+      const url = `https://pwd.kcompute.com/Designer/GetDistictById/${value}`;
       const response = await PostService(url, null);
       return response.data;
     } catch (error: any) {
@@ -23,7 +23,7 @@ export const CenterDropdown = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const url = `http://localhost:54050/Designer/GetCentral/${encodeURIComponent(
+      const url = `https://pwd.kcompute.com/Designer/GetCentral/${encodeURIComponent(
         sdpType
       )},${encodeURIComponent(value)}`;
       const response = await PostService(url, null);
@@ -50,7 +50,7 @@ export const dynamicAPI = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const url = 'http://localhost:54050/Designer/GetDashboard';
+      const url = 'https://pwd.kcompute.com/Designer/GetDashboard';
       
       // Create payload object
       const payload = {
@@ -88,7 +88,7 @@ export const SldieoutAPI = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try { 
-      const url = 'http://localhost:54050/Dashboard/GetSdpsStatus';
+      const url = 'https://pwd.kcompute.com/Dashboard/GetSdpsStatus';
       
       // Create payload object
       const payload = {
@@ -126,7 +126,7 @@ export const StaffPositionAPI = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try { 
-      const url = `http://localhost:54050/Dashboard/StaffPosition`;
+      const url = `https://pwd.kcompute.com/Dashboard/StaffPosition`;
       
       // Create payload object
       const payload = {
@@ -164,7 +164,250 @@ export const MonitoringVisitsReportAPI = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try { 
-      const url = `http://localhost:54050/Dashboard/MonitoringVisitsReport`;
+      const url = `https://pwd.kcompute.com/Dashboard/MonitoringVisitsReport`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const OfficerVisitReportAPI = createAsyncThunk(
+  'init/fetchOfficerVisitReport',
+  async () => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/OfficerVisitReport`;
+      
+      const response = await axios.get(url);
+      
+      return response.data;
+    } catch (error: any) {
+      return 'Request failed';
+    }
+  }
+);
+
+export const StockOfContraceptiveAPI = createAsyncThunk(
+  'init/fetchStockOfContraceptive',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/StockOfContraceptive`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const DetailStockOfContraceptiveAPI = createAsyncThunk(
+  'init/fetchDetailStockOfContraceptive',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/DetailStockOfContraceptive`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const EquiptmentPositionDetailAPI = createAsyncThunk(
+  'init/fetchEquiptmentPositionDetail',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/EquiptmentPositionDetail`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const TechnicalMonitoringDetailAPI = createAsyncThunk(
+  'init/fetchTechnicalMonitoringDetail',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/TechnicalMonitoringDetail`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const TechnicalMonitoringStockAPI = createAsyncThunk(
+  'init/fetchTechnicalMonitoringStock',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/TechnicalMonitoringStock`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const EquiptmentPositionStockAPI = createAsyncThunk(
+  'init/fetchEquiptmentPositionStockAPI',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/EquiptmentPositionStock`;
       
       // Create payload object
       const payload = {
@@ -187,17 +430,116 @@ export const MonitoringVisitsReportAPI = createAsyncThunk(
 );
 
 
-export const OfficerVisitReportAPI = createAsyncThunk(
-  'init/fetchOfficerVisitReport',
-  async () => {
+export const IECMatrialStockAPI = createAsyncThunk(
+  'init/fetchIECMatrialStockAPI',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
     try { 
-      const url = `http://localhost:54050/Dashboard/OfficerVisitReport`;
+      const url = `https://pwd.kcompute.com/Dashboard/IECMatrialStock`;
       
-      const response = await axios.get(url);
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
       
+      const response = await PostService(url, payload);
       return response.data;
     } catch (error: any) {
-      return 'Request failed';
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const IECMatrialDetailAPI = createAsyncThunk(
+  'init/fetchIECMatrialDetailAPI',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/IECMatrialDetail`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);
+
+export const PerformaceOfSdpAPI = createAsyncThunk(
+  'init/fetchPerformaceOfSdp',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/PerformaceOfSdp`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
     }
   }
 );

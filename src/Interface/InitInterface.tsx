@@ -31,6 +31,14 @@ export interface PWDInitINTERFACE {
     MonitoringReportRecord:Array<any>;
     furnitureData:Array<any>;
     officeGridRecord:Array<any>;
+    viewStockOfContraceptiveRecord:Array<any>;
+    furnitureGridData:Array<any>;
+    equipmentStockData:Array<any>;
+    equipmentGridData: Array<any>;
+    buildingStatusData: Array<any>;
+    technicalGridData: Array<any>;
+    IECMaterialChartData: any;
+    performanceSdpDataset: Array<any>;
 }
 
 export interface ISDPdropdown {

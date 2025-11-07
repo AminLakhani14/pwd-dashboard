@@ -1,4 +1,4 @@
-import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, useMediaQuery, CardContent } from "@mui/material";
+import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, useMediaQuery, CardContent, Drawer } from "@mui/material";
 import { BarChart, PieChart } from "@mui/x-charts";
 import { useState } from "react";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -21,25 +21,54 @@ interface AlertItem {
   TotalStock: number;
 }
 
+interface PieChartItem {
+  id: number;
+  value: number;
+  label: string;
+}
+
 const IecChart = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [chartType, setChartType] = useState<ChartType>("IEC Material");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedChartType, setSelectedChartType] = useState<ChartType | null>(null);
+  const [selectedSegment, setSelectedSegment] = useState<PieChartItem | null>(null);
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
 
-  const chartData: Record<ChartType, { id: number; value: number; label: string }[]> = {
+  const chartData = PWDdashboard.IECMaterialChartData || {
     "IEC Material": [
-      { id: 0, value: 157, label: "Displayed" },
-      { id: 1, value: 28, label: "Non Displayed" },
+      { id: 0, value: 0, label: "Displayed" },
+      { id: 1, value: 0, label: "Non Displayed" },
     ],
     "MEC Wheel": [
-      { id: 0, value: 158, label: "Available"  },
-      { id: 1, value: 27, label: "Not Available" },
+      { id: 0, value: 0, label: "Available" },
+      { id: 1, value: 0, label: "Not Available" },
     ],
   };
 
   const handleChange = (event: SelectChangeEvent) => {
     setChartType(event.target.value as ChartType);
+  };
+
+  // Handle pie chart segment click
+  const handlePieChartClick = (event: any, pieItem: PieChartItem) => {
+    setSelectedChartType(chartType);
+    setSelectedSegment(pieItem);
+    setDrawerOpen(true);
+  };
+
+  // Handle entire pie chart click (when clicking on the chart but not on a segment)
+  const handlePieChartContainerClick = () => {
+    setSelectedChartType(chartType);
+    setSelectedSegment(null);
+    setDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerOpen(false);
+    setSelectedSegment(null);
+    setSelectedChartType(null);
   };
 
   // Map API alert levels to our AlertType
@@ -109,32 +138,91 @@ const IecChart = () => {
     }
   };
 
- const dataset = [
-  {
-    new: 3911,
-    old: 2536,
-    month: 'General Clients\t',
-  },
-  {
-    new: 7925,
-    old: 4434,
-    month: 'F.P Clients\t',
-  },
-  {
-    new: 1002,
-    old: 804,
-    month: 'MCH/RH',
-  },
-  {
-    new: 1743,
-    old: 1373,
-    month: 'C.S Cases',
-  },
-];
- function valueFormatter(value: number | null) {
-  return value == null ? '' : `${value}`;
- }
+  const dataset = [
+    {
+      new: 3911,
+      old: 2536,
+      month: 'General Clients\t',
+    },
+    {
+      new: 7925,
+      old: 4434,
+      month: 'F.P Clients\t',
+    },
+    {
+      new: 1002,
+      old: 804,
+      month: 'MCH/RH',
+    },
+    {
+      new: 1743,
+      old: 1373,
+      month: 'C.S Cases',
+    },
+  ];
 
+  function valueFormatter(value: number | null) {
+    return value == null ? '' : `${value}`;
+  }
+
+  // Get drawer title based on selection
+  const getDrawerTitle = () => {
+    if (selectedSegment) {
+      return `${selectedChartType} - ${selectedSegment.label}`;
+    }
+    return `${selectedChartType} Details`;
+  };
+
+  // Get drawer content based on selection
+  const getDrawerContent = () => {
+    if (!selectedChartType) return null;
+
+    if (selectedSegment) {
+      // Show specific segment details
+      return (
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            {selectedSegment.label} Details
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Count: {selectedSegment.value}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            This shows the detailed information for {selectedSegment.label.toLowerCase()} {selectedChartType.toLowerCase()}.
+          </Typography>
+          {/* Add more specific data here based on your API response */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Related Data:
+            </Typography>
+            {/* You can add tables, lists, or other components here with specific data */}
+          </Box>
+        </Box>
+      );
+    } else {
+      // Show overall chart details
+      return (
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            {selectedChartType} Overview
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Total: {chartData[selectedChartType].reduce((sum: number, item: { value: number }) => sum + item.value, 0)}
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            {chartData[selectedChartType].map((item: { id: string | number; label: string; value: number }) => (
+              <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="body2">{item.label}:</Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  {item.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      );
+    }
+  };
 
   return (
     <>
@@ -149,9 +237,9 @@ const IecChart = () => {
             flexDirection: "column",
             p: isMobile ? 1 : 2,
             mb: 4,
-            filter: "blur(3px)",
-            opacity: 0.6,
+            cursor: 'pointer', // Add cursor pointer to indicate clickability
           }}
+          onClick={handlePieChartContainerClick}
         >
           <FormControl fullWidth sx={{ mb: 2 }} size="small">
             <Select
@@ -186,12 +274,13 @@ const IecChart = () => {
                 },
               ]}
               sx={{
-                 "& .MuiChartsSurface-root": { marginTop:'20px',marginBottom:'30px' }
+                "& .MuiChartsSurface-root": { marginTop:'20px',marginBottom:'30px' },
+                "& .MuiChartsArc-root": { cursor: 'pointer' }, // Make pie segments clickable
               }}
               width={isMobile ? 250 : 170}
               height={isMobile ? 150 : 120}
               slotProps={{
-              legend: {
+                legend: {
                   sx: {
                     '& .MuiChartsLegend-label': { fontSize: isMobile ? 8 : 6 },
                     '& .MuiChartsLegend-series': { gap: 0.5 },
@@ -201,136 +290,136 @@ const IecChart = () => {
             />
           </Box>
         </Card>
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            // backgroundColor: "#f4f4f4",
-            zIndex: 1,
-            filter: "blur(2px)",
-          }}
-        >
-          {/* <Typography variant="h6" color="text.secondary">
-           Coming Soon
-        </Typography> */}
-        </Box>
       </Box>
 
-     <Card
-      sx={{
-        borderRadius: 3,
-        boxShadow: 3,
-        height: isMobile ? "auto" : "248px",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        marginTop: isMobile ? "10px" : "10px",
-        overflow: "hidden",
-        mb: 4,
-      }}
-    >
-      <CardContent
+      {/* Drawer for showing details */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={handleCloseDrawer}
         sx={{
-          pb: 0,
+          '& .MuiDrawer-paper': {
+            width: isMobile ? '100%' : 400,
+          },
         }}
       >
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          gutterBottom
-          align="left"
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h5" gutterBottom>
+            {getDrawerTitle()}
+          </Typography>
+          {getDrawerContent()}
+        </Box>
+      </Drawer>
+
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: 3,
+          height: isMobile ? "auto" : "248px",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          marginTop: isMobile ? "10px" : "10px",
+          overflow: "hidden",
+          mb: 4,
+        }}
+      >
+        <CardContent
           sx={{
-            fontWeight: 600,
-            color: theme.palette.text.primary,
-            fontFamily: "inherit",
-            fontSize: 16,
+            pb: 0,
           }}
         >
-          <NotificationsIcon /> Urgent Alerts & Issues
-        </Typography>
-      </CardContent>
-
-      <Box
-        sx={{
-          overflowY: "auto",
-          height: "100%",
-          p: 1,
-          overflowX: "hidden",
-        }}
-      >
-        {alerts.length > 0 ? (
-          alerts.map((alert, index) => {
-            const alertStyle = getAlertStyle(alert.type);
-            return (
-              <Box
-                key={index}
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  p: 1.5,
-                  mb: 1,
-                  borderRadius: 2,
-                  ...alertStyle,
-                }}
-              >
-                <Box
-                  sx={{
-                    color: alertStyle.iconColor,
-                    mr: 1.5,
-                    mt: 0.2,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {alert.icon}
-                </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: isMobile ? "14px" : "12px",
-                      color: theme.palette.text.primary,
-                      mb: 0.3,
-                    }}
-                  >
-                    {alert.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: isMobile ? "13px" : "12px",
-                      color: theme.palette.text.secondary,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {alert.message}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })
-        ) : (
-          <Box
+          <Typography
+            variant="h6"
+            fontWeight={600}
+            gutterBottom
+            align="left"
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-              color: theme.palette.text.secondary,
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              fontFamily: "inherit",
+              fontSize: 16,
             }}
           >
-            <Typography variant="body2">No alerts found</Typography>
-          </Box>
-        )}
-      </Box>
-    </Card>
+            <NotificationsIcon /> Urgent Alerts & Issues
+          </Typography>
+        </CardContent>
+
+        <Box
+          sx={{
+            overflowY: "auto",
+            height: "100%",
+            p: 1,
+            overflowX: "hidden",
+          }}
+        >
+          {alerts.length > 0 ? (
+            alerts.map((alert, index) => {
+              const alertStyle = getAlertStyle(alert.type);
+              return (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    p: 1.5,
+                    mb: 1,
+                    borderRadius: 2,
+                    ...alertStyle,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      color: alertStyle.iconColor,
+                      mr: 1.5,
+                      mt: 0.2,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {alert.icon}
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: isMobile ? "14px" : "12px",
+                        color: theme.palette.text.primary,
+                        mb: 0.3,
+                      }}
+                    >
+                      {alert.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: isMobile ? "13px" : "12px",
+                        color: theme.palette.text.secondary,
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {alert.message}
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            })
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                color: theme.palette.text.secondary,
+              }}
+            >
+              <Typography variant="body2">No alerts found</Typography>
+            </Box>
+          )}
+        </Box>
+      </Card>
 
       <Box sx={{ position: "relative" }}>
         <Paper
@@ -343,8 +432,6 @@ const IecChart = () => {
             height: isMobile ? "auto" : 245,
             display: "flex",
             flexDirection: "column",
-            filter: "blur(3px)",
-            opacity: 0.6,
           }}  
         >
           <Typography
@@ -360,8 +447,8 @@ const IecChart = () => {
             Performance of SDP
           </Typography>
           <BarChart
-            dataset={dataset}
-             margin={{ 
+            dataset={PWDdashboard.performanceSdpDataset}
+            margin={{ 
               left: isMobile ? 40 : -13,
               right: isMobile ? 10 : 0, 
               top: isMobile ? 10 : 20, 
@@ -375,7 +462,7 @@ const IecChart = () => {
               { dataKey: 'new', label: 'New', valueFormatter },
               { dataKey: 'old', label: 'Old', valueFormatter },
             ]}
-             yAxis= {[{width: isMobile ? 80 : 60}]}
+            yAxis= {[{width: isMobile ? 80 : 60}]}
             height={isMobile ? 200 : undefined}
             sx={{
               width: "100%",
@@ -383,25 +470,6 @@ const IecChart = () => {
             }}
           />
         </Paper>
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            // backgroundColor: "#f4f4f4",
-            zIndex: 1,
-            filter: "blur(2px)",
-          }}
-        >
-          {/* <Typography variant="h6" color="text.secondary">
-           Coming Soon
-        </Typography> */}
-        </Box>
       </Box>
     </>
   );
