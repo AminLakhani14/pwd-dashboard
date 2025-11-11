@@ -12,6 +12,7 @@ import {
   SdpDropdown,
   SldieoutAPI,
   StaffPositionAPI,
+  StatusOfBuildingAPI,
   StockOfContraceptiveAPI,
   TechnicalMonitoringDetailAPI,
   TechnicalMonitoringStockAPI,
@@ -143,7 +144,7 @@ const PWDINITSLICE = createSlice({
           {
             name: "All Reports",
             value: action.payload.All?.SurveyCount || 0,
-            total: "1244",
+            total: "965",
             percentage: Math.round(
               ((action.payload.All?.SurveyCount || 0) /
                 targetValues["All Reports"]) *
@@ -154,7 +155,7 @@ const PWDINITSLICE = createSlice({
           {
             name: "FWC",
             value: action.payload.FWC?.SurveyCount || 0,
-            total: "1100",
+            total: "811",
             percentage: Math.round(
               ((action.payload.FWC?.SurveyCount || 0) / targetValues["FWC"]) *
                 100
@@ -164,7 +165,7 @@ const PWDINITSLICE = createSlice({
           {
             name: "RHS-A",
             value: action.payload.RHS?.SurveyCount || 0,
-            total: "72",
+            total: "85",
             percentage: Math.round(
               ((action.payload.RHS?.SurveyCount || 0) / targetValues["RHS-A"]) *
                 100
@@ -174,7 +175,7 @@ const PWDINITSLICE = createSlice({
           {
             name: "MSU",
             value: action.payload.MSU?.SurveyCount || 0,
-            total: "72",
+            total: "69",
             percentage: Math.round(
               ((action.payload.MSU?.SurveyCount || 0) / targetValues["MSU"]) *
                 100
@@ -409,6 +410,7 @@ const PWDINITSLICE = createSlice({
               status: string;
               asDate: string;
               premises: string;
+              Photos: string;
             }>;
             MSU: Array<{
               id: number;
@@ -418,6 +420,7 @@ const PWDINITSLICE = createSlice({
               status: string;
               asDate: string;
               premises: string;
+              Photos: string;
             }>;
             FWC: Array<{
               id: number;
@@ -427,6 +430,7 @@ const PWDINITSLICE = createSlice({
               status: string;
               asDate: string;
               premises: string;
+              Photos: string;
             }>;
           } = {
             RHS: [],
@@ -459,6 +463,7 @@ const PWDINITSLICE = createSlice({
                 status: item.OpenClose || "Unknown",
                 asDate: item.asDate || "N/A",
                 premises: item.Premises || "N/A",
+                Photos: item.Photos || "N/A",
               });
             }
           });
@@ -878,22 +883,8 @@ const PWDINITSLICE = createSlice({
 
             state.technicalGridData = technicalGridData;
 
-            // Console log the transformed data for verification
-            console.log(
-              "Transformed Technical Monitoring Grid Data:",
-              technicalGridData
-            );
-
             // Also log a sample record for detailed inspection
             if (technicalGridData.length > 0) {
-              console.log(
-                "Sample Technical Monitoring Record:",
-                technicalGridData[0]
-              );
-              console.log(
-                "Available fields in sample record:",
-                Object.keys(technicalGridData[0])
-              );
             }
           } else {
             state.technicalGridData = [];
@@ -1020,7 +1011,6 @@ const PWDINITSLICE = createSlice({
             state.IECMaterialChartData = chartData;
 
             // Optional: Log for verification
-            console.log("IEC Material Chart Data:", chartData);
           }
         }
       )
@@ -1028,11 +1018,52 @@ const PWDINITSLICE = createSlice({
         state.isLoading = false;
       });
 
-    builder
+      builder
       .addCase(IECMatrialDetailAPI.pending, (state: PWDInitINTERFACE) => {})
       .addCase(
         IECMatrialDetailAPI.fulfilled,
-        (state: PWDInitINTERFACE, action) => {}
+        (state: PWDInitINTERFACE, action) => {
+          if (action.payload && Array.isArray(action.payload)) {
+            // Transform the API response into updatedRecord format
+            const updatedRecord = action.payload.map((record: any) => {
+              // Parse IECMatrial values (ignore third number)
+              const iecMatrialValues = record.IECMatrial ? 
+                record.IECMatrial.split(',').map(Number) : [];
+              
+              // Parse MECWheel values (ignore third number)
+              const mecWheelValues = record.MECWheel ? 
+                record.MECWheel.split(',').map(Number) : [];
+    
+              // Determine IECMatrial status
+              const iecSecondValue = iecMatrialValues.length > 1 ? iecMatrialValues[1] : 2; // Default to "No" if not available
+              const iecDisplayed = iecSecondValue === 1 ? "Displayed" : "Non Displayed";
+              const iecYesNo = iecSecondValue === 1 ? "Yes" : "No";
+    
+              // Determine MECWheel status
+              const mecSecondValue = mecWheelValues.length > 1 ? mecWheelValues[1] : 2; // Default to "No" if not available
+              const mecAvailable = mecSecondValue === 1 ? "Available" : "Not Available";
+              const mecYesNo = mecSecondValue === 1 ? "Yes" : "No";
+    
+              return {
+                asDate: record.asDate || "N/A",
+                ProjectName: record.ProjectName || "N/A",
+                District: record.District || "N/A",
+                Center: record.Center || "N/A",
+                IECMatrial: iecDisplayed,
+                "IECMatrialYES/NO": iecYesNo,
+                MECWheel: mecAvailable,
+                "MECWheelYES/NO": mecYesNo
+              };
+            });
+    
+            // Set the transformed data to state
+            state.IECMaterialDetailRecord = updatedRecord;
+    
+            // Optional: Log for verification
+          } else {
+            state.IECMaterialDetailRecord = [];
+          }
+        }
       )
       .addCase(IECMatrialDetailAPI.rejected, (state: PWDInitINTERFACE) => {
         state.isLoading = false;
@@ -1074,11 +1105,29 @@ const PWDINITSLICE = createSlice({
             state.performanceSdpDataset = dataset;
 
             // Optional: Log for verification
-            console.log("Performance SDP Dataset:", dataset);
           }
         }
       )
       .addCase(PerformaceOfSdpAPI.rejected, (state: PWDInitINTERFACE) => {
+        state.isLoading = false;
+      });
+
+      builder
+      .addCase(StatusOfBuildingAPI.pending, (state: PWDInitINTERFACE) => {})
+      .addCase(StatusOfBuildingAPI.fulfilled,(state: PWDInitINTERFACE, action) => {
+         state.GovernmentPercentage  = action.payload.GovermentPercentage;
+         state.RentedPercentage = action.payload.RantedPercentage;
+         state.PVTPercentage = action.payload.PVTPercentage;
+         state.IndicationPercentage = action.payload.IndicationPercentage;
+         state.ElectricityPercentage = action.payload.ElectricityPercentage;
+         state.GasPercentage = action.payload.GasPercentage;
+         state.WaterPercentage = action.payload.WaterPercentage;
+         state.CleanessPercentage = action.payload.CleanessPercentage;
+         state.BrandedPercentage = action.payload.BrandedPercentage;
+         state.UnbrandedPercentage = action.payload.UnbrandedPercentage;
+        }
+      )
+      .addCase(StatusOfBuildingAPI.rejected, (state: PWDInitINTERFACE) => {
         state.isLoading = false;
       });
   },

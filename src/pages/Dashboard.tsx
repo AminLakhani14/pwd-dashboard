@@ -39,6 +39,7 @@ import {
   PerformaceOfSdpAPI,
   IECMatrialDetailAPI,
   IECMatrialStockAPI,
+  StatusOfBuildingAPI,
 } from "../Service/Init";
 import { useAppDispatch } from "../app/Hooks";
 import { Col, Container, Row } from "react-bootstrap";
@@ -61,15 +62,9 @@ const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [filteredData, setFilteredData] = useState<any[]>([]);
 
-  // Debug: Log the technicalGridData to see its structure
   useEffect(() => {
-    console.log("technicalGridData:", PWDdashboard.technicalGridData);
-    console.log("buildingStatusData:", PWDdashboard.buildingStatusData);
-    
     // Log the structure of first item if available
     if (PWDdashboard.technicalGridData && PWDdashboard.technicalGridData.length > 0) {
-      console.log("First technicalGridData item structure:", Object.keys(PWDdashboard.technicalGridData[0]));
-      console.log("First technicalGridData item:", PWDdashboard.technicalGridData[0]);
     }
   }, [PWDdashboard.technicalGridData, PWDdashboard.buildingStatusData]);
 
@@ -415,6 +410,19 @@ const Dashboard = () => {
         QuestionId: "",
       })
     );
+
+    await dispatch(
+      StatusOfBuildingAPI({
+        StartDate: ToDatabaseFormat(dateRange.startDate) || "",
+        EndDate: ToDatabaseFormat(dateRange.endDate) || "",
+        DistrictID: districtData[0] || "0",
+        DistrictName: PWDdashboard.districtValue,
+        CenterID: "",
+        CenterName: PWDdashboard.centerValue,
+        ProjectId: districtData[2] || "7122,7121,7120",
+        QuestionId: "",
+      })
+    );
     await dispatch(updateStates({ key: "isLoading", value: false }));
 
   };
@@ -572,6 +580,18 @@ const Dashboard = () => {
             })
           ),
           dispatch(
+            StatusOfBuildingAPI({
+              StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
+              EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
+              DistrictID: "",
+              DistrictName: "",
+              CenterID: "",
+              CenterName: "",
+              ProjectId: "7122,7121,7120",
+              QuestionId: "",
+            })
+          ),
+          dispatch(
             PerformaceOfSdpAPI({
               StartDate: ToDatabaseFormat(defaultDateRange.startDate) || "",
               EndDate: ToDatabaseFormat(defaultDateRange.endDate) || "",
@@ -584,7 +604,7 @@ const Dashboard = () => {
             })
           )
         ]);
-  
+
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -775,6 +795,7 @@ const Dashboard = () => {
             name="SDPdropdownValue"
             value={PWDdashboard.SDPdropdownValue}
             onChange={handleChange}
+            disabled
             size={isMobile ? "small" : "medium"}
           >
             {PWDdashboard.SDPdropdown.map((option) => (
@@ -790,6 +811,7 @@ const Dashboard = () => {
             margin="normal"
             label="District"
             name="districtValue"
+            disabled
             value={PWDdashboard.districtValue}
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}
@@ -808,6 +830,7 @@ const Dashboard = () => {
             margin="normal"
             label="Center"
             name="centerValue"
+            disabled
             value={PWDdashboard.centerValue}
             onChange={handleChange}
             size={isMobile ? "small" : "medium"}

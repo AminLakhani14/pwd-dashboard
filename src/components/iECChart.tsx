@@ -1,5 +1,6 @@
-import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, useMediaQuery, CardContent, Drawer } from "@mui/material";
+import { Box, Card, MenuItem, Select, FormControl, Typography, useTheme, Paper, useMediaQuery, CardContent, Drawer, IconButton } from "@mui/material";
 import { BarChart, PieChart } from "@mui/x-charts";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useState } from "react";
 import WarningIcon from "@mui/icons-material/Warning";
 import ErrorIcon from "@mui/icons-material/Error";
@@ -8,6 +9,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { RootState } from "../app/store";
 import { useSelector } from "react-redux";
+import CloseIcon from "@mui/icons-material/Close";
 
 type ChartType = 'IEC Material' | 'MEC Wheel';
 
@@ -25,6 +27,17 @@ interface PieChartItem {
   id: number;
   value: number;
   label: string;
+}
+
+interface IECMaterialDetailRecord {
+  asDate: string;
+  ProjectName: string;
+  District: string;
+  Center: string;
+  IECMatrial: string;
+  "IECMatrialYES/NO": string;
+  MECWheel: string;
+  "MECWheelYES/NO": string;
 }
 
 const IecChart = () => {
@@ -52,10 +65,13 @@ const IecChart = () => {
   };
 
   // Handle pie chart segment click
-  const handlePieChartClick = (event: any, pieItem: PieChartItem) => {
-    setSelectedChartType(chartType);
-    setSelectedSegment(pieItem);
-    setDrawerOpen(true);
+  const handlePieChartClick = (event: React.MouseEvent, pieParam: any) => {
+    if (pieParam && pieParam.dataIndex !== undefined) {
+      const clickedItem = chartData[chartType][pieParam.dataIndex];
+      setSelectedChartType(chartType);
+      setSelectedSegment(clickedItem);
+      setDrawerOpen(true);
+    }
   };
 
   // Handle entire pie chart click (when clicking on the chart but not on a segment)
@@ -138,92 +154,204 @@ const IecChart = () => {
     }
   };
 
-  const dataset = [
-    {
-      new: 3911,
-      old: 2536,
-      month: 'General Clients\t',
-    },
-    {
-      new: 7925,
-      old: 4434,
-      month: 'F.P Clients\t',
-    },
-    {
-      new: 1002,
-      old: 804,
-      month: 'MCH/RH',
-    },
-    {
-      new: 1743,
-      old: 1373,
-      month: 'C.S Cases',
-    },
-  ];
+  const getFilteredRecords = (): IECMaterialDetailRecord[] => {
+    if (!selectedChartType || !selectedSegment) {
+      return PWDdashboard.IECMaterialDetailRecord || [];
+    }
+
+    const records = PWDdashboard.IECMaterialDetailRecord || [];
+
+    if (selectedChartType === 'IEC Material') {
+      if (selectedSegment.label === 'Displayed') {
+        return records.filter(record => record.IECMatrial === 'Displayed');
+      } else if (selectedSegment.label === 'Non Displayed') {
+        return records.filter(record => record.IECMatrial === 'Non Displayed');
+      }
+    } else if (selectedChartType === 'MEC Wheel') {
+      if (selectedSegment.label === 'Available') {
+        return records.filter(record => record.MECWheel === 'Available');
+      } else if (selectedSegment.label === 'Not Available') {
+        return records.filter(record => record.MECWheel === 'Not Available');
+      }
+    }
+
+    return records;
+  };
+
+  // DataGrid columns configuration
+  const getColumns = (): GridColDef[] => {
+    const baseColumns: GridColDef[] = [
+      { 
+        field: 'asDate', 
+        headerName: 'Date', 
+        width: 100,
+        flex: isMobile ? 0 : 1,
+      },
+      { 
+        field: 'District', 
+        headerName: 'District', 
+        width: 120,
+        flex: isMobile ? 0 : 1,
+      },
+      { 
+        field: 'Center', 
+        headerName: 'Center', 
+        width: 200,
+        flex: 2,
+      },
+    ];
+
+    if (selectedChartType === 'IEC Material') {
+      baseColumns.push({
+        field: 'IECMatrialYES/NO',
+        headerName: 'Status',
+        width: 100,
+        flex: isMobile ? 0 : 1,
+      });
+    } else if (selectedChartType === 'MEC Wheel') {
+      baseColumns.push({
+        field: 'MECWheelYES/NO',
+        headerName: 'Status',
+        width: 100,
+        flex: isMobile ? 0 : 1,
+      });
+    }
+
+    return baseColumns;
+  };
+
+  // Prepare data for DataGrid with unique IDs
+  const getDataGridRows = () => {
+    const filteredRecords = getFilteredRecords();
+    return filteredRecords.map((record, index) => ({
+      id: index,
+      ...record
+    }));
+  };
 
   function valueFormatter(value: number | null) {
     return value == null ? '' : `${value}`;
   }
 
-  // Get drawer title based on selection
-  const getDrawerTitle = () => {
-    if (selectedSegment) {
-      return `${selectedChartType} - ${selectedSegment.label}`;
-    }
-    return `${selectedChartType} Details`;
-  };
-
-  // Get drawer content based on selection
   const getDrawerContent = () => {
     if (!selectedChartType) return null;
-
+  
+    const filteredRecords = getFilteredRecords();
+    const dataGridRows = getDataGridRows();
+    const columns = getColumns();
+  
     if (selectedSegment) {
-      // Show specific segment details
+      // Show specific segment details with DataGrid
       return (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {selectedSegment.label} Details
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Count: {selectedSegment.value}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            This shows the detailed information for {selectedSegment.label.toLowerCase()} {selectedChartType.toLowerCase()}.
-          </Typography>
-          {/* Add more specific data here based on your API response */}
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Related Data:
-            </Typography>
-            {/* You can add tables, lists, or other components here with specific data */}
-          </Box>
+        <Box sx={{ height: "calc(100vh - 120px)" }}>
+          {filteredRecords.length > 0 ? (
+            <Box sx={{ height: "100%", width: '100%' }}>
+              <DataGrid
+                rows={dataGridRows}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: { page: 0, pageSize: 15 },
+                  },
+                }}
+                pageSizeOptions={[10, 15, 20, 50]}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                sx={{
+                  height: '100%',
+                  '& .MuiDataGrid-cell': {
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                  },
+                  '& .MuiDataGrid-columnHeaders': {
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                    backgroundColor: theme.palette.background.default,
+                  },
+                  '& .MuiDataGrid-virtualScroller': {
+                    minHeight: '200px',
+                  },
+                }}
+              />
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+              <Typography variant="body2" color="text.secondary">
+                No records found for {selectedSegment.label} {selectedChartType.toLowerCase()}.
+              </Typography>
+            </Box>
+          )}
         </Box>
       );
     } else {
-      // Show overall chart details
+      // Show overall chart details with summary using DataGrid for sample records
+      const sampleRecords = PWDdashboard.IECMaterialDetailRecord?.slice(0, 10) || [];
+      const sampleDataGridRows = sampleRecords.map((record, index) => ({
+        id: index,
+        ...record
+      }));
+  
+      const sampleColumns: GridColDef[] = [
+        { 
+          field: 'asDate', 
+          headerName: 'Date', 
+          width: 100,
+          flex: 1,
+        },
+        { 
+          field: 'Center', 
+          headerName: 'Center', 
+          width: 200,
+          flex: 2,
+        },
+        { 
+          field: 'status', 
+          headerName: 'Status', 
+          width: 150,
+          flex: 1,
+          renderCell: (params) => {
+            const record = params.row as IECMaterialDetailRecord;
+            return selectedChartType === 'IEC Material' ? 
+              `${record.IECMatrial} (${record["IECMatrialYES/NO"]})` : 
+              `${record.MECWheel} (${record["MECWheelYES/NO"]})`;
+          }
+        },
+      ];
+  
       return (
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {selectedChartType} Overview
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Total: {chartData[selectedChartType].reduce((sum: number, item: { value: number }) => sum + item.value, 0)}
-          </Typography>
-          <Box sx={{ mt: 2 }}>
-            {chartData[selectedChartType].map((item: { id: string | number; label: string; value: number }) => (
-              <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">{item.label}:</Typography>
-                <Typography variant="body2" fontWeight="bold">
-                  {item.value}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
+        <Box sx={{ height: "calc(100vh - 120px)" }}>
+          {/* Show sample records with DataGrid */}
+          {sampleRecords.length > 0 && (
+            <Box sx={{ height: "100%", width: '100%' }}>
+              <Typography variant="subtitle1" gutterBottom>
+                Recent Records:
+              </Typography>
+              <DataGrid
+                rows={sampleDataGridRows}
+                columns={sampleColumns}
+                initialState={{
+                  pagination: {
+                    paginationModel: { page: 0, pageSize: 10 },
+                  },
+                }}
+                pageSizeOptions={[10, 15, 20]}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                sx={{
+                  height: 'calc(100% - 40px)',
+                  '& .MuiDataGrid-cell': {
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                  },
+                  '& .MuiDataGrid-columnHeaders': {
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                    backgroundColor: theme.palette.background.default,
+                  },
+                }}
+              />
+            </Box>
+          )}
         </Box>
       );
     }
   };
-
   return (
     <>
       <Box sx={{ position: "relative" }}>
@@ -237,9 +365,9 @@ const IecChart = () => {
             flexDirection: "column",
             p: isMobile ? 1 : 2,
             mb: 4,
-            cursor: 'pointer', // Add cursor pointer to indicate clickability
+            cursor: 'pointer',
           }}
-          onClick={handlePieChartContainerClick}
+          // onClick={handlePieChartContainerClick}
         >
           <FormControl fullWidth sx={{ mb: 2 }} size="small">
             <Select
@@ -275,10 +403,8 @@ const IecChart = () => {
               ]}
               sx={{
                 "& .MuiChartsSurface-root": { marginTop:'20px',marginBottom:'30px' },
-                "& .MuiChartsArc-root": { cursor: 'pointer' }, // Make pie segments clickable
+                "& .MuiChartsArc-root": { cursor: 'pointer' },
               }}
-              width={isMobile ? 250 : 170}
-              height={isMobile ? 150 : 120}
               slotProps={{
                 legend: {
                   sx: {
@@ -287,6 +413,9 @@ const IecChart = () => {
                   },
                 },
               }}
+              onItemClick={handlePieChartClick}
+              width={isMobile ? 250 : 170}
+              height={isMobile ? 150 : 120}
             />
           </Box>
         </Card>
@@ -298,19 +427,26 @@ const IecChart = () => {
         open={drawerOpen}
         onClose={handleCloseDrawer}
         sx={{
-          '& .MuiDrawer-paper': {
-            width: isMobile ? '100%' : 400,
+          "& .MuiDrawer-paper": {
+            width: isMobile ? "100%" : "80%",
+            maxWidth: "1200px",
           },
         }}
       >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h5" gutterBottom>
-            {getDrawerTitle()}
+        <Box sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Typography variant="h5" gutterBottom>
+            {selectedChartType} Overview
           </Typography>
+            <IconButton onClick={() => setDrawerOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
           {getDrawerContent()}
         </Box>
       </Drawer>
 
+      {/* Rest of your existing code for alerts and performance chart */}
       <Card
         sx={{
           borderRadius: 3,

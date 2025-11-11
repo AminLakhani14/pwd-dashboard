@@ -543,3 +543,41 @@ export const PerformaceOfSdpAPI = createAsyncThunk(
     }
   }
 );
+
+export const StatusOfBuildingAPI = createAsyncThunk(
+  'init/fetchStatusOfBuilding',
+  async (
+    { StartDate, EndDate, DistrictID, DistrictName, CenterID, CenterName, ProjectId, QuestionId }: { 
+      StartDate: string; 
+      EndDate: string; 
+      DistrictID: string; 
+      DistrictName: string; 
+      CenterID: string; 
+      CenterName: string; 
+      ProjectId: string;
+      QuestionId: string; 
+    },
+    { rejectWithValue }
+  ) => {
+    try { 
+      const url = `https://pwd.kcompute.com/Dashboard/StatusOfBuilding`;
+      
+      // Create payload object
+      const payload = {
+        StartDate: StartDate || '',
+        EndDate: EndDate || '',
+        DistrictID,
+        DistrictName,
+        CenterID,
+        CenterName,
+        ProjectId,
+        QuestionId
+      };
+      
+      const response = await PostService(url, payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data ?? 'Request failed');
+    }
+  }
+);

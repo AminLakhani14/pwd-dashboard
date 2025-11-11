@@ -40,7 +40,6 @@ export default function StackBars() {
 
   // Handle bar click - improved version
   const handleBarClick = (event: any, barData: any) => {
-    console.log('Full bar click event:', barData);
     
     if (barData && barData.dataIndex !== undefined && barData.seriesId !== undefined) {
       const furnitureItem = furnitureData[barData.dataIndex];
@@ -66,10 +65,6 @@ export default function StackBars() {
         condition: condition
       };
 
-      console.log('Selected furniture:', newSelection);
-      console.log('Available furnitureGridData sample:', furnitureGridData.slice(0, 2));
-
-      // Set new selection and open drawer
       setSelectedFurniture(newSelection);
       setDrawerOpen(true);
     }
@@ -86,15 +81,10 @@ export default function StackBars() {
   const filteredData = React.useMemo(() => {
     if (!selectedFurniture) return [];
     
-    console.log('Filtering for:', selectedFurniture);
-    console.log('Total furnitureGridData records:', furnitureGridData.length);
-    
     const result = furnitureGridData
       .filter((item: FurnitureGridItem) => {
         const furnitureCondition = item[selectedFurniture.furnitureType];
         const furnitureQuantity = item[`${selectedFurniture.furnitureType} quantity`];
-        
-        console.log(`Checking item: ${item.center}, ${selectedFurniture.furnitureType}: ${furnitureCondition}, quantity: ${furnitureQuantity}`);
         
         const matches = furnitureCondition === selectedFurniture.condition && 
                Number(furnitureQuantity) > 0;
@@ -112,21 +102,12 @@ export default function StackBars() {
         projectName: item.projectName
       }));
 
-    console.log('Filtered result count:', result.length);
-    console.log('Sample filtered items:', result.slice(0, 3));
     return result;
   }, [selectedFurniture, furnitureGridData]);
 
   // Debug: Log furniture data structure
   React.useEffect(() => {
     if (furnitureGridData.length > 0) {
-      console.log('First furnitureGridData item structure:', furnitureGridData[0]);
-      console.log('Available furniture types in first item:', 
-        Object.keys(furnitureGridData[0]).filter(key => 
-          !['asDate', 'projectName', 'district', 'center'].includes(key) && 
-          !key.includes('quantity')
-        )
-      );
     }
   }, [furnitureGridData]);
 

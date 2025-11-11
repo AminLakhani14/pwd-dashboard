@@ -10,12 +10,20 @@ import {
   Box,
   Typography,
   IconButton,
-  Drawer
+  Drawer,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Alert
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
+import axios from 'axios';
 
 const COLORS = ['#b3b3b3', '#4caf50'];
 
@@ -78,21 +86,145 @@ const CustomTooltip = ({ active, payload }:any) => {
   return null;
 };
 
-// Define columns for DataGrid
-const columns: { field: string; headerName: string; width: number }[] = [
-  { field: 'district', headerName: 'Name of District', width: 200 },
-  { field: 'sdpType', headerName: 'SDP Type', width: 300 },
-  { field: 'centerName', headerName: 'Center Name', width: 300 },
-  { field: 'status', headerName: 'Status of Center', width: 150 }
-];
+// Function to fetch image from API using Axios
+const fetchImage = async (photos: string): Promise<string> => {
+  try {
+    const url = `https://pwd.kcompute.com/Dashboard/GetImages?ImageName=${encodeURIComponent(photos)}`;
+    
+    const response = await axios.get(url, {
+      responseType: 'json', // Expecting JSON response with base64
+    });
+
+    console.log('API Response:', response);
+
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Handle different response structures
+    let base64Data = '';
+
+    if (typeof response.data === 'string') {
+      // If response is directly a base64 string
+      base64Data = response.data;
+    } else if (response.data?.base64) {
+      // If response is an object with base64 property
+      base64Data = response.data.base64;
+    } else if (response.data?.data) {
+      // If response is an object with data property containing base64
+      base64Data = response.data.data;
+    } else if (response.data?.image) {
+      // If response is an object with image property
+      base64Data = response.data.image;
+    } else {
+      // Try to stringify and use if it's a simple object
+      base64Data = typeof response.data === 'object' ? JSON.stringify(response.data) : response.data;
+    }
+
+    // Clean the base64 string (remove data URL prefix if present)
+    const cleanBase64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+
+    // Create data URL from base64
+    const imageUrl = `data:image/jpeg;base64,${cleanBase64}`;
+    
+    return imageUrl;
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    throw error;
+  }
+};
 
 export default function StatisticsCard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [loadingImage, setLoadingImage] = useState<string | null>(null); // Track which row is loading
+  const [imageError, setImageError] = useState<string | null>(null);
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
   const total = PWDdashboard.AllOpenClose.reduce((sum: number, item: { value: number }) => sum + item.value, 0);
 
-  // Transform API data into sdpDetailsData format
+  // Function to handle image view
+  const handleViewImage = async (photos: string, rowId: number) => {
+    if (!photos) {
+      setImageError('No photo reference available');
+      return;
+    }
+
+    setLoadingImage(`${rowId}`);
+    setImageError(null);
+    setCurrentImageUrl(null);
+
+    try {
+      const imageUrl = await fetchImage(photos);
+      setCurrentImageUrl(imageUrl);
+      setImageDialogOpen(true);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to load image. Please try again.';
+      setImageError(errorMessage);
+      console.error('Error loading image:', error);
+    } finally {
+      setLoadingImage(null);
+    }
+  };
+
+  const handleCloseImageDialog = () => {
+    setImageDialogOpen(false);
+    setCurrentImageUrl(null);
+    setImageError(null);
+  };
+
+  // Define columns for DataGrid
+  const getColumns = (selectedStatus: string | null): GridColDef[] => {
+    const baseColumns: GridColDef[] = [
+      { field: 'district', headerName: 'Name of District', width: 200 },
+      { field: 'sdpType', headerName: 'SDP Type', width: 300 },
+      { field: 'centerName', headerName: 'Center Name', width: 300 },
+      { field: 'status', headerName: 'Status of Center', width: 150 }
+    ];
+
+    // Add image column only when selectedStatus is "Close"
+    if (selectedStatus === 'Close') {
+      baseColumns.push({
+        field: 'image',
+        headerName: 'Image',
+        width: 150,
+        renderCell: (params) => {
+          const photos = params.row.photos || '';
+          const isCurrentLoading = loadingImage === `${params.row.id}`;
+          
+          return (
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'left',
+              width: '100%',
+              marginTop:'10px',
+            }}>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={isCurrentLoading ? <CircularProgress size={16} /> : <VisibilityIcon />}
+                onClick={() => handleViewImage(photos, params.row.id)}
+                disabled={!photos || !!loadingImage}
+                sx={{
+                  fontSize: '0.75rem',
+                  minWidth: 'auto',
+                  backgroundColor: 'gray',
+                }}
+              >
+                {isCurrentLoading ? 'Loading...' : 'View'}
+              </Button>
+            </Box>
+          );
+        }
+      });
+    }
+
+    return baseColumns;
+  };
+
+  // Transform API data into sdpDetailsData format with photos
   const sdpDetailsData = useMemo(() => {
     const transformedData: Record<string, Array<{
       id: number;
@@ -100,6 +232,7 @@ export default function StatisticsCard() {
       sdpType: string;
       centerName: string;
       status: string;
+      photos: string; // Store the photos parameter for API call
     }>> = {
       "RHS-A": [],
       "MSU": [],
@@ -127,7 +260,9 @@ export default function StatisticsCard() {
             district: item.District || 'N/A',
             sdpType: sdpType,
             centerName: item.Center || 'N/A',
-            status: item.OpenClose || 'Unknown'
+            status: item.OpenClose || 'Unknown',
+            // Store the photos parameter for API call - adjust based on your API response
+            photos: item.Photos || item.photos || item.Photo || item.ImageName || '' // Added ImageName as fallback
           });
         }
       });
@@ -166,6 +301,9 @@ export default function StatisticsCard() {
     handleCloseDrawer();
   };
 
+  // Get columns based on selected status
+  const columns = getColumns(selectedStatus);
+
   return (
     <>
       <div 
@@ -203,8 +341,8 @@ export default function StatisticsCard() {
         onClose={handleDrawerClose}
         sx={{
           '& .MuiDrawer-paper': {
-            width: '80%',
-            maxWidth: 1000,
+            width: selectedStatus === 'Close' ? '90%' : '80%', // Wider when image column is present
+            maxWidth: selectedStatus === 'Close' ? 1200 : 1000,
             bgcolor: 'background.paper',
             borderRadius: '8px 0 0 8px',
             boxShadow: 24,
@@ -224,6 +362,7 @@ export default function StatisticsCard() {
         }}>
           <Typography id="drawer-title" variant="h6" component="h2">
             SDP Status Details - {selectedStatus || 'All'}
+            {selectedStatus === 'Close' && ' (with Images)'}
           </Typography>
           <IconButton onClick={handleCloseDrawer} size="small">
             <CloseIcon />
@@ -282,6 +421,70 @@ export default function StatisticsCard() {
           </Typography>
         )}
       </Drawer>
+
+      {/* Image Dialog */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={handleCloseImageDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          m: 0, 
+          p: 2,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center'
+        }}>
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseImageDialog}
+            sx={{
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent sx={{ textAlign: 'center', p: 3 }}>
+          {imageError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {imageError}
+            </Alert>
+          )}
+          
+          {loadingImage ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+              <CircularProgress />
+              <Typography variant="body1" sx={{ ml: 2 }}>
+                Loading image...
+              </Typography>
+            </Box>
+          ) : currentImageUrl ? (
+            <img
+              src={currentImageUrl}
+              alt="SDP Center"
+              style={{ 
+                maxWidth: '100%', 
+                maxHeight: '70vh', 
+                objectFit: 'contain' 
+              }}
+              onError={() => setImageError('Failed to display image')}
+            />
+          ) : null}
+          
+          <Box sx={{ mt: 2 }}>
+            <Button 
+              onClick={handleCloseImageDialog} 
+              variant="contained"
+              color="primary"
+            >
+              Close
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -9,6 +9,12 @@ import {
   LinearProgress,
   Drawer,
   IconButton,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Alert
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -22,9 +28,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import Statisticscard from "./Statisticscard";
 import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
+import axios from 'axios';
 
 type AttendanceStatus = "present" | "absent" | "vacant" | "leave";
 
@@ -70,6 +78,54 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: TooltipPayloadItem[];
   total: number;
+};
+
+// Function to fetch image from API using Axios
+const fetchImage = async (photos: string): Promise<string> => {
+  try {
+    const url = `https://pwd.kcompute.com/Dashboard/GetImages?ImageName=${encodeURIComponent(photos)}`;
+    
+    const response = await axios.get(url, {
+      responseType: 'json', // Expecting JSON response with base64
+    });
+
+    console.log('API Response:', response);
+
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Handle different response structures
+    let base64Data = '';
+
+    if (typeof response.data === 'string') {
+      // If response is directly a base64 string
+      base64Data = response.data;
+    } else if (response.data?.base64) {
+      // If response is an object with base64 property
+      base64Data = response.data.base64;
+    } else if (response.data?.data) {
+      // If response is an object with data property containing base64
+      base64Data = response.data.data;
+    } else if (response.data?.image) {
+      // If response is an object with image property
+      base64Data = response.data.image;
+    } else {
+      // Try to stringify and use if it's a simple object
+      base64Data = typeof response.data === 'object' ? JSON.stringify(response.data) : response.data;
+    }
+
+    // Clean the base64 string (remove data URL prefix if present)
+    const cleanBase64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+
+    // Create data URL from base64
+    const imageUrl = `data:image/jpeg;base64,${cleanBase64}`;
+    
+    return imageUrl;
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    throw error;
+  }
 };
 
 const getEquipmentColumns = (selectedEquipment: string): GridColDef[] => [
@@ -160,13 +216,8 @@ const positionToFieldMap: Record<PositionKey, keyof AttendanceRecord> = {
   sweep: "Sweep",
 };
 
-// Define columns for DataGrid
-const sdpColumns: GridColDef[] = [
-  { field: "district", headerName: "District", width: 150 },
-  { field: "sdpType", headerName: "SDP Type", width: 200 },
-  { field: "centerName", headerName: "Center Name", flex: 1 },
-  { field: "status", headerName: "Status", width: 100 },
-];
+// Define columns for DataGrid with image column for Close status
+
 
 export default function KeyMetricCard() {
   const theme = useTheme();
@@ -249,7 +300,41 @@ export default function KeyMetricCard() {
   const [selectedStatus, setSelectedStatus] = useState<"Open" | "Close" | null>(
     null
   );
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [loadingImage, setLoadingImage] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
+
+  // Function to handle image view
+  const handleViewImage = async (photos: string, rowId: number) => {
+    if (!photos) {
+      setImageError('No photo reference available');
+      return;
+    }
+
+    setLoadingImage(`${rowId}`);
+    setImageError(null);
+    setCurrentImageUrl(null);
+
+    try {
+      const imageUrl = await fetchImage(photos);
+      setCurrentImageUrl(imageUrl);
+      setImageDialogOpen(true);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to load image. Please try again.';
+      setImageError(errorMessage);
+      console.error('Error loading image:', error);
+    } finally {
+      setLoadingImage(null);
+    }
+  };
+
+  const handleCloseImageDialog = () => {
+    setImageDialogOpen(false);
+    setCurrentImageUrl(null);
+    setImageError(null);
+  };
 
   // Get equipment data from Redux state
   const equipmentData = PWDdashboard.equipmentStockData || [];
@@ -332,6 +417,56 @@ export default function KeyMetricCard() {
   };
 
   const stats = calculateAttendanceStats();
+
+  const getSdpColumns = (selectedStatus: string | null): GridColDef[] => {
+    const baseColumns: GridColDef[] = [
+      { field: "district", headerName: "District", width: 150 },
+      { field: "sdpType", headerName: "SDP Type", width: 200 },
+      { field: "centerName", headerName: "Center Name", flex: 1 },
+      { field: "status", headerName: "Status", width: 100 },
+    ];
+  
+    // Add image column only when selectedStatus is "Close"
+    if (selectedStatus === "Close") {
+      baseColumns.push({
+        field: "image",
+        headerName: "Image",
+        width: 150,
+        renderCell: (params) => {
+          const photos = params.row.photos || '';
+          const isCurrentLoading = loadingImage === `${params.row.id}`;
+          
+          return (
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'left',
+              width: '100%',
+              marginTop:'10px',
+            }}>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={isCurrentLoading ? <CircularProgress size={16} /> : <VisibilityIcon />}
+                onClick={() => handleViewImage(photos, params.row.id)}
+                disabled={!photos || !!loadingImage}
+                sx={{
+                  fontSize: isMobile ? "0.75rem" : "0.75rem",
+                  // padding: isMobile ? "6px 12px" : "8px 16px",
+                  minWidth: 'auto',
+                  backgroundColor: 'gray',
+                }}
+              >
+                {isCurrentLoading ? 'Loading...' : 'View'}
+              </Button>
+            </Box>
+          );
+        }
+      });
+    }
+  
+    return baseColumns;
+  };
 
     // Handle equipment item click
   const handleEquipmentClick = (equipmentName: string) => {
@@ -661,11 +796,23 @@ export default function KeyMetricCard() {
     },
   ] as const;
 
-  // Get SDP data from Redux state
+  // Get SDP data from Redux state and add photos field
   const sdpData = {
-    "RHS-A": PWDdashboard.RHSAOpenCloseRecord || [],
-    MSU: PWDdashboard.MSUOpenCloseRecord || [],
-    FWC: PWDdashboard.FWCOpenCloseRecord || [],
+    "RHS-A": (PWDdashboard.RHSAOpenCloseRecord || []).map((item: any, index: number) => ({
+      ...item,
+      id: index,
+      photos: item.Photos || item.photos || item.Photo || item.ImageName || ''
+    })),
+    MSU: (PWDdashboard.MSUOpenCloseRecord || []).map((item: any, index: number) => ({
+      ...item,
+      id: index,
+      photos: item.Photos || item.photos || item.Photo || item.ImageName || ''
+    })),
+    FWC: (PWDdashboard.FWCOpenCloseRecord || []).map((item: any, index: number) => ({
+      ...item,
+      id: index,
+      photos: item.Photos || item.photos || item.Photo || item.ImageName || ''
+    })),
   };
 
   useEffect(() => {
@@ -1016,7 +1163,7 @@ export default function KeyMetricCard() {
                                 paddingTop: "7px",
                               }}
                             >
-                              {item.current} / ({item.percentage}%)
+                              {item.percentage}%
                             </Typography>
                           </Box>
                         </Box>
@@ -1169,8 +1316,6 @@ export default function KeyMetricCard() {
                 display: "flex",
                 flexDirection: "column",
                 marginTop: isMobile ? "10px" : "20px",
-                filter: "blur(3px)",
-                opacity: 0.6,
               }}
             >
               <CardContent sx={{ flexGrow: 1, p: isMobile ? 1 : 2 }}>
@@ -1199,7 +1344,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      61.58%
+                      {PWDdashboard?.GovernmentPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1213,7 +1358,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      31.64%
+                      {PWDdashboard?.RentedPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1227,7 +1372,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      6.78%
+                      {PWDdashboard?.PVTPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1241,7 +1386,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      83.51%
+                      {PWDdashboard?.IndicationPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1255,7 +1400,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      94.14%
+                      {PWDdashboard?.ElectricityPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1269,7 +1414,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      50.53%
+                      {PWDdashboard?.GasPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1283,7 +1428,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      86.70%
+                      {PWDdashboard?.WaterPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1297,7 +1442,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      92.02%
+                      {PWDdashboard?.CleanessPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1311,7 +1456,7 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      61.01%
+                      {PWDdashboard?.BrandedPercentage}%
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1325,31 +1470,12 @@ export default function KeyMetricCard() {
                       variant="body1"
                       sx={{ fontWeight: 600, fontSize: 10 }}
                     >
-                      38.98%
+                      {PWDdashboard?.UnbrandedPercentage}%
                     </Typography>
                   </Box>
                 </Box>
               </CardContent>
             </Card>
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                // backgroundColor: "#f4f4f4",
-                zIndex: 1,
-                filter: "blur(3px)",
-              }}
-            >
-              {/* <Typography variant="h6" color="text.secondary">
-                Coming Soon
-              </Typography> */}
-            </Box>
           </Box>
         </Grid>
 
@@ -1610,8 +1736,8 @@ export default function KeyMetricCard() {
         onClose={handleCloseSdpDrawer}
         sx={{
           "& .MuiDrawer-paper": {
-            width: "80%",
-            maxWidth: 800,
+            width: selectedStatus === "Close" ? "90%" : "80%",
+            maxWidth: selectedStatus === "Close" ? 1200 : 800,
             p: 4,
             maxHeight: "100vh",
             overflow: "auto",
@@ -1630,6 +1756,7 @@ export default function KeyMetricCard() {
         >
           <Typography variant="h6">
             {selectedSdp} - SDP Status Details - {selectedStatus || "All"}
+            {selectedStatus === "Close" && " (with Images)"}
           </Typography>
           <IconButton onClick={handleCloseSdpDrawer}>
             <CloseIcon />
@@ -1642,7 +1769,7 @@ export default function KeyMetricCard() {
                 rows={(sdpData[selectedSdp] || []).filter(
                   (row) => !selectedStatus || row.status === selectedStatus
                 )}
-                columns={sdpColumns}
+                columns={getSdpColumns(selectedStatus)}
                 getRowId={(row) =>
                   `${row.district}-${row.centerName}-${row.status}-${row.id}`
                 }
@@ -1877,6 +2004,70 @@ export default function KeyMetricCard() {
           </Box>
         )}
       </Drawer>
+
+      {/* Image Dialog */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={handleCloseImageDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          m: 0, 
+          p: 2,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center'
+        }}>
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseImageDialog}
+            sx={{
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent sx={{ textAlign: 'center', p: 3 }}>
+          {imageError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {imageError}
+            </Alert>
+          )}
+          
+          {loadingImage ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+              <CircularProgress />
+              <Typography variant="body1" sx={{ ml: 2 }}>
+                Loading image...
+              </Typography>
+            </Box>
+          ) : currentImageUrl ? (
+            <img
+              src={currentImageUrl}
+              alt="SDP Center"
+              style={{ 
+                maxWidth: '100%', 
+                maxHeight: '70vh', 
+                objectFit: 'contain' 
+              }}
+              onError={() => setImageError('Failed to display image')}
+            />
+          ) : null}
+          
+          <Box sx={{ mt: 2 }}>
+            <Button 
+              onClick={handleCloseImageDialog} 
+              variant="contained"
+              color="primary"
+            >
+              Close
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

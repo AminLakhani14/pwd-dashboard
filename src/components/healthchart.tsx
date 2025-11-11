@@ -6,15 +6,10 @@ import {
   LinearProgress,
   useTheme,
   Drawer,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   IconButton,
   Button
 } from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -51,6 +46,89 @@ const HealthMetricsCard = () => {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [filteredData, setFilteredData] = useState<MonitoringReportRecord[]>([]);
   const PWDdashboard: any = useSelector((state: RootState) => state.PWDINITSLICE);
+
+  // Define columns for DataGrid
+  const columns: GridColDef[] = [
+    {
+      field: 'Project',
+      headerName: 'Monitoring List',
+      width: 150,
+      flex: 1,
+    },
+    {
+      field: 'DistrictName',
+      headerName: 'District Name',
+      width: 150,
+      flex: 1,
+    },
+    {
+      field: 'CenterName',
+      headerName: 'Center Name',
+      width: 150,
+      flex: 1,
+    },
+    {
+      field: 'DeviceTimestamp',
+      headerName: 'Date of Visit',
+      width: 150,
+      flex: 1,
+    },
+    {
+      field: 'SurveyorName',
+      headerName: 'Officer Name',
+      width: 150,
+      flex: 1,
+    },
+    {
+      field: 'view',
+      headerName: 'Action',
+      width: 100,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <IconButton 
+          size="small"
+          onClick={() => handleViewRecord(params.row)}
+          sx={{ 
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover'
+            }
+          }}
+        >
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+      ),
+    },
+    {
+      field: 'location',
+      headerName: 'Location',
+      width: 100,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <IconButton 
+          size="small"
+          onClick={() => handleViewLocation(params.row)}
+          disabled={!params.row.Latitude || !params.row.Longitude}
+          sx={{ 
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover'
+            },
+            '&:disabled': {
+              borderColor: 'action.disabled',
+              color: 'action.disabled'
+            }
+          }}
+        >
+          <LocationOnIcon fontSize="small" />
+        </IconButton>
+      ),
+    },
+  ];
 
   const handleMetricClick = (metric: string) => {
     setSelectedMetric(metric);
@@ -217,7 +295,7 @@ const HealthMetricsCard = () => {
                         backgroundColor: theme.palette.grey[200],
                         "& .MuiLinearProgress-bar": {
                           borderRadius: "4px",
-                          backgroundColor: metric.percentage >= 60 ? '#4caf50' : metric.percentage < 60 && metric.percentage >= 30 ? '#ff9800' : '#f44336',
+                          backgroundColor: metric.percentage >= 70 ? '#4caf50' : metric.percentage < 70 && metric.percentage >= 40 ? '#ff9800' : '#f44336',
                         },
                       }}
                     />
@@ -265,7 +343,7 @@ const HealthMetricsCard = () => {
           pb: 2
         }}>
           <Typography id="drawer-title" variant="h6" component="h2">
-            {selectedMetric} - Visit Details ({filteredData.length} records)
+            {selectedMetric} - Visit Details
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
@@ -273,67 +351,32 @@ const HealthMetricsCard = () => {
         </Box>
         
         {filteredData.length > 0 ? (
-          <TableContainer>
-            <Table stickyHeader aria-label="visit details table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Monitoring List</TableCell>
-                  <TableCell>District Name</TableCell>
-                  <TableCell>Center Name</TableCell>
-                  <TableCell>Date of Visit</TableCell>
-                  <TableCell>Officer Name</TableCell>
-                  <TableCell>Action</TableCell>
-                  <TableCell>Location</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredData.map((record, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{record.Project}</TableCell>
-                    <TableCell>{record.DistrictName}</TableCell>
-                    <TableCell>{record.CenterName}</TableCell>
-                    <TableCell>{record.DeviceTimestamp}</TableCell>
-                    <TableCell>{record.SurveyorName}</TableCell>
-                    <TableCell>
-                      <IconButton 
-                        size="small"
-                        onClick={() => handleViewRecord(record)}
-                        sx={{ 
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          '&:hover': {
-                            backgroundColor: 'action.hover'
-                          }
-                        }}
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell>
-                      <IconButton 
-                        size="small"
-                        onClick={() => handleViewLocation(record)}
-                        disabled={!record.Latitude || !record.Longitude}
-                        sx={{ 
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          '&:hover': {
-                            backgroundColor: 'action.hover'
-                          },
-                          '&:disabled': {
-                            borderColor: 'action.disabled',
-                            color: 'action.disabled'
-                          }
-                        }}
-                      >
-                        <LocationOnIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Box sx={{ height: 'calc(100vh - 150px)', width: '100%' }}>
+            <DataGrid
+              rows={filteredData.map((record, index) => ({ 
+                id: index, // DataGrid requires a unique id for each row
+                ...record 
+              }))}
+              columns={columns}
+              pageSizeOptions={[10, 25, 50]}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 10, page: 0 },
+                },
+              }}
+              disableRowSelectionOnClick
+              sx={{
+                border: 'none',
+                '& .MuiDataGrid-cell': {
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  backgroundColor: theme.palette.background.default,
+                },
+              }}
+            />
+          </Box>
         ) : (
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Typography variant="body2" color="text.secondary">

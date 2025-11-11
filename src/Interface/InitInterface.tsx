@@ -39,6 +39,17 @@ export interface PWDInitINTERFACE {
     technicalGridData: Array<any>;
     IECMaterialChartData: any;
     performanceSdpDataset: Array<any>;
+    GovernmentPercentage: number,
+    RentedPercentage: number,
+    PVTPercentage: number,
+    IndicationPercentage: number,
+    ElectricityPercentage: number,
+    GasPercentage: number,
+    WaterPercentage: number,
+    CleanessPercentage: number,
+    BrandedPercentage: number,
+    UnbrandedPercentage: number,
+    IECMaterialDetailRecord: Array<any>;
 }
 
 export interface ISDPdropdown {
