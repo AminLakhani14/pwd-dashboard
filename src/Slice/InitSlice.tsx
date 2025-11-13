@@ -389,6 +389,8 @@ const PWDINITSLICE = createSlice({
 
         const furnitureDataArray = Object.values(furnitureStats);
         state.furnitureData = furnitureDataArray;
+
+        state.stockdetail = action.payload.contraceptiveStockPositionModel.contraceptiveStockPositionResponse;
       })
       .addCase(dynamicAPI.rejected, (state: PWDInitINTERFACE) => {
         state.isLoading = false;

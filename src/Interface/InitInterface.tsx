@@ -50,6 +50,7 @@ export interface PWDInitINTERFACE {
     BrandedPercentage: number,
     UnbrandedPercentage: number,
     IECMaterialDetailRecord: Array<any>;
+    stockdetail: Array<any>;
 }
 
 export interface ISDPdropdown {

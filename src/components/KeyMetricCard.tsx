@@ -427,7 +427,7 @@ export default function KeyMetricCard() {
     ];
   
     // Add image column only when selectedStatus is "Close"
-    if (selectedStatus === "Close") {
+    // if (selectedStatus === "Close") {
       baseColumns.push({
         field: "image",
         headerName: "Image",
@@ -463,7 +463,7 @@ export default function KeyMetricCard() {
           );
         }
       });
-    }
+    // }
   
     return baseColumns;
   };

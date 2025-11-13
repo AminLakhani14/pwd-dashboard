@@ -59,4 +59,5 @@ CleanessPercentage: 0,
 BrandedPercentage: 0,
 UnbrandedPercentage: 0,
 IECMaterialDetailRecord:[],
+stockdetail:[],
 }

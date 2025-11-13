@@ -21,6 +21,23 @@ interface AlertItem {
   Message: string;
   AlertLevel: string;
   TotalStock: number;
+  sbjnum: number;
+}
+
+interface StockDetailItem {
+  Date: string;
+  SDP: string;
+  District: string;
+  Center: string;
+  CondomsStock: number;
+  POP: number;
+  COC: number;
+  ECP: number;
+  ThreemonthsInj: number;
+  DefoStock: number;
+  IUD: number;
+  Jadelle: number;
+  sbjnum: number;
 }
 
 interface PieChartItem {
@@ -47,6 +64,7 @@ const IecChart = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedChartType, setSelectedChartType] = useState<ChartType | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<PieChartItem | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<AlertItem | null>(null);
   const PWDdashboard = useSelector((state: RootState) => state.PWDINITSLICE);
 
   const chartData = PWDdashboard.IECMaterialChartData || {
@@ -70,6 +88,7 @@ const IecChart = () => {
       const clickedItem = chartData[chartType][pieParam.dataIndex];
       setSelectedChartType(chartType);
       setSelectedSegment(clickedItem);
+      setSelectedAlert(null);
       setDrawerOpen(true);
     }
   };
@@ -78,6 +97,15 @@ const IecChart = () => {
   const handlePieChartContainerClick = () => {
     setSelectedChartType(chartType);
     setSelectedSegment(null);
+    setSelectedAlert(null);
+    setDrawerOpen(true);
+  };
+
+  // Handle alert click
+  const handleAlertClick = (alert: AlertItem) => {
+    setSelectedAlert(alert);
+    setSelectedChartType(null);
+    setSelectedSegment(null);
     setDrawerOpen(true);
   };
 
@@ -85,6 +113,7 @@ const IecChart = () => {
     setDrawerOpen(false);
     setSelectedSegment(null);
     setSelectedChartType(null);
+    setSelectedAlert(null);
   };
 
   // Map API alert levels to our AlertType
@@ -122,8 +151,105 @@ const IecChart = () => {
     message: alert.Message,
     icon: getAlertIcon(alert.AlertLevel),
     district: alert.District,
-    totalStock: alert.TotalStock
+    totalStock: alert.TotalStock,
+    sbjnum: alert.sbjnum,
+    originalAlert: alert // Keep original alert data for matching
   })) || [];
+
+  // Get matching stock details for selected alert
+  const getMatchingStockDetails = (): StockDetailItem[] => {
+    if (!selectedAlert || !PWDdashboard?.stockdetail) {
+      return [];
+    }
+
+    return PWDdashboard.stockdetail.filter((stock: StockDetailItem) => 
+      stock.sbjnum === selectedAlert.sbjnum
+    );
+  };
+
+  // Stock details columns for DataGrid
+  const getStockDetailColumns = (): GridColDef[] => [
+    { 
+      field: 'Date', 
+      headerName: 'Date', 
+      width: 100,
+      flex: 1,
+    },
+    { 
+      field: 'SDP', 
+      headerName: 'SDP', 
+      width: 150,
+      flex: 1,
+    },
+    { 
+      field: 'District', 
+      headerName: 'District', 
+      width: 120,
+      flex: 1,
+    },
+    { 
+      field: 'Center', 
+      headerName: 'Center', 
+      width: 200,
+      flex: 2,
+    },
+    { 
+      field: 'CondomsStock', 
+      headerName: 'Condoms', 
+      width: 100,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'POP', 
+      headerName: 'POP', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'COC', 
+      headerName: 'COC', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'ECP', 
+      headerName: 'ECP', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'ThreemonthsInj', 
+      headerName: '3M Inj', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'DefoStock', 
+      headerName: 'Defo', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'IUD', 
+      headerName: 'IUD', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+    { 
+      field: 'Jadelle', 
+      headerName: 'Jadelle', 
+      width: 80,
+      flex: 1,
+      type: 'number',
+    },
+  ];
 
   const getAlertStyle = (type: AlertType) => {
     switch (type) {
@@ -178,7 +304,7 @@ const IecChart = () => {
     return records;
   };
 
-  // DataGrid columns configuration
+  // DataGrid columns configuration for IEC Material
   const getColumns = (): GridColDef[] => {
     const baseColumns: GridColDef[] = [
       { 
@@ -234,12 +360,60 @@ const IecChart = () => {
   }
 
   const getDrawerContent = () => {
+    // Show alert stock details
+    if (selectedAlert) {
+      const matchingStockDetails = getMatchingStockDetails();
+      const stockColumns = getStockDetailColumns();
+      
+      return (
+        <Box sx={{ height: "calc(100vh - 120px)" }}>
+          <Typography variant="h6" gutterBottom>
+            Stock Details
+          </Typography>
+          
+          {matchingStockDetails.length > 0 ? (
+            <Box sx={{ height: "calc(100% - 200px)", width: '100%' }}>
+              <DataGrid
+                rows={matchingStockDetails.map((stock, index) => ({ id: index, ...stock }))}
+                columns={stockColumns}
+                initialState={{
+                  pagination: {
+                    paginationModel: { page: 0, pageSize: 10 },
+                  },
+                }}
+                pageSizeOptions={[10, 15, 20]}
+                checkboxSelection={false}
+                disableRowSelectionOnClick
+                sx={{
+                  height: '100%',
+                  '& .MuiDataGrid-cell': {
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                  },
+                  '& .MuiDataGrid-columnHeaders': {
+                    fontSize: isMobile ? '0.7rem' : '0.8rem',
+                    backgroundColor: theme.palette.background.default,
+                  },
+                }}
+              />
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+              <Typography variant="body2" color="text.secondary">
+                No matching stock details found for this alert.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      );
+    }
+
+    // Show chart details (existing functionality)
     if (!selectedChartType) return null;
-  
+
     const filteredRecords = getFilteredRecords();
     const dataGridRows = getDataGridRows();
     const columns = getColumns();
-  
+
     if (selectedSegment) {
       // Show specific segment details with DataGrid
       return (
@@ -288,7 +462,7 @@ const IecChart = () => {
         id: index,
         ...record
       }));
-  
+
       const sampleColumns: GridColDef[] = [
         { 
           field: 'asDate', 
@@ -315,7 +489,7 @@ const IecChart = () => {
           }
         },
       ];
-  
+
       return (
         <Box sx={{ height: "calc(100vh - 120px)" }}>
           {/* Show sample records with DataGrid */}
@@ -352,6 +526,18 @@ const IecChart = () => {
       );
     }
   };
+
+  const getDrawerTitle = () => {
+    if (selectedAlert) {
+      return "Alert Stock Details";
+    } else if (selectedChartType && selectedSegment) {
+      return `${selectedSegment.label} ${selectedChartType} Details`;
+    } else if (selectedChartType) {
+      return `${selectedChartType} Overview`;
+    }
+    return "Details";
+  };
+
   return (
     <>
       <Box sx={{ position: "relative" }}>
@@ -434,11 +620,11 @@ const IecChart = () => {
         }}
       >
         <Box sx={{ p: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h5" gutterBottom>
-            {selectedChartType} Overview
-          </Typography>
-            <IconButton onClick={() => setDrawerOpen(false)}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              {getDrawerTitle()}
+            </Typography>
+            <IconButton onClick={handleCloseDrawer}>
               <CloseIcon />
             </IconButton>
           </Box>
@@ -446,7 +632,7 @@ const IecChart = () => {
         </Box>
       </Drawer>
 
-      {/* Rest of your existing code for alerts and performance chart */}
+      {/* Alerts section with clickable alerts */}
       <Card
         sx={{
           borderRadius: 3,
@@ -502,7 +688,14 @@ const IecChart = () => {
                     mb: 1,
                     borderRadius: 2,
                     ...alertStyle,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      opacity: 0.8,
+                      transform: 'translateY(-1px)',
+                      transition: 'all 0.2s ease-in-out',
+                    },
                   }}
+                  onClick={() => handleAlertClick(alert.originalAlert)}
                 >
                   <Box
                     sx={{
